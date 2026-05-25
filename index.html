@@ -77,6 +77,8 @@
         .tag-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
         .contact-list { display: flex; flex-direction: column; gap: 15px; }
         .contact-card { border: 1px solid var(--panel-border); border-radius: 14px; padding: 18px; background: var(--panel-bg); }
+        .contact-card.new-card { animation: slideIn 0.35s ease; }
+        @keyframes slideIn { from { opacity:0; transform:translateY(-16px) scale(0.97); } to { opacity:1; transform:none; } }
         .profile-img { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 20px; float: right; margin-left: 12px; }
         /* AI RESULT BOX */
         .ai-result-box { display: none; font-size: 13px; background: rgba(99,102,241,0.15); border: 1px dashed #818cf8; padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; line-height: 1.4; position: relative; }
@@ -168,6 +170,7 @@
         <div style="display:flex;gap:6px;align-items:center;">
             <button onclick="shareApp()" style="background:rgba(16,185,129,0.2);border:1px solid #10b981;color:#10b981;padding:6px 10px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:bold;">📤 שתף</button>
             <button class="btn-settings-nav" onclick="openSettingsPage()">⚙️ הגדרות</button>
+            <button onclick="document.getElementById('aboutModal').classList.add('open')" style="background:rgba(255,255,255,0.08); border:1px solid var(--border-color); color:var(--text-muted); padding:6px 10px; border-radius:10px; cursor:pointer; font-size:13px;">ℹ️</button>
         </div>
     </div>
 
@@ -269,17 +272,25 @@
     <div class="calendar-box" id="calendarListContainer"></div>
 
     <h2>🔎 חיפוש וסינון מתקדם</h2>
-    <div class="time-filter-wrapper">
-        <select id="timeFilter" onchange="renderContacts()">
+    <div class="time-filter-wrapper" style="display:flex; gap:8px; flex-wrap:wrap;">
+        <select id="timeFilter" onchange="renderContacts()" style="flex:2; min-width:160px;">
             <option value="30" selected>⏳ 30 הימים הקרובים</option>
             <option value="future">📅 כל האירועים העתידיים השנה</option>
             <option value="past">⏪ אירועים שעברו השנה</option>
             <option value="all">♾️ כל הרשימה (ללא סינון)</option>
         </select>
+        <select id="sortFilter" onchange="renderContacts()" style="flex:1; min-width:130px;">
+            <option value="date">📅 מיון: לפי תאריך</option>
+            <option value="name">🔤 מיון: לפי שם</option>
+            <option value="group">🏷️ מיון: לפי קבוצה</option>
+        </select>
     </div>
     <input type="text" id="searchInp" oninput="renderContacts()" placeholder="חפש לפי שם...">
     <div class="filter-tags" id="filterTagsContainer"></div>
     <div class="contact-list" id="listContainer"></div>
+
+    <!-- כפתור גלול למעלה -->
+    <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none; position:fixed; bottom:24px; left:20px; width:46px; height:46px; border-radius:50%; background:var(--accent-color); color:white; border:none; font-size:20px; cursor:pointer; box-shadow:0 4px 15px rgba(99,102,241,0.5); z-index:999; transition:opacity 0.3s;">↑</button>
 
 </div>
 </div><!-- end main-page -->
@@ -446,6 +457,28 @@
 </div><!-- end settings-page -->
 
 <!-- ===== MODAL עריכת איש קשר ===== -->
+<!-- About Modal -->
+<div class="modal-overlay" id="aboutModal">
+    <div class="modal-box" style="text-align:center;">
+        <button class="modal-close" onclick="document.getElementById('aboutModal').classList.remove('open')">✕</button>
+        <div style="font-size:52px; margin-bottom:10px;">🔔</div>
+        <div class="modal-title" style="font-size:22px;">לא שכחתי</div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">גרסה 1.0</div>
+        <div style="font-size:13px; line-height:1.8; color:var(--text-main); margin-bottom:16px;">
+            אפליקציה לניהול אירועים, ימי הולדת, אזכרות ותזכורות חכמות.<br>
+            עם ברכות מוכנות, ניהול מתנות והתראות מותאמות אישית.
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
+            פותח על ידי <b style="color:var(--text-main);">ברק אפללו</b><br>
+            כל הזכויות שמורות © 2025
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <button onclick="shareApp()" style="padding:10px; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#10b981; border-radius:10px; cursor:pointer; font-size:13px;">📤 שתף את האפליקציה עם חברים</button>
+            <a href="mailto:support@loshachachti.com?subject=באג / הצעה - לא שכחתי" style="padding:10px; background:rgba(99,102,241,0.15); border:1px solid var(--accent-color); color:var(--accent-color); border-radius:10px; font-size:13px; text-decoration:none; display:block;">🐛 דווח על באג / הצעה לשיפור</a>
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="editModal">
     <div class="modal-box">
         <button class="modal-close" onclick="closeEditModal()">✕</button>
@@ -529,6 +562,7 @@ let generatedTexts = {};
 let countdownInterval = null;
 let currentGroupFilter = 'הכל';
 let editingId = null;
+let _lastSavedId = null;
 
 // IndexedDB for audio
 let audioDB = null;
@@ -848,6 +882,11 @@ window.onload = function() {
     setInterval(()=>{const d=new Date();document.getElementById('liveClock').innerText=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});},1000);
     // Splash screen
     setTimeout(hideSplash, 1800);
+    // Scroll to top button
+    window.addEventListener('scroll', () => {
+        const btn = document.getElementById('scrollTopBtn');
+        if(btn) btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+    });
     // Gift tags
     initGiftTags();
     document.getElementById('giftIdeaInp').addEventListener('input', updateGiftSelectedDisplay);
@@ -1076,7 +1115,9 @@ function addContact() {
     } else {
         const gender=document.getElementById('genderInp').value;
         const recurrence=document.getElementById('recurrenceInp').value;
-        contacts.push({id:Date.now(),name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,recurrence,hasSound:false,trimStart:0,trimDuration:15});
+        const newId = Date.now();
+        _lastSavedId = newId;
+        contacts.push({id:newId,name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,recurrence,hasSound:false,trimStart:0,trimDuration:15});
         clearForm();
     }
     saveToStorage(); playSound('save'); document.getElementById('timeFilter').value='30'; renderContacts();
@@ -1403,8 +1444,15 @@ function renderContacts() {
     updateDynamicGroups();
     const query=document.getElementById('searchInp').value.toLowerCase();
     const timeMode=document.getElementById('timeFilter').value;
+    const sortMode=document.getElementById('sortFilter').value;
     let enriched=contacts.map(c=>({...c,...getEventCalculations(c.bday,c.recurrence)}));
     let sorted=enriched.sort((a,b)=>{
+        if(sortMode==='name') return (a.name||'').localeCompare(b.name||'', 'he');
+        if(sortMode==='group') {
+            const cmp=(a.group||'ת').localeCompare(b.group||'ת','he');
+            if(cmp!==0) return cmp;
+        }
+        // default: date
         if(timeMode==='past'){if(a.pastDays===null)return 1;if(b.pastDays===null)return -1;return a.pastDays-b.pastDays;}
         else{if(a.daysLeft===null)return 1;if(b.daysLeft===null)return -1;return a.daysLeft-b.daysLeft;}
     });
@@ -1514,6 +1562,8 @@ function renderContacts() {
                 <button class="btn-card btn-delete" onclick="openEditModal(${c.id})">⚙️ עוד</button>
             </div>`;
         cont.appendChild(card);
+        // Animate newest card (last saved)
+        if(c.id === _lastSavedId) { card.classList.add('new-card'); _lastSavedId = null; }
     });
 }
 
