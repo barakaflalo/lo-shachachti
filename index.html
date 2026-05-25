@@ -171,9 +171,10 @@
 
     <div class="stats-box" id="gamificationStats">התחל להוסיף אירועים כדי להתחיל לחגוג! 🎈</div>
 
-    <div class="budget-dashboard">
-        <div>💰 פתוח למתנות:<br><div class="budget-val" id="budgetPending">0 ₪</div></div>
-        <div>✅ שכבר שולם:<br><div class="budget-val" id="budgetPaid">0 ₪</div></div>
+    <!-- budget values hidden, used by settings page -->
+    <div style="display:none;">
+        <div id="budgetPending">0</div>
+        <div id="budgetPaid">0</div>
     </div>
 
     <div id="heroWidgetContainer"></div>
@@ -374,6 +375,42 @@
             <button class="btn-backup" onclick="document.getElementById('importFile').click()">📂 שחזר מגיבוי</button>
         </div>
         <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display:none;">
+    </div>
+
+    <!-- רובריקה: סיכום תקציב -->
+    <div class="settings-section">
+        <div class="settings-section-title">💰 סיכום הוצאות מתנות</div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px; line-height:1.6;">
+            בדוק כמה הוצאת על מתנות לפי תקופה — שימושי לתכנון תקציב שנתי.
+        </p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+            <div style="flex:1; min-width:120px;">
+                <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">סנן לפי:</label>
+                <select id="budgetFilterType" onchange="updateBudgetSummary()" style="margin-bottom:0;">
+                    <option value="all">📊 כל הזמן</option>
+                    <option value="year">📅 לפי שנה</option>
+                    <option value="month">🗓️ לפי חודש</option>
+                </select>
+            </div>
+            <div id="budgetYearBox" style="flex:1; min-width:100px; display:none;">
+                <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">שנה:</label>
+                <select id="budgetYear" onchange="updateBudgetSummary()" style="margin-bottom:0;"></select>
+            </div>
+            <div id="budgetMonthBox" style="flex:1; min-width:100px; display:none;">
+                <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">חודש:</label>
+                <select id="budgetMonth" onchange="updateBudgetSummary()" style="margin-bottom:0;">
+                    <option value="0">ינואר</option><option value="1">פברואר</option>
+                    <option value="2">מרץ</option><option value="3">אפריל</option>
+                    <option value="4">מאי</option><option value="5">יוני</option>
+                    <option value="6">יולי</option><option value="7">אוגוסט</option>
+                    <option value="8">ספטמבר</option><option value="9">אוקטובר</option>
+                    <option value="10">נובמבר</option><option value="11">דצמבר</option>
+                </select>
+            </div>
+        </div>
+        <div id="budgetSummaryResult" style="background:rgba(99,102,241,0.08); border-radius:12px; padding:14px;">
+            <div style="text-align:center; color:var(--text-muted); font-size:13px;">פתח את ההגדרות לראות סיכום</div>
+        </div>
     </div>
 
     <!-- רובריקה 6: דוח חודשי -->
@@ -1627,9 +1664,57 @@ function importData(e) {
 }
 
 // ========== SETTINGS PAGE NAVIGATION ==========
+function updateBudgetSummary() {
+    const type = document.getElementById('budgetFilterType').value;
+    document.getElementById('budgetYearBox').style.display = (type==='year'||type==='month') ? 'block' : 'none';
+    document.getElementById('budgetMonthBox').style.display = type==='month' ? 'block' : 'none';
+    const year = parseInt(document.getElementById('budgetYear').value);
+    const month = parseInt(document.getElementById('budgetMonth').value);
+    let filtered = contacts.filter(c => {
+        if(!c.bday) return false;
+        const ev = new Date(c.bday);
+        if(type==='year') return ev.getFullYear()===year;
+        if(type==='month') return ev.getFullYear()===year && ev.getMonth()===month;
+        return true;
+    });
+    const paid = filtered.filter(c=>c.giftStatus==='paid');
+    const pending = filtered.filter(c=>c.giftStatus!=='paid' && c.giftBudget);
+    const paidTotal = paid.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);
+    const pendingTotal = pending.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);
+    const el = document.getElementById('budgetSummaryResult');
+    if(!filtered.length){el.innerHTML=`<div style="text-align:center;color:var(--text-muted);font-size:13px;">אין אירועים בתקופה זו</div>`;return;}
+    const rows = paid.map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;"><span>✅ ${c.name} — ${getEventLabel(c.eventType,c.customEventName)}</span><span style="color:#10b981;font-weight:bold;">${parseInt(c.giftBudget)||0} ₪</span></div>`).join('');
+    const pendingRows = pending.map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;"><span>⏳ ${c.name} — ${getEventLabel(c.eventType,c.customEventName)}</span><span style="color:#f59e0b;font-weight:bold;">${parseInt(c.giftBudget)||0} ₪</span></div>`).join('');
+    el.innerHTML=`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;text-align:center;">
+            <div style="background:rgba(16,185,129,0.15);border-radius:10px;padding:10px;">
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">✅ שולם</div>
+                <div style="font-size:22px;font-weight:bold;color:#10b981;">${paidTotal} ₪</div>
+                <div style="font-size:11px;color:var(--text-muted);">${paid.length} מתנות</div>
+            </div>
+            <div style="background:rgba(245,158,11,0.15);border-radius:10px;padding:10px;">
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">⏳ עדיין פתוח</div>
+                <div style="font-size:22px;font-weight:bold;color:#f59e0b;">${pendingTotal} ₪</div>
+                <div style="font-size:11px;color:var(--text-muted);">${pending.length} מתנות</div>
+            </div>
+        </div>
+        <div style="font-size:13px;font-weight:bold;text-align:center;margin-bottom:10px;color:var(--text-main);">סה"כ תקציב מתוכנן: ${paidTotal+pendingTotal} ₪</div>
+        ${rows}${pendingRows}`;
+}
+function initBudgetSummary() {
+    const years=[...new Set(contacts.map(c=>c.bday?new Date(c.bday).getFullYear():null).filter(Boolean))];
+    const cur=new Date().getFullYear();
+    if(!years.includes(cur)) years.push(cur);
+    years.sort((a,b)=>b-a);
+    document.getElementById('budgetYear').innerHTML=years.map(y=>`<option value="${y}" ${y===cur?'selected':''}>${y}</option>`).join('');
+    document.getElementById('budgetMonth').value=new Date().getMonth();
+    updateBudgetSummary();
+}
+
 function openSettingsPage() {
     document.getElementById('mainPage').classList.add('hidden');
     document.getElementById('settingsPage').classList.add('active');
+    initBudgetSummary();
     // Load greetings into settings inputs
     for(let i=0;i<5;i++){
         const el=document.getElementById('sGreet'+(i+1));
