@@ -55,6 +55,10 @@
         .edit-mode-banner { display: none; background: rgba(245,158,11,0.15); border: 1px solid #f59e0b; border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; font-weight: bold; color: #fbbf24; text-align: center; }
         .edit-mode-banner.visible { display: block; }
         input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        input[type="date"] { color-scheme: dark; color: var(--text-main); }
+        .light-mode input[type="date"] { color-scheme: light; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
+        .light-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
         .light-mode input, .light-mode select, .light-mode textarea { background: #ffffff; color: #0f172a; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .btn-submit { background: var(--accent-color); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; }
@@ -190,7 +194,7 @@
 
         <input type="text" id="nameInp" placeholder="עבור מי / שם האירוע? *">
         <div class="grid-2">
-            <input type="date" id="bdayInp" required>
+            <input type="date" id="bdayInp" required style="color-scheme: dark; color: var(--text-main);">
             <select id="eventTypeInp" onchange="toggleCustomEventField()">
                 <option value="birthday">🎉 יום הולדת</option>
                 <option value="anniversary">💍 יום נישואין</option>
@@ -240,10 +244,10 @@
     <h2>🔎 חיפוש וסינון מתקדם</h2>
     <div class="time-filter-wrapper">
         <select id="timeFilter" onchange="renderContacts()">
-            <option value="all" selected>♾️ כל הרשימה (ללא סינון)</option>
-            <option value="30">⏳ 30 הימים הקרובים</option>
+            <option value="30" selected>⏳ 30 הימים הקרובים</option>
             <option value="future">📅 כל האירועים העתידיים השנה</option>
             <option value="past">⏪ אירועים שעברו השנה</option>
+            <option value="all">♾️ כל הרשימה (ללא סינון)</option>
         </select>
     </div>
     <input type="text" id="searchInp" oninput="renderContacts()" placeholder="חפש לפי שם...">
@@ -841,7 +845,7 @@ async function importFromPhone() {
         const results=await navigator.contacts.select(['name','tel','email'],{multiple:true});
         if(results.length>0){
             results.forEach(c=>{contacts.push({id:Date.now()+Math.random(),name:c.name?c.name[0]:'איש קשר',bday:'',eventType:'birthday',customEventName:'',phone:c.tel?c.tel[0]:'',email:c.email?c.email[0]:'',group:'',notes:'יובא מהטלפון',giftBudget:'',giftIdea:'',giftStatus:'pending',hasSound:false,trimStart:0,trimDuration:15});});
-            saveToStorage(); document.getElementById('timeFilter').value='all'; renderContacts(); alert(`יובאו בהצלחה ${results.length} אנשי קשר!`);
+            saveToStorage(); document.getElementById('timeFilter').value='30'; renderContacts(); alert(`יובאו בהצלחה ${results.length} אנשי קשר!`);
         }
     } catch(ex){console.error(ex);}
 }
@@ -872,7 +876,7 @@ function addContact() {
         contacts.push({id:Date.now(),name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,recurrence,hasSound:false,trimStart:0,trimDuration:15});
         clearForm();
     }
-    saveToStorage(); playSound('save'); document.getElementById('timeFilter').value='all'; renderContacts();
+    saveToStorage(); playSound('save'); document.getElementById('timeFilter').value='30'; renderContacts();
 }
 
 function editContact(id) {
