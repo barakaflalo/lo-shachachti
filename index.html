@@ -178,6 +178,10 @@
             </select>
         </div>
         <input type="text" id="customEventInp" placeholder="הקלד את סוג האירוע..." style="display:none; border-color:#6366f1;">
+        <select id="recurrenceInp" style="margin-bottom:0;">
+            <option value="yearly">🔁 אירוע חוזר מדי שנה (יום הולדת, אזכרה...)</option>
+            <option value="once">📌 אירוע חד פעמי (חתונה, בר מצווה...)</option>
+        </select>
         <div class="grid-2">
             <input type="tel" id="phoneInp" placeholder="טלפון">
             <input type="email" id="emailInp" placeholder="אימייל">
@@ -206,6 +210,7 @@
 
         <button class="btn-submit" id="submitBtn" onclick="addContact()">💾 שמור אירוע במערכת</button>
         <button class="btn-cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">✖️ ביטול עריכה</button>
+        <button id="deleteInFormBtn" onclick="deleteFromForm()" style="display:none; width:100%; padding:11px; margin-top:6px; background:rgba(239,68,68,0.15); color:#f87171; border:1px solid #f87171; border-radius:10px; font-weight:bold; cursor:pointer; font-size:14px;">🗑️ מחק אירוע זה לצמיתות</button>
     </div>
 
     <h2>📅 פירוט אירועים (30 הימים הקרובים)</h2>
@@ -537,18 +542,6 @@ function getEventLabel(type,customName) {
     if(type==='memorial') return '🕯️ אזכרה / זיכרון';
     return '✨ אירוע';
 }
-function getEventCalculations(dateString) {
-    if(!dateString) return {daysLeft:null,pastDays:null,isPastThisYear:false};
-    const today=new Date(); today.setHours(0,0,0,0);
-    const ev=new Date(dateString);
-    const next=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
-    if(next<today) next.setFullYear(today.getFullYear()+1);
-    const daysLeft=Math.ceil((next-today)/86400000);
-    const thisY=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
-    const isPast=thisY<today;
-    const pastDays=isPast?Math.ceil((today-thisY)/86400000):0;
-    return {daysLeft,pastDays,isPastThisYear:isPast};
-}
 
 // ========== BUDGETS & STATS ==========
 function updateGameStats(list) {
@@ -609,11 +602,12 @@ function addContact() {
 
     if(editingId!==null) {
         const idx=contacts.findIndex(c=>c.id===editingId);
-        if(idx!==-1) contacts[idx]={...contacts[idx],name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender:document.getElementById('genderInp').value};
+        if(idx!==-1) contacts[idx]={...contacts[idx],name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender:document.getElementById('genderInp').value,recurrence:document.getElementById('recurrenceInp').value};
         cancelEdit();
     } else {
         const gender=document.getElementById('genderInp').value;
-        contacts.push({id:Date.now(),name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,hasSound:false,trimStart:0,trimDuration:15});
+        const recurrence=document.getElementById('recurrenceInp').value;
+        contacts.push({id:Date.now(),name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,recurrence,hasSound:false,trimStart:0,trimDuration:15});
         clearForm();
     }
     saveToStorage(); document.getElementById('timeFilter').value='all'; renderContacts();
@@ -632,6 +626,7 @@ function editContact(id) {
     document.getElementById('giftIdeaInp').value=c.giftIdea||'';
     document.getElementById('giftStatusInp').value=c.giftStatus||'pending';
     document.getElementById('genderInp').value=c.gender||'';
+    document.getElementById('recurrenceInp').value=c.recurrence||'yearly';
     document.getElementById('eventTypeInp').value=c.eventType||'birthday';
     if(c.eventType==='custom'){document.getElementById('customEventInp').style.display='block';document.getElementById('customEventInp').value=c.customEventName||'';}
     else{document.getElementById('customEventInp').style.display='none';}
@@ -641,6 +636,7 @@ function editContact(id) {
     document.getElementById('submitBtn').innerText='✅ עדכן אירוע';
     document.getElementById('submitBtn').style.background='#f59e0b';
     document.getElementById('cancelEditBtn').classList.add('visible');
+    document.getElementById('deleteInFormBtn').style.display='block';
     document.getElementById('mainFormBox').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -652,12 +648,14 @@ function cancelEdit() {
     document.getElementById('submitBtn').innerText='💾 שמור אירוע במערכת';
     document.getElementById('submitBtn').style.background='';
     document.getElementById('cancelEditBtn').classList.remove('visible');
+    document.getElementById('deleteInFormBtn').style.display='none';
 }
 
 function clearForm() {
     ['nameInp','phoneInp','emailInp','groupInp','notesInp','giftBudgetInp','giftIdeaInp','customEventInp'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('bdayInp').value='';
     document.getElementById('genderInp').value='';
+    document.getElementById('recurrenceInp').value='yearly';
     document.getElementById('giftStatusInp').value='pending';
     document.getElementById('eventTypeInp').value='birthday';
     document.getElementById('customEventInp').style.display='none';
@@ -669,6 +667,32 @@ function deleteContact(id) {
         if(editingId===id) cancelEdit();
         saveToStorage(); renderContacts();
     }
+}
+
+function deleteFromForm() {
+    if(editingId===null) return;
+    if(confirm('למחוק אירוע זה לצמיתות?')) {
+        contacts=contacts.filter(c=>c.id!==editingId);
+        cancelEdit();
+        saveToStorage(); renderContacts();
+    }
+}
+
+function getEventCalculations(dateString, recurrence) {
+    if(!dateString) return {daysLeft:null,pastDays:null,isPastThisYear:false};
+    const today=new Date(); today.setHours(0,0,0,0);
+    const ev=new Date(dateString);
+    if(recurrence==='once') {
+        const actual=new Date(ev.getFullYear(),ev.getMonth(),ev.getDate());
+        if(actual<today) return {daysLeft:null,pastDays:Math.ceil((today-actual)/86400000),isPastThisYear:true,isOver:true};
+        return {daysLeft:Math.ceil((actual-today)/86400000),pastDays:0,isPastThisYear:false,isOver:false};
+    }
+    const next=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
+    if(next<today) next.setFullYear(today.getFullYear()+1);
+    const daysLeft=Math.ceil((next-today)/86400000);
+    const thisY=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
+    const isPast=thisY<today;
+    return {daysLeft,pastDays:isPast?Math.ceil((today-thisY)/86400000):0,isPastThisYear:isPast,isOver:false};
 }
 function toggleGiftStatus(id) {
     const idx=contacts.findIndex(c=>c.id===id); if(idx===-1) return;
@@ -839,7 +863,7 @@ function renderVisualCalendar() {
 
 function renderCalendarList() {
     const el=document.getElementById('calendarListContainer'); if(!el) return; el.innerHTML='';
-    const upcoming=contacts.map(c=>({...c,daysLeft:getEventCalculations(c.bday).daysLeft})).filter(c=>c.bday&&c.daysLeft!==null&&c.daysLeft<=30).sort((a,b)=>a.daysLeft-b.daysLeft);
+    const upcoming=contacts.map(c=>({...c,...getEventCalculations(c.bday,c.recurrence)})).filter(c=>c.bday&&c.daysLeft!==null&&!c.isOver&&c.daysLeft<=30).sort((a,b)=>a.daysLeft-b.daysLeft);
     if(!upcoming.length){el.innerHTML=`<div style="font-size:12px;color:var(--text-muted);text-align:center;">אין אירועים ב-30 הימים הקרובים</div>`;return;}
     upcoming.forEach(c=>{
         const d=document.createElement('div'); d.className='event-item';
@@ -868,7 +892,7 @@ function renderContacts() {
     updateDynamicGroups();
     const query=document.getElementById('searchInp').value.toLowerCase();
     const timeMode=document.getElementById('timeFilter').value;
-    let enriched=contacts.map(c=>({...c,...getEventCalculations(c.bday)}));
+    let enriched=contacts.map(c=>({...c,...getEventCalculations(c.bday,c.recurrence)}));
     let sorted=enriched.sort((a,b)=>{
         if(timeMode==='past'){if(a.pastDays===null)return 1;if(b.pastDays===null)return -1;return a.pastDays-b.pastDays;}
         else{if(a.daysLeft===null)return 1;if(b.daysLeft===null)return -1;return a.daysLeft-b.daysLeft;}
@@ -916,7 +940,7 @@ function renderContacts() {
 
         card.innerHTML=`
             <div class="profile-img">${icon}</div>
-            <div style="font-weight:bold;font-size:18px;">${c.name} <span style="font-size:12px;font-weight:normal;color:var(--accent-color)">(${getEventLabel(c.eventType,c.customEventName)})</span></div>
+            <div style="font-weight:bold;font-size:18px;">${c.name} <span style="font-size:12px;font-weight:normal;color:var(--accent-color)">(${getEventLabel(c.eventType,c.customEventName)})</span> ${c.recurrence==='once'?'<span style="font-size:10px;background:rgba(239,68,68,0.2);color:#fca5a5;padding:2px 7px;border-radius:10px;">📌 חד פעמי</span>':'<span style="font-size:10px;background:rgba(16,185,129,0.2);color:#6ee7b7;padding:2px 7px;border-radius:10px;">🔁 שנתי</span>'}</div>
             <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">${daysText}<br>🏷️ ${c.group||'ללא קבוצה'}<br>📱 ${c.phone||'-'} | ✉️ ${c.email||'-'}</div>
             ${soundBtn}
             ${giftSection}
@@ -1093,7 +1117,7 @@ function printMonthlyReport() {
         const nextY=new Date(today.getFullYear()+1,ev.getMonth(),ev.getDate());
         return (thisY>=today&&thisY<=in30)||(nextY>=today&&nextY<=in30);
     }).sort((a,b)=>{
-        const calc=c=>getEventCalculations(c.bday).daysLeft||999;
+        const calc=c=>getEventCalculations(c.bday,c.recurrence).daysLeft||999;
         return calc(a)-calc(b);
     });
     buildAndPrintReport(upcoming, 'דוח 30 ימים קרובים');
