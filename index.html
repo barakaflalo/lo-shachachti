@@ -145,6 +145,11 @@
         .countdown-normal { background:rgba(99,102,241,0.2); color:var(--accent-color); padding:3px 10px; border-radius:20px; font-size:12px; display:inline-block; margin-bottom:6px; }
         .contact-photo { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--accent-color); flex-shrink:0; cursor:pointer; }
         .contact-photo-placeholder { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--accent-color),#8b5cf6); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; color:white; font-weight:bold; cursor:pointer; }
+        .gift-tag { display:inline-flex; align-items:center; gap:5px; padding:7px 12px; border-radius:20px; border:1.5px solid var(--border-color); background:rgba(255,255,255,0.04); color:var(--text-muted); cursor:pointer; font-size:13px; transition:all 0.15s; user-select:none; }
+        .gift-tag:hover { border-color:var(--accent-color); color:var(--text-main); }
+        .gift-tag.selected { background:rgba(99,102,241,0.25); border-color:var(--accent-color); color:var(--text-main); font-weight:bold; }
+        .light-mode .gift-tag { background:#f1f5f9; color:#64748b; }
+        .light-mode .gift-tag.selected { background:rgba(99,102,241,0.15); color:#4338ca; }
     </style>
 </head>
 <body>
@@ -243,14 +248,16 @@
         <datalist id="groupListOptions"></datalist>
         <div class="grid-2">
             <input type="number" id="giftBudgetInp" placeholder="תקציב מתנה (₪)">
-        </div>
-        <div class="grid-2">
-            <input type="text" id="giftIdeaInp" placeholder="רעיון למתנה">
             <select id="giftStatusInp">
-                <option value="pending">⏳ טרם נקנה</option>
-                <option value="paid">✅ נקנה</option>
+                <option value="pending">🛒 סטטוס: טרם נקנה</option>
+                <option value="paid">✅ סטטוס: נקנה</option>
             </select>
         </div>
+        <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">🎁 רעיון למתנה — בחר אחד או יותר (יחפש בחנויות אוטומטית)</label>
+        <div id="giftTagsContainer" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+        </div>
+        <input type="text" id="giftIdeaInp" placeholder="✏️ כתוב רעיון מותאם אישית למתנה..." style="margin-bottom:6px;">
+        <div id="giftSelectedDisplay" style="display:none; font-size:12px; color:#10b981; margin-bottom:8px; padding:6px 10px; background:rgba(16,185,129,0.1); border-radius:8px;"></div>
         <textarea id="notesInp" placeholder="הערות שלי (תחביבים, העדפות, דברים חשובים לזכור...)"></textarea>
 
         <button class="btn-submit" id="submitBtn" onclick="addContact()">💾 שמור אירוע במערכת</button>
@@ -664,7 +671,99 @@ function playSound(type) {
     } catch(e) {}
 }
 
-// ========== SPLASH SCREEN ==========
+// ========== GIFT TAGS ==========
+const GIFT_OPTIONS = [
+    {emoji:'⌚',label:'שעון'},
+    {emoji:'👕',label:'בגדים'},
+    {emoji:'👟',label:'נעליים'},
+    {emoji:'🖼️',label:'תמונה / ציור'},
+    {emoji:'📱',label:'אביזרי סלולר'},
+    {emoji:'🎮',label:'משחקים / גיימינג'},
+    {emoji:'📚',label:'ספרים'},
+    {emoji:'💄',label:'קוסמטיקה / טיפוח'},
+    {emoji:'🌸',label:'פרחים'},
+    {emoji:'🍫',label:'שוקולד / ממתקים'},
+    {emoji:'🍷',label:'יין / אלכוהול'},
+    {emoji:'☕',label:'קפה / תה'},
+    {emoji:'🎒',label:'תיק'},
+    {emoji:'💍',label:'תכשיטים'},
+    {emoji:'🏠',label:'לבית'},
+    {emoji:'🧹',label:'שואב אבק / מכשיר חשמלי'},
+    {emoji:'📺',label:'טלוויזיה / מסך'},
+    {emoji:'🎵',label:'מוזיקה / אוזניות'},
+    {emoji:'✈️',label:'חוויה / טיול'},
+    {emoji:'💆',label:'עיסוי / ספא'},
+    {emoji:'🎟️',label:'כרטיסים לאירוע'},
+    {emoji:'💰',label:'כסף / גיפט קארד'},
+];
+
+let selectedGiftTags = [];
+
+function initGiftTags() {
+    const container = document.getElementById('giftTagsContainer');
+    container.innerHTML = '';
+    selectedGiftTags = [];
+    GIFT_OPTIONS.forEach(opt => {
+        const tag = document.createElement('div');
+        tag.className = 'gift-tag';
+        tag.innerHTML = `${opt.emoji} ${opt.label}`;
+        tag.dataset.label = opt.label;
+        tag.onclick = () => toggleGiftTag(tag, opt.label);
+        container.appendChild(tag);
+    });
+    updateGiftSelectedDisplay();
+}
+
+function toggleGiftTag(el, label) {
+    const idx = selectedGiftTags.indexOf(label);
+    if(idx === -1) {
+        selectedGiftTags.push(label);
+        el.classList.add('selected');
+    } else {
+        selectedGiftTags.splice(idx, 1);
+        el.classList.remove('selected');
+    }
+    updateGiftSelectedDisplay();
+}
+
+function updateGiftSelectedDisplay() {
+    const disp = document.getElementById('giftSelectedDisplay');
+    const custom = document.getElementById('giftIdeaInp').value.trim();
+    const all = [...selectedGiftTags, ...(custom ? [custom] : [])];
+    if(all.length) {
+        disp.style.display = 'block';
+        disp.innerHTML = '🎁 נבחר: ' + all.join(' · ');
+    } else {
+        disp.style.display = 'none';
+    }
+}
+
+function getGiftIdeaValue() {
+    const custom = document.getElementById('giftIdeaInp').value.trim();
+    const all = [...selectedGiftTags, ...(custom ? [custom] : [])];
+    return all.join(', ');
+}
+
+function setGiftIdeaValue(val) {
+    // Clear tags
+    selectedGiftTags = [];
+    document.querySelectorAll('.gift-tag').forEach(t => t.classList.remove('selected'));
+    if(!val) { updateGiftSelectedDisplay(); return; }
+    // Try to match known tags
+    const parts = val.split(',').map(s=>s.trim());
+    const remaining = [];
+    parts.forEach(p => {
+        const tag = document.querySelector(`.gift-tag[data-label="${p}"]`);
+        if(tag) {
+            selectedGiftTags.push(p);
+            tag.classList.add('selected');
+        } else {
+            remaining.push(p);
+        }
+    });
+    document.getElementById('giftIdeaInp').value = remaining.join(', ');
+    updateGiftSelectedDisplay();
+}
 function hideSplash() {
     const s = document.getElementById('splashScreen');
     if(!s) return;
@@ -749,6 +848,9 @@ window.onload = function() {
     setInterval(()=>{const d=new Date();document.getElementById('liveClock').innerText=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});},1000);
     // Splash screen
     setTimeout(hideSplash, 1800);
+    // Gift tags
+    initGiftTags();
+    document.getElementById('giftIdeaInp').addEventListener('input', updateGiftSelectedDisplay);
     // Service worker + notifications
     if('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(reg => {
@@ -962,7 +1064,7 @@ function addContact() {
     const group=getGroupValue();
     const notes=document.getElementById('notesInp').value;
     const budget=document.getElementById('giftBudgetInp').value;
-    const giftIdea=document.getElementById('giftIdeaInp').value;
+    const giftIdea=getGiftIdeaValue();
     const giftStatus=document.getElementById('giftStatusInp').value;
     if(!name||!bday){alert('חובה להזין שם ותאריך.');return;}
     if(type==='custom'&&!customName){alert('נא להזין את סוג האירוע.');return;}
@@ -990,7 +1092,7 @@ function editContact(id) {
     setGroupValue(c.group||'');
     document.getElementById('notesInp').value=c.notes||'';
     document.getElementById('giftBudgetInp').value=c.giftBudget||'';
-    document.getElementById('giftIdeaInp').value=c.giftIdea||'';
+    setGiftIdeaValue(c.giftIdea||'');
     document.getElementById('giftStatusInp').value=c.giftStatus||'pending';
     document.getElementById('genderInp').value=c.gender||'';
     document.getElementById('recurrenceInp').value=c.recurrence||'yearly';
@@ -1021,6 +1123,7 @@ function cancelEdit() {
 
 function clearForm() {
     ['nameInp','phoneInp','emailInp','groupInp','notesInp','giftBudgetInp','giftIdeaInp','customEventInp'].forEach(id=>document.getElementById(id).value='');
+    setGiftIdeaValue('');
     document.getElementById('groupSelectInp').value='';
     document.getElementById('groupInp').style.display='none';
     document.getElementById('bdayInp').value='';
