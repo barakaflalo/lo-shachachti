@@ -225,9 +225,21 @@
                 <option value="female">👩 נקבה</option>
                 <option value="other">🧑 אחר / לא רלוונטי</option>
             </select>
-            <input type="text" id="groupInp" placeholder="שם קבוצה (משפחה, חברים...)" list="groupListOptions">
-            <datalist id="groupListOptions"></datalist>
         </div>
+        <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">🏷️ קבוצה / קשר</label>
+        <select id="groupSelectInp" onchange="toggleCustomGroup()" style="margin-bottom:6px;">
+            <option value="">— בחר קבוצה —</option>
+            <option value="משפחה">👨‍👩‍👧‍👦 משפחה</option>
+            <option value="חברים">👫 חברים / חברות</option>
+            <option value="עבודה">💼 חברים / חברות מהעבודה</option>
+            <option value="צבא">🎖️ חברים / חברות מהצבא / מילואים</option>
+            <option value="טיול">✈️ חברים / חברות מהטיול</option>
+            <option value="לימודים">📚 חברים / חברות מהלימודים</option>
+            <option value="שכנים">🏠 שכנים</option>
+            <option value="custom_group">✏️ אחר — הקלד בעצמך</option>
+        </select>
+        <input type="text" id="groupInp" placeholder="הקלד שם קבוצה מותאם אישית..." list="groupListOptions" style="display:none;">
+        <datalist id="groupListOptions"></datalist>
         <div class="grid-2">
             <input type="number" id="giftBudgetInp" placeholder="תקציב מתנה (₪)">
         </div>
@@ -495,8 +507,13 @@ const wishStyles = [
         if(type==='holiday') return `חג שמח ${name}! 🎊 שיהיה חג מלא שמחה, משפחה ואוכל טוב!`;
         if(type==='graduation') return `מזל טוב ${name} על הסיום! 🎓 עבודה קשה משתלמת — גאווה גדולה!`;
         const gl=(group||'').toLowerCase();
-        if(gl.includes('עבודה')||gl.includes('הורים')) return `ל-${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, ברכות חמות. מאחל${f?'ת':''} שנת עשייה והצלחה! 🌟`;
-        if(gl.includes('חבר')||gl.includes('מילואים')) return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'אח/ות'} יקר${f?'ה':''} 🍻`;
+        if(gl==='עבודה') return `ל-${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, ברכות חמות מהעבודה. מאחל${f?'ת':''} שנת עשייה והצלחה! 🌟`;
+        if(gl==='משפחה') return `${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, המון מזל טוב מכל המשפחה! ❤️ בריאות ואושר!`;
+        if(gl==='צבא') return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'אח/ות'} יקר${f?'ה':''} מהצבא 🎖️🍻`;
+        if(gl==='טיול') return `מזל טוב ${name}! ✈️ זוכר${f?'ת':''} את הטיולים שלנו יחד — רק שמחות!`;
+        if(gl==='לימודים') return `מזל טוב ${name}! 📚 חבר${f?'ה':''} ללימודים — שתמשיך${f?'/י':''} להצליח!`;
+        if(gl==='שכנים') return `מזל טוב ${name} השכן${f?'ה':''}! 🏠 שמח${f?'ה':''} לחגוג איתך!`;
+        if(gl==='חברים'||gl.includes('חבר')) return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'חבר/ה'} יקר${f?'ה':''} 🍻`;
         return `המון מזל טוב ${name}! מאחל${f?'ת':''} אושר, בריאות והצלחה! 🎈`;
     },
     (name, type, group, gender) => {
@@ -760,6 +777,30 @@ function savePersonalGreetings() {
 function toggleCustomEventField() {
     document.getElementById('customEventInp').style.display = document.getElementById('eventTypeInp').value==='custom'?'block':'none';
 }
+function toggleCustomGroup() {
+    const sel = document.getElementById('groupSelectInp').value;
+    document.getElementById('groupInp').style.display = sel==='custom_group'?'block':'none';
+    if(sel!=='custom_group') document.getElementById('groupInp').value='';
+}
+function getGroupValue() {
+    const sel = document.getElementById('groupSelectInp').value;
+    if(sel==='custom_group') return document.getElementById('groupInp').value.trim();
+    return sel;
+}
+function setGroupValue(val) {
+    const options = ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];
+    if(options.includes(val)) {
+        document.getElementById('groupSelectInp').value=val;
+        document.getElementById('groupInp').style.display='none';
+    } else if(val) {
+        document.getElementById('groupSelectInp').value='custom_group';
+        document.getElementById('groupInp').style.display='block';
+        document.getElementById('groupInp').value=val;
+    } else {
+        document.getElementById('groupSelectInp').value='';
+        document.getElementById('groupInp').style.display='none';
+    }
+}
 function getEventLabel(type,customName) {
     const labels = {
         birthday:   '🎉 יום הולדת',
@@ -881,7 +922,7 @@ function addContact() {
     const customName=document.getElementById('customEventInp').value;
     const phone=document.getElementById('phoneInp').value;
     const email=document.getElementById('emailInp').value;
-    const group=document.getElementById('groupInp').value;
+    const group=getGroupValue();
     const notes=document.getElementById('notesInp').value;
     const budget=document.getElementById('giftBudgetInp').value;
     const giftIdea=document.getElementById('giftIdeaInp').value;
@@ -909,7 +950,7 @@ function editContact(id) {
     document.getElementById('bdayInp').value=c.bday||'';
     document.getElementById('phoneInp').value=c.phone||'';
     document.getElementById('emailInp').value=c.email||'';
-    document.getElementById('groupInp').value=c.group||'';
+    setGroupValue(c.group||'');
     document.getElementById('notesInp').value=c.notes||'';
     document.getElementById('giftBudgetInp').value=c.giftBudget||'';
     document.getElementById('giftIdeaInp').value=c.giftIdea||'';
@@ -943,6 +984,8 @@ function cancelEdit() {
 
 function clearForm() {
     ['nameInp','phoneInp','emailInp','groupInp','notesInp','giftBudgetInp','giftIdeaInp','customEventInp'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('groupSelectInp').value='';
+    document.getElementById('groupInp').style.display='none';
     document.getElementById('bdayInp').value='';
     document.getElementById('genderInp').value='';
     document.getElementById('recurrenceInp').value='yearly';
