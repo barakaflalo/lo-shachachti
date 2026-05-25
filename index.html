@@ -156,7 +156,10 @@
     <div class="top-bar">
         <button class="mode-toggle" onclick="toggleDarkMode()">🌓 שינוי מראה</button>
         <span style="font-size:12px; color:var(--text-muted);" id="liveClock"></span>
-        <button class="btn-settings-nav" onclick="openSettingsPage()">⚙️ הגדרות</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+            <button onclick="shareApp()" style="background:rgba(16,185,129,0.2);border:1px solid #10b981;color:#10b981;padding:6px 10px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:bold;">📤 שתף</button>
+            <button class="btn-settings-nav" onclick="openSettingsPage()">⚙️ הגדרות</button>
+        </div>
     </div>
 
     <h1>לא שכחתי</h1>
@@ -296,6 +299,17 @@
     <!-- רובריקה 4: ייצוא/ייבוא CSV -->
     <div class="settings-section">
         <div class="settings-section-title">📊 ייצוא וייבוא CSV (אקסל)</div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.6;">
+            ייצא את רשימת האירועים שלך לקובץ אקסל לעריכה במחשב, או ייבא רשימה מוכנה מאקסל.<br>
+            שימושי לעריכת הרבה אירועים בבת אחת.
+        </p>
+        <div style="background:rgba(99,102,241,0.08); border-radius:10px; padding:10px; margin-bottom:12px; font-size:11px; color:var(--text-muted); line-height:1.7;">
+            <b>איך מייבאים מאקסל?</b><br>
+            1. לחץ "ייצוא ל-CSV" כדי לקבל קובץ לדוגמה<br>
+            2. פתח אותו באקסל / Google Sheets<br>
+            3. ערוך או הוסף שורות<br>
+            4. שמור כ-CSV והעלה עם "ייבוא מ-CSV"
+        </div>
         <div class="settings-row">
             <button class="btn-backup" style="background:#10b981;" onclick="exportCSV()">📊 ייצוא ל-CSV</button>
             <button class="btn-backup" style="background:#f59e0b;" onclick="document.getElementById('importCSVFile').click()">📁 ייבוא מ-CSV</button>
@@ -325,6 +339,13 @@
     <!-- רובריקה 5: גיבוי ושחזור -->
     <div class="settings-section">
         <div class="settings-section-title">💾 שמירה ושחזור גיבוי</div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.6;">
+            שמור גיבוי מלא של כל האירועים, ההגדרות והתזכורות שלך.<br>
+            <b>מחליף טלפון?</b> שמור גיבוי בטלפון הישן ← שחזר בחדש — וכל המידע חוזר! 📱➡️📱
+        </p>
+        <div style="background:rgba(16,185,129,0.08); border-radius:10px; padding:10px; margin-bottom:12px; font-size:11px; color:var(--text-muted); line-height:1.7;">
+            <b>המלצה:</b> שמור גיבוי אחת לחודש ב-Google Drive / WhatsApp לעצמך / אימייל — כך המידע שלך תמיד מוגן.
+        </div>
         <div class="settings-row">
             <button class="btn-backup" onclick="exportData()">💾 שמור גיבוי</button>
             <button class="btn-backup" onclick="document.getElementById('importFile').click()">📂 שחזר מגיבוי</button>
@@ -732,8 +753,63 @@ function getEventLabel(type,customName) {
 // ========== BUDGETS & STATS ==========
 function updateGameStats(list) {
     const el=document.getElementById('gamificationStats');
-    if(!list.length){el.innerHTML="הוסף אירועים כדי להתחיל לנהל 🎈";return;}
-    el.innerHTML=`🎉 מוצגים: <b>${list.length}</b> אירועים! &nbsp;|&nbsp; 🏆 שולמו: <b>${list.filter(c=>c.giftStatus==='paid').length}</b> מתנות!`;
+    if(!contacts.length){el.innerHTML="הוסף אירועים כדי להתחיל לנהל 🎈";return;}
+    const today=new Date(); today.setHours(0,0,0,0);
+    const todayEvents=contacts.filter(c=>{
+        if(!c.bday) return false;
+        const ev=new Date(c.bday);
+        return ev.getMonth()===today.getMonth()&&ev.getDate()===today.getDate();
+    });
+    const upcoming30=contacts.filter(c=>c.daysLeft!==undefined&&c.daysLeft<=30&&c.daysLeft!==null&&!c.isOver).length;
+    const paid=contacts.filter(c=>c.giftStatus==='paid').length;
+    const totalBudget=contacts.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);
+
+    if(todayEvents.length) {
+        el.innerHTML=`🎉 <b>היום יש ${todayEvents.length} אירוע${todayEvents.length>1?'ות':''}!</b> ${todayEvents.map(c=>c.name).join(', ')} 🎂`;
+        el.style.background='linear-gradient(135deg,rgba(99,102,241,0.3),rgba(139,92,246,0.3))';
+        triggerConfetti();
+    } else {
+        el.style.background='';
+        el.innerHTML=`📅 <b>${upcoming30}</b> אירועים ב-30 יום הקרובים &nbsp;|&nbsp; 🎁 <b>${paid}</b> מתנות שנקנו &nbsp;|&nbsp; 💰 סה"כ תקציב: <b>${totalBudget} ₪</b>`;
+    }
+}
+
+function triggerConfetti() {
+    const canvas=document.createElement('canvas');
+    canvas.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;';
+    document.body.appendChild(canvas);
+    const ctx=canvas.getContext('2d');
+    canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+    const pieces=Array.from({length:120},()=>({
+        x:Math.random()*canvas.width, y:-10,
+        w:8+Math.random()*8, h:8+Math.random()*8,
+        color:`hsl(${Math.random()*360},90%,60%)`,
+        vx:(Math.random()-0.5)*4, vy:2+Math.random()*3,
+        rot:Math.random()*360, rotV:(Math.random()-0.5)*8
+    }));
+    let frame=0;
+    function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        pieces.forEach(p=>{
+            p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV;
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+            ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+            ctx.restore();
+        });
+        frame++;
+        if(frame<120) requestAnimationFrame(draw);
+        else canvas.remove();
+    }
+    draw();
+}
+
+function shareApp() {
+    const text = '🔔 "לא שכחתי" — האפליקציה שתזכיר לך כל יום הולדת, אזכרה ואירוע חשוב!\nבחינם לגמרי 👇\nhttps://barakaflalo.github.io/lo-shachachti';
+    if(navigator.share) {
+        navigator.share({title:'לא שכחתי',text}).catch(()=>{});
+    } else {
+        navigator.clipboard.writeText(text).then(()=>alert('הקישור הועתק! 📋'));
+    }
 }
 function calculateBudgets(list) {
     let p=0,d=0;
@@ -1140,7 +1216,28 @@ function renderContacts() {
     });
 
     calculateBudgets(filtered);
-    if(!filtered.length){cont.innerHTML=`<div style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:20px;">לא נמצאו אירועים התואמים לסינון זה.</div>`;return;}
+    if(!filtered.length) {
+        if(contacts.length === 0) {
+            // מסך כניסה ריק — אין אנשי קשר בכלל
+            cont.innerHTML=`
+                <div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+                    <div style="font-size:72px; margin-bottom:16px; animation:pulse 2s infinite;">🔔</div>
+                    <h2 style="color:var(--text-main); font-size:22px; margin-bottom:8px;">ברוך הבא ל"לא שכחתי"!</h2>
+                    <p style="font-size:14px; line-height:1.7; margin-bottom:20px;">
+                        האפליקציה שתזכיר לך כל אירוע חשוב —<br>
+                        ימי הולדת, אזכרות, נישואין ועוד.<br>
+                        עם ברכות מוכנות, ניהול מתנות והתראות חכמות.
+                    </p>
+                    <div style="display:flex; flex-direction:column; gap:10px; max-width:280px; margin:0 auto;">
+                        <button onclick="document.getElementById('nameInp').focus(); document.getElementById('mainFormBox').scrollIntoView({behavior:'smooth'})" style="padding:14px; background:var(--accent-color); color:white; border:none; border-radius:12px; font-size:15px; font-weight:bold; cursor:pointer;">➕ הוסף אירוע ראשון</button>
+                        <button onclick="openSettingsPage()" style="padding:12px; background:rgba(99,102,241,0.15); color:var(--accent-color); border:1px solid var(--accent-color); border-radius:12px; font-size:14px; cursor:pointer;">📅 ייבוא מלוח שנה</button>
+                    </div>
+                </div>`;
+        } else {
+            cont.innerHTML=`<div style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:20px;">לא נמצאו אירועים התואמים לסינון זה.</div>`;
+        }
+        return;
+    }
 
     filtered.forEach(c=>{
         const icon=c.eventType==='birthday'?'🎉':c.eventType==='anniversary'?'💍':c.eventType==='memorial'?'🕯️':'📌';
