@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לא שכחתי - ניהול אירועים</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="לא שכחתי">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --panel-bg: rgba(255, 255, 255, 0.06);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #6366f1;
+        }
+        .light-mode {
+            --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --panel-bg: rgba(255, 255, 255, 0.8);
+            --panel-border: rgba(15, 23, 42, 0.08);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --accent-color: #4f46e5;
+        }
+        body { font-family: 'Segoe UI', system-ui, Tahoma, sans-serif; background: var(--bg-gradient); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; transition: background 0.5s ease; min-height: 100vh; }
+        .container { width: 100%; max-width: 500px; background: var(--panel-bg); backdrop-filter: blur(12px); border: 1px solid var(--panel-border); border-radius: 24px; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37); padding: 25px; box-sizing: border-box; margin-bottom: 20px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .mode-toggle { background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px 14px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .mode-toggle:hover { background: var(--accent-color); color: white; }
+        h1 { text-align: center; font-size: 28px; margin: 0 0 5px 0; color: #fbbf24; }
+        .credit { text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+        h2 { font-size: 16px; margin-top: 25px; margin-bottom: 12px; opacity: 0.9; border-bottom: 1px solid var(--panel-border); padding-bottom: 5px; }
+        .stats-box { background: rgba(16,185,129,0.1); border: 1px dashed rgba(16,185,129,0.4); padding: 10px; border-radius: 12px; margin-bottom: 20px; text-align: center; font-size: 14px; color: #34d399; font-weight: bold; }
+        .light-mode .stats-box { background: rgba(16,185,129,0.15); color: #059669; border-color: #10b981; }
+        .budget-dashboard { background: rgba(99,102,241,0.08); border: 1px solid var(--panel-border); padding: 12px; border-radius: 14px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; font-size: 13px; }
+        .budget-val { font-weight: bold; color: #34d399; font-size: 16px; margin-top:4px; }
+        .hero-event-widget { background: linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(239,68,68,0.2) 100%); border: 1px solid rgba(245,158,11,0.4); padding: 20px; border-radius: 18px; margin-bottom: 25px; text-align: center; }
+        .hero-name { font-size: 22px; font-weight: bold; margin-bottom: 10px; }
+        .hero-countdown { font-family: monospace; font-size: 24px; color: white; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 12px; display: inline-block; }
+        .light-mode .hero-countdown { background: rgba(255,255,255,0.7); color: #b45309; }
+        .visual-calendar-wrapper { background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); border-radius: 16px; padding: 15px; margin-bottom: 25px; }
+        .visual-calendar { display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px; }
+        .day-dot { aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; background: rgba(255,255,255,0.05); color: var(--text-muted); }
+        .light-mode .day-dot { background: rgba(0,0,0,0.05); }
+        .day-dot.has-event { background: var(--accent-color); color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(99,102,241,0.4); }
+        .form-box { background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); padding: 15px; border-radius: 16px; margin-bottom: 25px; }
+        /* EDIT MODE */
+        .form-box.edit-mode { border-color: #f59e0b; background: rgba(245,158,11,0.05); }
+        .edit-mode-banner { display: none; background: rgba(245,158,11,0.15); border: 1px solid #f59e0b; border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; font-weight: bold; color: #fbbf24; text-align: center; }
+        .edit-mode-banner.visible { display: block; }
+        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .light-mode input, .light-mode select, .light-mode textarea { background: #ffffff; color: #0f172a; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-submit { background: var(--accent-color); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        .btn-cancel-edit { display: none; background: #64748b; color: white; border: none; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 8px; }
+        .btn-cancel-edit.visible { display: block; }
+        .btn-import { background: #0284c7; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-settings { background: #475569; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px; }
+        #personalGreetingsBox { display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed #6366f1; }
+        .light-mode #personalGreetingsBox { background: rgba(0,0,0,0.05); }
+        .calendar-box { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 16px; padding: 15px; margin-bottom: 25px; }
+        .event-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+        .event-item:last-child { border-bottom: none; }
+        .days-left-badge { font-size: 11px; background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 8px; border-radius: 20px; font-weight: bold; }
+        .filter-tags { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .tag-btn { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; color: var(--text-main); }
+        .tag-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+        .contact-list { display: flex; flex-direction: column; gap: 15px; }
+        .contact-card { border: 1px solid var(--panel-border); border-radius: 14px; padding: 18px; background: var(--panel-bg); }
+        .profile-img { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 20px; float: right; margin-left: 12px; }
+        /* AI RESULT BOX */
+        .ai-result-box { display: none; font-size: 13px; background: rgba(99,102,241,0.15); border: 1px dashed #818cf8; padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; line-height: 1.4; position: relative; }
+        .ai-wish-counter { font-size: 10px; color: #a78bfa; margin-bottom: 4px; display: block; }
+        /* GIFT STORE LINKS */
+        .store-links { margin-top: 6px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .store-link-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--panel-border); color: var(--text-main); font-size: 11px; padding: 3px 8px; border-radius: 6px; text-decoration: none; display: inline-block; }
+        .store-link-btn:hover { background: var(--accent-color); color: white; }
+        /* CARD ACTIONS */
+        .card-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 15px; clear: both; }
+        .btn-card { padding: 8px 4px; border-radius: 8px; border: none; font-size: 11px; font-weight: bold; cursor: pointer; color: white; text-align: center; }
+        .btn-ai { background: #8b5cf6; }
+        .btn-my-greet { background: #10b981; }
+        .btn-share { background: #0284c7; }
+        .btn-edit { background: #f59e0b; }
+        .btn-delete { background: #ef4444; }
+        .btn-play-sound { background: #ec4899; padding: 3px 7px; border-radius: 6px; font-size: 11px; border: none; color: white; cursor: pointer; margin-top: 4px; display: inline-block; }
+        /* BACKUP */
+        .backup-section { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid var(--panel-border); }
+        .btn-backup { flex: 1; min-width: 100px; background: #475569; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .time-filter-wrapper { display: flex; gap: 10px; margin-bottom: 15px; }
+        .time-filter-wrapper select { flex: 1; margin: 0; padding: 8px; background: rgba(99,102,241,0.1); border-color: var(--accent-color); font-weight: bold; }
+        .light-mode .time-filter-wrapper select { background: rgba(99,102,241,0.05); }
+
+        /* ======= MODAL ======= */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 15px; box-sizing: border-box; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: #1e1b4b; border: 1px solid rgba(255,255,255,0.15); width: 100%; max-width: 430px; border-radius: 20px; padding: 20px; box-sizing: border-box; max-height: 88vh; overflow-y: auto; position: relative; }
+        .light-mode .modal-box { background: #ffffff; border-color: rgba(0,0,0,0.1); color: #0f172a; }
+        .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 14px; border-bottom: 1px solid var(--panel-border); padding-bottom: 8px; padding-left: 30px; }
+        .modal-close { position: absolute; top: 14px; left: 14px; background: rgba(255,255,255,0.1); border: none; color: var(--text-main); font-size: 17px; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .modal-section { background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+        .light-mode .modal-section { background: #f8fafc; }
+        .modal-section-title { font-size: 12px; font-weight: bold; margin-bottom: 8px; color: var(--accent-color); }
+        .btn-save-modal { background: #22c55e; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; font-size: 14px; }
+        .btn-delete-modal { background: none; color: #ef4444; border: none; width: 100%; text-align: center; margin-top: 10px; font-size: 12px; cursor: pointer; text-decoration: underline; display: block; }
+
+        /* STORES MODAL */
+        .stores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+        .store-check-item { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.04); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+        .store-check-item input[type=checkbox] { width: auto; margin: 0; cursor: pointer; }
+        .btn-open-stores { background: rgba(99,102,241,0.15); border: 1px solid var(--accent-color); color: var(--accent-color); padding: 7px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; width: 100%; margin-bottom: 10px; font-weight: bold; }
+
+        /* ======= SETTINGS PAGE ======= */
+        .settings-page { display: none; }
+        .settings-page.active { display: block; }
+        .main-page { display: block; }
+        .main-page.hidden { display: none; }
+        .btn-settings-nav { background: rgba(99,102,241,0.2); border: 1px solid var(--accent-color); color: var(--text-main); padding: 8px 14px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-settings-nav:hover { background: var(--accent-color); color: white; }
+        .settings-section { background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); border-radius: 16px; padding: 18px; margin-bottom: 18px; }
+        .settings-section-title { font-size: 15px; font-weight: bold; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--panel-border); display: flex; align-items: center; gap: 8px; }
+        .settings-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .settings-row .btn-backup { flex: 1; min-width: 120px; }
+        .btn-back { background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+        .btn-back:hover { background: var(--accent-color); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="main-page" id="mainPage">
+<div class="container">
+    <div class="top-bar">
+        <button class="mode-toggle" onclick="toggleDarkMode()">🌓 שינוי מראה</button>
+        <span style="font-size:12px; color:var(--text-muted);" id="liveClock"></span>
+        <button class="btn-settings-nav" onclick="openSettingsPage()">⚙️ הגדרות</button>
+    </div>
+
+    <h1>לא שכחתי</h1>
+    <div class="credit">כל הזכויות שמורות לברק וגימי אפללו</div>
+
+    <div class="stats-box" id="gamificationStats">התחל להוסיף אירועים כדי להתחיל לחגוג! 🎈</div>
+
+    <div class="budget-dashboard">
+        <div>💰 פתוח למתנות:<br><div class="budget-val" id="budgetPending">0 ₪</div></div>
+        <div>✅ שכבר שולם:<br><div class="budget-val" id="budgetPaid">0 ₪</div></div>
+    </div>
+
+    <div id="heroWidgetContainer"></div>
+
+    <div class="visual-calendar-wrapper">
+        <div style="font-size:12px; font-weight:bold; margin-bottom:10px; color:var(--text-muted);">מפת עומס: 30 הימים הקרובים</div>
+        <div class="visual-calendar" id="visualCalendar"></div>
+    </div>
+
+    <div class="form-box" id="mainFormBox">
+
+        <div class="edit-mode-banner" id="editModeBanner">✏️ מצב עריכה — משנה פרטים קיימים</div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; margin-top:10px;">
+            <h3 style="margin:0; font-size:15px;" id="formTitle">➕ הוספת אירוע / איש קשר</h3>
+            <button class="btn-import" onclick="importFromPhone()">📥 ייבוא מהטלפון</button>
+        </div>
+
+        <input type="text" id="nameInp" placeholder="עבור מי / שם האירוע? *">
+        <div class="grid-2">
+            <input type="date" id="bdayInp" required>
+            <select id="eventTypeInp" onchange="toggleCustomEventField()">
+                <option value="birthday">🎉 יום הולדת</option>
+                <option value="anniversary">💍 יום נישואין</option>
+                <option value="memorial">🕯️ אזכרה / זיכרון</option>
+                <option value="custom">✏️ אחר (מותאם אישית)...</option>
+            </select>
+        </div>
+        <input type="text" id="customEventInp" placeholder="הקלד את סוג האירוע..." style="display:none; border-color:#6366f1;">
+        <div class="grid-2">
+            <input type="tel" id="phoneInp" placeholder="טלפון">
+            <input type="email" id="emailInp" placeholder="אימייל">
+        </div>
+        <div class="grid-2">
+            <select id="genderInp" style="border-color:#6366f1;">
+                <option value="">⚧ מין (לא חובה)</option>
+                <option value="male">👨 זכר</option>
+                <option value="female">👩 נקבה</option>
+                <option value="other">🧑 אחר / לא רלוונטי</option>
+            </select>
+            <input type="text" id="groupInp" placeholder="שם קבוצה (משפחה, חברים...)" list="groupListOptions">
+            <datalist id="groupListOptions"></datalist>
+        </div>
+        <div class="grid-2">
+            <input type="number" id="giftBudgetInp" placeholder="תקציב מתנה (₪)">
+        </div>
+        <div class="grid-2">
+            <input type="text" id="giftIdeaInp" placeholder="רעיון למתנה">
+            <select id="giftStatusInp">
+                <option value="pending">⏳ טרם נקנה</option>
+                <option value="paid">✅ נקנה</option>
+            </select>
+        </div>
+        <textarea id="notesInp" placeholder="הערות שחשוב לזכור (תחביבים, העדפות — עוזר לברכות AI)"></textarea>
+
+        <button class="btn-submit" id="submitBtn" onclick="addContact()">💾 שמור אירוע במערכת</button>
+        <button class="btn-cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">✖️ ביטול עריכה</button>
+    </div>
+
+    <h2>📅 פירוט אירועים (30 הימים הקרובים)</h2>
+    <div class="calendar-box" id="calendarListContainer"></div>
+
+    <h2>🔎 חיפוש וסינון מתקדם</h2>
+    <div class="time-filter-wrapper">
+        <select id="timeFilter" onchange="renderContacts()">
+            <option value="all" selected>♾️ כל הרשימה (ללא סינון)</option>
+            <option value="30">⏳ 30 הימים הקרובים</option>
+            <option value="future">📅 כל האירועים העתידיים השנה</option>
+            <option value="past">⏪ אירועים שעברו השנה</option>
+        </select>
+    </div>
+    <input type="text" id="searchInp" oninput="renderContacts()" placeholder="חפש לפי שם...">
+    <div class="filter-tags" id="filterTagsContainer"></div>
+    <div class="contact-list" id="listContainer"></div>
+
+</div>
+</div><!-- end main-page -->
+
+<!-- ======= SETTINGS PAGE ======= -->
+<div class="settings-page" id="settingsPage">
+<div class="container">
+    <div class="top-bar">
+        <button class="btn-back" onclick="closeSettingsPage()">← חזרה</button>
+        <span style="font-size:12px; color:var(--text-muted);" id="liveClockSettings"></span>
+        <button class="mode-toggle" onclick="toggleDarkMode()">🌓 מראה</button>
+    </div>
+
+    <h1 style="font-size:22px;">⚙️ הגדרות</h1>
+    <div class="credit">לא שכחתי — כל הזכויות שמורות לברק וגימי אפללו</div>
+
+    <!-- רובריקה 1: אנשי קשר -->
+    <div class="settings-section">
+        <div class="settings-section-title">👥 הגדרות אנשי קשר</div>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">ייבא אנשי קשר ישירות מרשימת אנשי הקשר בטלפון שלך.</p>
+        <button class="btn-backup" style="background:#0284c7; width:100%;" onclick="importFromPhone()">📥 ייבוא אנשי קשר מהטלפון</button>
+    </div>
+
+    <!-- רובריקה 2: ברכות אישיות -->
+    <div class="settings-section">
+        <div class="settings-section-title">📝 הגדרות ברכות אישיות</div>
+        <p style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">רשום את המילה <b>[שם]</b> איפה שתרצה שיופיע שם החוגג.</p>
+        <input type="text" id="sGreet1" placeholder="ברכה 1: מזל טוב [שם] היקר...">
+        <input type="text" id="sGreet2" placeholder="ברכה 2...">
+        <input type="text" id="sGreet3" placeholder="ברכה 3...">
+        <input type="text" id="sGreet4" placeholder="ברכה 4...">
+        <input type="text" id="sGreet5" placeholder="ברכה 5...">
+        <button class="btn-submit" style="background:#10b981; padding:10px; margin-top:4px;" onclick="saveGreetingsFromSettings()">💾 שמור ברכות אישיות</button>
+    </div>
+
+    <!-- רובריקה 3: חנויות מועדפות -->
+    <div class="settings-section">
+        <div class="settings-section-title">🛒 חנויות מועדפות לחיפוש מתנות</div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">בחר אילו חנויות יופיעו בכפתורי החיפוש המהיר ליד כל מתנה.</p>
+        <div class="stores-grid" id="settingsStoresGrid"></div>
+        <div style="margin-top:10px;">
+            <input type="text" id="settingsCustomStoreInp" placeholder="הוסף חנות מותאמת (למשל: Zara)">
+            <button class="btn-submit" style="padding:8px; font-size:13px; margin-top:0;" onclick="addCustomStoreFromSettings()">+ הוסף חנות</button>
+        </div>
+        <button class="btn-submit" style="background:#10b981; padding:10px; margin-top:8px;" onclick="saveStoresFromSettings()">💾 שמור חנויות</button>
+    </div>
+
+    <!-- רובריקה 4: ייצוא/ייבוא CSV -->
+    <div class="settings-section">
+        <div class="settings-section-title">📊 ייצוא וייבוא CSV (אקסל)</div>
+        <div class="settings-row">
+            <button class="btn-backup" style="background:#10b981;" onclick="exportCSV()">📊 ייצוא ל-CSV</button>
+            <button class="btn-backup" style="background:#f59e0b;" onclick="document.getElementById('importCSVFile').click()">📁 ייבוא מ-CSV</button>
+        </div>
+        <input type="file" id="importCSVFile" accept=".csv" onchange="importCSV(event)" style="display:none;">
+    </div>
+
+    <!-- רובריקה 4b: ייבוא לוח שנה ICS -->
+    <div class="settings-section">
+        <div class="settings-section-title">📅 ייבוא מלוח שנה (ICS)</div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.6;">
+            ייצא קובץ <b>.ics</b> מגוגל קלנדר / אפל / אאוטלוק והעלה אותו כאן.<br>
+            כל האירועים ייכנסו אוטומטית לאפליקציה.
+        </p>
+        <div style="background:rgba(99,102,241,0.08); border-radius:10px; padding:10px; margin-bottom:12px; font-size:11px; color:var(--text-muted); line-height:1.7;">
+            <b>איך מייצאים מגוגל קלנדר?</b><br>
+            1. כנס ל-calendar.google.com במחשב<br>
+            2. הגדרות ← ייצוא<br>
+            3. הורד את קובץ ה-ZIP, פתח אותו<br>
+            4. העלה כאן את הקובץ <b>.ics</b>
+        </div>
+        <button class="btn-backup" style="background:#6366f1; width:100%;" onclick="document.getElementById('importICSFile').click()">📅 בחר קובץ ICS לייבוא</button>
+        <input type="file" id="importICSFile" accept=".ics" onchange="importICS(event)" style="display:none;">
+        <div id="icsImportResult" style="margin-top:10px; font-size:12px; display:none;"></div>
+    </div>
+
+    <!-- רובריקה 5: גיבוי ושחזור -->
+    <div class="settings-section">
+        <div class="settings-section-title">💾 שמירה ושחזור גיבוי</div>
+        <div class="settings-row">
+            <button class="btn-backup" onclick="exportData()">💾 שמור גיבוי</button>
+            <button class="btn-backup" onclick="document.getElementById('importFile').click()">📂 שחזר מגיבוי</button>
+        </div>
+        <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display:none;">
+    </div>
+
+    <!-- רובריקה 6: דוח חודשי -->
+    <div class="settings-section">
+        <div class="settings-section-title">🖨️ הדפסת דוח</div>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">הדפס דוח של כל האירועים ב-30 הימים הקרובים, או בחר טווח תאריכים מותאם אישית.</p>
+        <button class="btn-backup" onclick="printMonthlyReport()" style="background:#0284c7; width:100%; margin-bottom:12px;">🖨️ הדפס דוח 30 יום קרובים</button>
+        <div style="border-top:1px solid var(--border-color); padding-top:14px; margin-top:4px;">
+            <div style="font-size:13px; font-weight:600; margin-bottom:10px; color:var(--text-main);">📅 הדפסה לפי טווח תאריכים</div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+                <div style="flex:1; min-width:130px;">
+                    <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">מתאריך</label>
+                    <input type="date" id="printFromDate" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-main); font-size:13px;">
+                </div>
+                <div style="flex:1; min-width:130px;">
+                    <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">עד תאריך</label>
+                    <input type="date" id="printToDate" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-main); font-size:13px;">
+                </div>
+            </div>
+            <button class="btn-backup" onclick="printRangeReport()" style="background:#7c3aed; width:100%;">🖨️ הדפס לפי טווח</button>
+        </div>
+    </div>
+
+    <div style="height:20px;"></div>
+</div>
+</div><!-- end settings-page -->
+
+<!-- ===== MODAL עריכת איש קשר ===== -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+        <div class="modal-title" id="editModalTitle">⚙️ הגדרות מתקדמות</div>
+        <input type="hidden" id="editModalId">
+
+        <div class="modal-section">
+            <div class="modal-section-title">🎵 צליל התראה מותאם מהטלפון</div>
+            <div id="soundStatus" style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">אין שיר שמור</div>
+            <input type="file" id="soundFileInput" accept="audio/*" onchange="handleSoundUpload()" style="font-size:12px;">
+            <div id="soundDurationInfo" style="font-size:11px; color:var(--text-muted); margin-top:4px; margin-bottom:6px;"></div>
+            <div class="grid-2">
+                <div>
+                    <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:3px;">שניית התחלה:</label>
+                    <input type="number" id="trimStart" value="0" min="0" placeholder="0">
+                </div>
+                <div>
+                    <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:3px;">כמה שניות לנגן:</label>
+                    <input type="number" id="trimDuration" value="15" min="1" max="60" placeholder="15">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-save-modal" onclick="saveEditModal()">💾 שמור ובצא</button>
+        <button class="btn-delete-modal" onclick="deleteFromEditModal()">🗑️ מחק אירוע זה לצמיתות</button>
+    </div>
+</div>
+
+<!-- ===== MODAL חנויות ===== -->
+<div class="modal-overlay" id="storesModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeStoresModal()">✕</button>
+        <div class="modal-title">🛒 חנויות מועדפות</div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">בחר אילו חנויות יופיעו בכפתורי החיפוש המהיר ליד כל מתנה.</p>
+        <div class="stores-grid" id="storesGrid"></div>
+        <div style="margin-top:10px;">
+            <input type="text" id="customStoreInp" placeholder="הוסף חנות מותאמת (למשל: Zara)">
+            <button class="btn-submit" style="padding:8px; font-size:13px;" onclick="addCustomStore()">+ הוסף חנות</button>
+        </div>
+        <button class="btn-save-modal" style="margin-top:10px;" onclick="saveStores()">💾 שמור</button>
+    </div>
+</div>
+
+<script>
+// ========== DATA ==========
+let contacts = [];
+let savedData = localStorage.getItem('lc_v25_data') || localStorage.getItem('lc_v24_data') || localStorage.getItem('lc_v23_data');
+if (savedData) contacts = JSON.parse(savedData);
+
+let myCustomGreetings = ["","","","",""];
+let savedGreetings = localStorage.getItem('lc_my_greetings');
+if (savedGreetings) {
+    myCustomGreetings = JSON.parse(savedGreetings);
+    for(let i=0;i<5;i++){let el=document.getElementById('myGreet'+(i+1));if(el)el.value=myCustomGreetings[i]||"";}
+}
+
+let aiTrackers = {};
+let generatedTexts = {};
+let countdownInterval = null;
+let currentGroupFilter = 'הכל';
+let editingId = null;
+
+// IndexedDB for audio
+let audioDB = null;
+let tempSoundBlob = null;
+const dbReq = indexedDB.open('lc_audio_db', 1);
+dbReq.onupgradeneeded = e => e.target.result.createObjectStore('sounds', { keyPath: 'id' });
+dbReq.onsuccess = e => { audioDB = e.target.result; };
+
+// ========== 5 WISH STYLES (LOOP) ==========
+const wishStyles = [
+    (name, notes, type, group, gender) => {
+        const m=gender==='male', f=gender==='female', known=m||f;
+        if(type==='memorial') return `חושב עליכם היום ביום האזכרה. מחבק מרחוק. 🕯️`;
+        if(type==='anniversary') return `יום נישואין שמח ${name}! 💍 שתמשיכו לאהוב ולצמוח יחד. המון בריאות ואושר!`;
+        const gl=(group||'').toLowerCase();
+        if(gl.includes('עבודה')||gl.includes('הורים')) return `ל-${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, ברכות חמות. מאחל${f?'ת':''} שנת עשייה והצלחה! 🌟`;
+        if(gl.includes('חבר')||gl.includes('מילואים')) return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'אח/ות'} יקר${f?'ה':''} 🍻`;
+        return `המון מזל טוב ${name}! מאחל${f?'ת':''} אושר, בריאות והצלחה! 🎈${notes?' (אגב — '+notes+' זה מדהים!)':''}`;
+    },
+    (name, notes, type, group, gender) => {
+        const m=gender==='male', f=gender==='female';
+        if(type==='memorial') return `מדליק נר לזכר${f?'ה':'ו'}. איתכם בכאבכם. 🕯️`;
+        if(type==='anniversary') return `מזל טוב ${name} על עוד שנה מדהימה יחד! 🥂 שתמשיכו לגדול ביחד!`;
+        return `יום הולדת שמח ${name} ${f?'היקרה':'היקר'}! 🎉 מאחל${f?'ת':''} לך שנה מלאה בחיוכים והגשמת חלומות!${notes?' ובמיוחד בתחום '+notes+'!':''}`;
+    },
+    (name, notes, type, group, gender) => {
+        const m=gender==='male', f=gender==='female';
+        if(type==='memorial') return `זוכר${f?'ת':''} איתכם היום. חיבוק חם. 🕯️`;
+        if(type==='anniversary') return `${name} — מזל טוב! 💍 שהאהבה תמשיך לצמוח ולהתחזק כל שנה!`;
+        return `${name}! 🎂 מזל טוב! שהשנה תהיה העתק-הדבק של כל הדברים הטובים!${notes?' [ובמיוחד ב-'+notes+']':''}`;
+    },
+    (name, notes, type, group, gender) => {
+        const m=gender==='male', f=gender==='female';
+        if(type==='memorial') return `ביום הזה מקדיש${f?'ה':''} מחשבה. יהי${f?' זכרה':' זכרו'} ברוך${f?'ה':''}. 🕯️`;
+        if(type==='anniversary') return `המון מזל טוב ${name}! 💍 זוג מדהים — שתמשיכו לחגוג ביחד שנים רבות!`;
+        return `המון מזל טוב ל-${name}! 🌟 תמשיך${f?'/י':''} להפיץ אור! מאחל${f?'ת':''} רק טוב!${notes?' '+notes+' — זה פשוט מקסים.':''}`;
+    },
+    (name, notes, type, group, gender) => {
+        const m=gender==='male', f=gender==='female';
+        if(type==='memorial') return `ביום הזיכרון — חושב${f?'ת':''} עליכם. 🕯️`;
+        if(type==='anniversary') return `יום נישואין שמח! 💍 ${name} — שתמשיכו לבנות ביחד ולהנות מכל רגע!`;
+        return `יום הולדת שמח ${name}! 🥳 שתהיה שנה מאושרת, בריאה ומלאה באנרגיות טובות!${notes?' וכמובן הרבה '+notes+'!':''}`;
+    }
+];
+
+// ========== STORES ==========
+const defaultStores = ['KSP','Amazon','זאפ','Etsy','iHerb','AliExpress'];
+function getActiveStores() {
+    const s = localStorage.getItem('lc_stores');
+    return s ? JSON.parse(s) : ['KSP','Amazon','זאפ'];
+}
+function buildStoreLinks(giftIdea) {
+    if(!giftIdea) return '';
+    const stores = getActiveStores();
+    let html = '<div class="store-links">';
+    stores.forEach(store => {
+        const q = encodeURIComponent(giftIdea + ' ' + store);
+        html += `<a href="https://www.google.com/search?q=${q}" target="_blank" class="store-link-btn">🔍 ${store}</a>`;
+    });
+    html += '</div>';
+    return html;
+}
+
+// ========== INIT ==========
+window.onload = function() {
+    if(localStorage.getItem('lc_theme')==='light') document.body.classList.add('light-mode');
+    renderContacts();
+    setInterval(()=>{const d=new Date();document.getElementById('liveClock').innerText=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});},1000);
+
+    // Register Service Worker for PWA + notifications
+    if('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            console.log('SW registered');
+            scheduleNotifications(reg);
+        }).catch(e => console.log('SW error:', e));
+    }
+};
+
+function toggleDarkMode() {
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('lc_theme', document.body.classList.contains('light-mode')?'light':'dark');
+}
+function saveToStorage() { localStorage.setItem('lc_v25_data', JSON.stringify(contacts)); }
+
+// ========== NOTIFICATIONS ==========
+async function scheduleNotifications(reg) {
+    if(!('Notification' in window)) return;
+    if(Notification.permission === 'default') {
+        const perm = await Notification.requestPermission();
+        if(perm !== 'granted') return;
+    }
+    if(Notification.permission !== 'granted') return;
+
+    // Find events in next 7 days and notify for tomorrow/today
+    const today = new Date(); today.setHours(0,0,0,0);
+    contacts.forEach(c => {
+        if(!c.bday) return;
+        const ev = new Date(c.bday);
+        const next = new Date(today.getFullYear(), ev.getMonth(), ev.getDate());
+        if(next < today) next.setFullYear(today.getFullYear()+1);
+        const daysLeft = Math.round((next - today) / 86400000);
+
+        if(daysLeft === 1) {
+            reg.showNotification('לא שכחתי ⏰', {
+                body: `מחר — ${getEventLabel(c.eventType, c.customEventName)} של ${c.name}! 🎉`,
+                icon: 'icon-192.png',
+                badge: 'icon-192.png',
+                tag: 'event-' + c.id,
+                dir: 'rtl'
+            });
+        } else if(daysLeft === 0) {
+            reg.showNotification('לא שכחתי 🎉', {
+                body: `היום — ${getEventLabel(c.eventType, c.customEventName)} של ${c.name}!`,
+                icon: 'icon-192.png',
+                badge: 'icon-192.png',
+                tag: 'event-today-' + c.id,
+                dir: 'rtl'
+            });
+        }
+    });
+}
+
+function togglePersonalGreetings() {
+    const b=document.getElementById('personalGreetingsBox');
+    b.style.display=b.style.display==='block'?'none':'block';
+}
+function savePersonalGreetings() {
+    for(let i=0;i<5;i++) myCustomGreetings[i]=document.getElementById('myGreet'+(i+1)).value;
+    localStorage.setItem('lc_my_greetings',JSON.stringify(myCustomGreetings));
+    alert('הברכות נשמרו!'); togglePersonalGreetings();
+}
+function toggleCustomEventField() {
+    document.getElementById('customEventInp').style.display = document.getElementById('eventTypeInp').value==='custom'?'block':'none';
+}
+function getEventLabel(type,customName) {
+    if(type==='custom') return customName||'אירוע';
+    if(type==='birthday') return '🎉 יום הולדת';
+    if(type==='anniversary') return '💍 יום נישואין';
+    if(type==='memorial') return '🕯️ אזכרה / זיכרון';
+    return '✨ אירוע';
+}
+function getEventCalculations(dateString) {
+    if(!dateString) return {daysLeft:null,pastDays:null,isPastThisYear:false};
+    const today=new Date(); today.setHours(0,0,0,0);
+    const ev=new Date(dateString);
+    const next=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
+    if(next<today) next.setFullYear(today.getFullYear()+1);
+    const daysLeft=Math.ceil((next-today)/86400000);
+    const thisY=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
+    const isPast=thisY<today;
+    const pastDays=isPast?Math.ceil((today-thisY)/86400000):0;
+    return {daysLeft,pastDays,isPastThisYear:isPast};
+}
+
+// ========== BUDGETS & STATS ==========
+function updateGameStats(list) {
+    const el=document.getElementById('gamificationStats');
+    if(!list.length){el.innerHTML="הוסף אירועים כדי להתחיל לנהל 🎈";return;}
+    el.innerHTML=`🎉 מוצגים: <b>${list.length}</b> אירועים! &nbsp;|&nbsp; 🏆 שולמו: <b>${list.filter(c=>c.giftStatus==='paid').length}</b> מתנות!`;
+}
+function calculateBudgets(list) {
+    let p=0,d=0;
+    (list||contacts).forEach(c=>{const b=parseInt(c.giftBudget||'0');if(c.giftStatus==='paid')d+=b;else p+=b;});
+    document.getElementById('budgetPending').innerText=p+' ₪';
+    document.getElementById('budgetPaid').innerText=d+' ₪';
+    updateGameStats(list||contacts);
+}
+
+// ========== GROUPS ==========
+function updateDynamicGroups() {
+    const groups=[...new Set(contacts.map(c=>c.group).filter(g=>g&&g.trim()))];
+    let html=`<button class="tag-btn ${currentGroupFilter==='הכל'?'active':''}" onclick="setGroupFilter('הכל',this)">הכל</button>`;
+    groups.forEach(g=>{html+=`<button class="tag-btn ${currentGroupFilter===g?'active':''}" onclick="setGroupFilter('${g.replace(/'/g,"\\'")}',this)">${g}</button>`;});
+    document.getElementById('filterTagsContainer').innerHTML=html;
+    const dl=document.getElementById('groupListOptions'); dl.innerHTML='';
+    groups.forEach(g=>{const o=document.createElement('option');o.value=g;dl.appendChild(o);});
+}
+function setGroupFilter(g,btn) {
+    currentGroupFilter=g;
+    document.querySelectorAll('.tag-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); renderContacts();
+}
+
+// ========== IMPORT FROM PHONE ==========
+async function importFromPhone() {
+    if(!('contacts' in navigator&&'ContactsManager' in window)){alert('הדפדפן שלך אינו תומך בייבוא מהטלפון.');return;}
+    try {
+        const results=await navigator.contacts.select(['name','tel','email'],{multiple:true});
+        if(results.length>0){
+            results.forEach(c=>{contacts.push({id:Date.now()+Math.random(),name:c.name?c.name[0]:'איש קשר',bday:'',eventType:'birthday',customEventName:'',phone:c.tel?c.tel[0]:'',email:c.email?c.email[0]:'',group:'',notes:'יובא מהטלפון',giftBudget:'',giftIdea:'',giftStatus:'pending',hasSound:false,trimStart:0,trimDuration:15});});
+            saveToStorage(); document.getElementById('timeFilter').value='all'; renderContacts(); alert(`יובאו בהצלחה ${results.length} אנשי קשר!`);
+        }
+    } catch(ex){console.error(ex);}
+}
+
+// ========== ADD / EDIT ==========
+function addContact() {
+    const name=document.getElementById('nameInp').value;
+    const bday=document.getElementById('bdayInp').value;
+    const type=document.getElementById('eventTypeInp').value;
+    const customName=document.getElementById('customEventInp').value;
+    const phone=document.getElementById('phoneInp').value;
+    const email=document.getElementById('emailInp').value;
+    const group=document.getElementById('groupInp').value;
+    const notes=document.getElementById('notesInp').value;
+    const budget=document.getElementById('giftBudgetInp').value;
+    const giftIdea=document.getElementById('giftIdeaInp').value;
+    const giftStatus=document.getElementById('giftStatusInp').value;
+    if(!name||!bday){alert('חובה להזין שם ותאריך.');return;}
+    if(type==='custom'&&!customName){alert('נא להזין את סוג האירוע.');return;}
+
+    if(editingId!==null) {
+        const idx=contacts.findIndex(c=>c.id===editingId);
+        if(idx!==-1) contacts[idx]={...contacts[idx],name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender:document.getElementById('genderInp').value};
+        cancelEdit();
+    } else {
+        const gender=document.getElementById('genderInp').value;
+        contacts.push({id:Date.now(),name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,hasSound:false,trimStart:0,trimDuration:15});
+        clearForm();
+    }
+    saveToStorage(); document.getElementById('timeFilter').value='all'; renderContacts();
+}
+
+function editContact(id) {
+    const c=contacts.find(x=>x.id===id); if(!c) return;
+    editingId=id;
+    document.getElementById('nameInp').value=c.name||'';
+    document.getElementById('bdayInp').value=c.bday||'';
+    document.getElementById('phoneInp').value=c.phone||'';
+    document.getElementById('emailInp').value=c.email||'';
+    document.getElementById('groupInp').value=c.group||'';
+    document.getElementById('notesInp').value=c.notes||'';
+    document.getElementById('giftBudgetInp').value=c.giftBudget||'';
+    document.getElementById('giftIdeaInp').value=c.giftIdea||'';
+    document.getElementById('giftStatusInp').value=c.giftStatus||'pending';
+    document.getElementById('genderInp').value=c.gender||'';
+    document.getElementById('eventTypeInp').value=c.eventType||'birthday';
+    if(c.eventType==='custom'){document.getElementById('customEventInp').style.display='block';document.getElementById('customEventInp').value=c.customEventName||'';}
+    else{document.getElementById('customEventInp').style.display='none';}
+    document.getElementById('mainFormBox').classList.add('edit-mode');
+    document.getElementById('editModeBanner').classList.add('visible');
+    document.getElementById('formTitle').innerText='✏️ עריכת אירוע קיים';
+    document.getElementById('submitBtn').innerText='✅ עדכן אירוע';
+    document.getElementById('submitBtn').style.background='#f59e0b';
+    document.getElementById('cancelEditBtn').classList.add('visible');
+    document.getElementById('mainFormBox').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function cancelEdit() {
+    editingId=null; clearForm();
+    document.getElementById('mainFormBox').classList.remove('edit-mode');
+    document.getElementById('editModeBanner').classList.remove('visible');
+    document.getElementById('formTitle').innerText='➕ הוספת אירוע / איש קשר';
+    document.getElementById('submitBtn').innerText='💾 שמור אירוע במערכת';
+    document.getElementById('submitBtn').style.background='';
+    document.getElementById('cancelEditBtn').classList.remove('visible');
+}
+
+function clearForm() {
+    ['nameInp','phoneInp','emailInp','groupInp','notesInp','giftBudgetInp','giftIdeaInp','customEventInp'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('bdayInp').value='';
+    document.getElementById('genderInp').value='';
+    document.getElementById('giftStatusInp').value='pending';
+    document.getElementById('eventTypeInp').value='birthday';
+    document.getElementById('customEventInp').style.display='none';
+}
+
+function deleteContact(id) {
+    if(confirm('למחוק אירוע זה לצמיתות?')){
+        contacts=contacts.filter(c=>c.id!==id);
+        if(editingId===id) cancelEdit();
+        saveToStorage(); renderContacts();
+    }
+}
+function toggleGiftStatus(id) {
+    const idx=contacts.findIndex(c=>c.id===id); if(idx===-1) return;
+    contacts[idx].giftStatus=contacts[idx].giftStatus==='paid'?'pending':'paid';
+    saveToStorage(); renderContacts();
+}
+
+// ========== AI WISHES (LOOP OF 5) ==========
+function generateAIContent(id) {
+    const c=contacts.find(x=>x.id===id); if(!c) return;
+    const box=document.getElementById('ai-result-'+id);
+    if(aiTrackers[id]===undefined) aiTrackers[id]=0;
+    const idx=aiTrackers[id];
+    const text=wishStyles[idx](c.name,c.notes,c.eventType,c.group,c.gender||'');
+    generatedTexts[id]=text;
+    box.innerHTML=`<span class="ai-wish-counter">✨ ברכה ${idx+1} מתוך 5 — לחץ שוב לסגנון אחר</span>🤖 <b>AI:</b><br>"${text}"`;
+    box.style.display='block';
+    aiTrackers[id]=(idx+1)%5;
+}
+
+function generateMyContent(id) {
+    const c=contacts.find(x=>x.id===id); if(!c) return;
+    const box=document.getElementById('ai-result-'+id);
+    if(aiTrackers[id]===undefined) aiTrackers[id]=0;
+    const active=myCustomGreetings.filter(g=>g&&g.trim());
+    if(!active.length){alert('לא הגדרת ברכות אישיות. לחץ על הגדרות הברכות למעלה.');return;}
+    const text=active[aiTrackers[id]%active.length].replace(/\[שם\]/g,c.name);
+    generatedTexts[id]=text;
+    box.innerHTML=`<span class="ai-wish-counter">📝 ברכה ${(aiTrackers[id]%active.length)+1} מתוך ${active.length} — לחץ שוב לסגנון אחר</span>📝 <b>הברכה שלך:</b><br>"${text}"`;
+    box.style.display='block';
+    aiTrackers[id]=(aiTrackers[id]+1);
+}
+
+function shareToAnyApp(id) {
+    const c=contacts.find(x=>x.id===id); if(!c) return;
+    let text=generatedTexts[id]||`מזל טוב ${c.name} לכבוד ה-${getEventLabel(c.eventType,c.customEventName)}! 🎉`;
+    if(c.phone&&text){
+        const phone=c.phone.replace(/[^0-9+]/g,'').replace(/^0/,'972');
+        if(navigator.share){navigator.share({title:'לא שכחתי',text}).catch(()=>window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`,'_blank'));}
+        else{window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`,'_blank');}
+    } else {
+        if(navigator.share) navigator.share({title:'לא שכחתי',text}).catch(()=>alert('הטקסט מוכן להעתקה:\n\n'+text));
+        else alert('הטקסט מוכן להעתקה:\n\n'+text);
+    }
+}
+
+function addToCalendar(id) {
+    const c=contacts.find(x=>x.id===id); if(!c||!c.bday) return alert('אין תאריך לאירוע זה');
+    const title=`${getEventLabel(c.eventType,c.customEventName)}: ${c.name}`;
+    const details=`הערות: ${c.notes||'אין'}\\nמתנה: ${c.giftIdea||'אין'} | תקציב: ${c.giftBudget||'0'}`;
+    const dateStr=c.bday.replace(/-/g,'');
+    const d=new Date(c.bday); d.setDate(d.getDate()+1);
+    const nextDay=d.toISOString().split('T')[0].replace(/-/g,'');
+    const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART;VALUE=DATE:${dateStr}\nDTEND;VALUE=DATE:${nextDay}\nSUMMARY:${title}\nDESCRIPTION:${details}\nRRULE:FREQ=YEARLY\nEND:VEVENT\nEND:VCALENDAR`;
+    const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`event_${c.name}.ics`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// ========== SOUND ==========
+function handleSoundUpload() {
+    const file=document.getElementById('soundFileInput').files[0]; if(!file) return;
+    tempSoundBlob=file;
+    const audio=document.createElement('audio');
+    audio.src=URL.createObjectURL(file);
+    audio.onloadedmetadata=()=>{
+        document.getElementById('soundDurationInfo').innerText=`אורך השיר: ${Math.floor(audio.duration)} שניות`;
+        document.getElementById('trimStart').max=Math.floor(audio.duration);
+    };
+    document.getElementById('soundStatus').innerText='🎵 קובץ חדש נבחר — יישמר בלחיצה על שמור';
+}
+
+function saveSoundToDB(id,blob) {
+    if(!audioDB) return;
+    audioDB.transaction(['sounds'],'readwrite').objectStore('sounds').put({id,blob});
+}
+
+let currentAudio=null;
+function playContactSound(id,start,duration) {
+    if(currentAudio){currentAudio.pause();currentAudio=null;}
+    if(!audioDB) return;
+    const req=audioDB.transaction(['sounds'],'readonly').objectStore('sounds').get(id);
+    req.onsuccess=()=>{
+        if(!req.result) return;
+        const audio=new Audio(URL.createObjectURL(req.result.blob));
+        audio.currentTime=parseInt(start||0);
+        audio.play(); currentAudio=audio;
+        setTimeout(()=>{if(currentAudio===audio){audio.pause();currentAudio=null;}},parseInt(duration||15)*1000);
+    };
+}
+
+// ========== EDIT MODAL (for sound settings only) ==========
+function openEditModal(id) {
+    const c=contacts.find(x=>x.id===id); if(!c) return;
+    document.getElementById('editModalId').value=id;
+    document.getElementById('editModalTitle').innerText=`⚙️ הגדרות: ${c.name}`;
+    document.getElementById('soundStatus').innerText=c.hasSound?'🎵 יש שיר חתוך שמור':'אין שיר שמור';
+    document.getElementById('soundDurationInfo').innerText='';
+    document.getElementById('soundFileInput').value='';
+    document.getElementById('trimStart').value=c.trimStart||0;
+    document.getElementById('trimDuration').value=c.trimDuration||15;
+    tempSoundBlob=null;
+    document.getElementById('editModal').classList.add('open');
+}
+function closeEditModal() { document.getElementById('editModal').classList.remove('open'); tempSoundBlob=null; }
+
+function saveEditModal() {
+    const id=parseInt(document.getElementById('editModalId').value);
+    const idx=contacts.findIndex(c=>c.id===id); if(idx===-1) return;
+    contacts[idx].trimStart=parseInt(document.getElementById('trimStart').value)||0;
+    contacts[idx].trimDuration=parseInt(document.getElementById('trimDuration').value)||15;
+    if(tempSoundBlob){ contacts[idx].hasSound=true; saveSoundToDB(id,tempSoundBlob); }
+    saveToStorage(); closeEditModal(); renderContacts();
+}
+
+function deleteFromEditModal() {
+    const id=parseInt(document.getElementById('editModalId').value);
+    if(!confirm('למחוק אירוע זה לצמיתות?')) return;
+    contacts=contacts.filter(c=>c.id!==id);
+    if(audioDB) try{audioDB.transaction(['sounds'],'readwrite').objectStore('sounds').delete(id);}catch(e){}
+    saveToStorage(); closeEditModal(); renderContacts();
+}
+
+// ========== STORES MODAL ==========
+function openStoresModal() {
+    const active=getActiveStores();
+    const all=[...new Set([...defaultStores,...active])];
+    let html='';
+    all.forEach(store=>{
+        const ch=active.includes(store)?'checked':'';
+        html+=`<label class="store-check-item"><input type="checkbox" value="${store}" ${ch}> ${store}</label>`;
+    });
+    document.getElementById('storesGrid').innerHTML=html;
+    document.getElementById('storesModal').classList.add('open');
+}
+function closeStoresModal() { document.getElementById('storesModal').classList.remove('open'); }
+function addCustomStore() {
+    const val=document.getElementById('customStoreInp').value.trim(); if(!val) return;
+    const active=getActiveStores(); if(!active.includes(val)) active.push(val);
+    localStorage.setItem('lc_stores',JSON.stringify(active));
+    document.getElementById('customStoreInp').value='';
+    openStoresModal();
+}
+function saveStores() {
+    const checked=[...document.querySelectorAll('#storesGrid input:checked')].map(el=>el.value);
+    localStorage.setItem('lc_stores',JSON.stringify(checked));
+    closeStoresModal(); renderContacts();
+}
+
+// ========== RENDER ==========
+function renderVisualCalendar() {
+    const cal=document.getElementById('visualCalendar'); cal.innerHTML='';
+    const today=new Date(); today.setHours(0,0,0,0);
+    for(let i=0;i<30;i++){
+        const d=new Date(today); d.setDate(today.getDate()+i);
+        const m=(d.getMonth()+1).toString().padStart(2,'0');
+        const day=d.getDate().toString().padStart(2,'0');
+        const match=`${m}-${day}`;
+        const has=contacts.some(c=>c.bday&&c.bday.endsWith(match));
+        const div=document.createElement('div'); div.className=`day-dot ${has?'has-event':''}`;
+        div.innerHTML=d.getDate(); cal.appendChild(div);
+    }
+}
+
+function renderCalendarList() {
+    const el=document.getElementById('calendarListContainer'); if(!el) return; el.innerHTML='';
+    const upcoming=contacts.map(c=>({...c,daysLeft:getEventCalculations(c.bday).daysLeft})).filter(c=>c.bday&&c.daysLeft!==null&&c.daysLeft<=30).sort((a,b)=>a.daysLeft-b.daysLeft);
+    if(!upcoming.length){el.innerHTML=`<div style="font-size:12px;color:var(--text-muted);text-align:center;">אין אירועים ב-30 הימים הקרובים</div>`;return;}
+    upcoming.forEach(c=>{
+        const d=document.createElement('div'); d.className='event-item';
+        d.innerHTML=`<span><strong>${c.name}</strong> (${getEventLabel(c.eventType,c.customEventName)})</span> <span class="days-left-badge">בעוד ${c.daysLeft} ימים</span>`;
+        el.appendChild(d);
+    });
+}
+
+function renderHeroWidget(ev) {
+    const cont=document.getElementById('heroWidgetContainer'); if(countdownInterval) clearInterval(countdownInterval);
+    if(!ev||!ev.bday){cont.innerHTML=`<div class="hero-event-widget"><div style="font-size:14px;font-weight:bold;color:#fbbf24;">אין אירועים קרובים עם תאריך</div></div>`;return;}
+    cont.innerHTML=`<div class="hero-event-widget"><div style="font-size:12px;font-weight:bold;color:#fbbf24;margin-bottom:5px;">🔥 האירוע הגדול הבא מתקרב!</div><div class="hero-name">${ev.name} - ${getEventLabel(ev.eventType,ev.customEventName)}</div><div id="heroTimerDisplay" class="hero-countdown">...</div></div>`;
+    const td=new Date(ev.bday);
+    countdownInterval=setInterval(()=>{
+        const el=document.getElementById('heroTimerDisplay'); if(!el) return;
+        const now=new Date(); let t=new Date(now.getFullYear(),td.getMonth(),td.getDate(),0,0,0);
+        if(t<now&&ev.daysLeft!==0) t.setFullYear(now.getFullYear()+1);
+        const diff=t-now;
+        if(diff<=0){el.innerText='זה קורה היום! 🎉';if(typeof confetti==='function'&&!window.confettiFired){confetti({particleCount:100,spread:70,origin:{y:0.6}});window.confettiFired=true;}return;}
+        const D=Math.floor(diff/86400000),H=Math.floor((diff%86400000)/3600000),M=Math.floor((diff%3600000)/60000),S=Math.floor((diff%60000)/1000);
+        el.innerText=`${D} ימים, ${H.toString().padStart(2,'0')}:${M.toString().padStart(2,'0')}:${S.toString().padStart(2,'0')}`;
+    },1000);
+}
+
+function renderContacts() {
+    updateDynamicGroups();
+    const query=document.getElementById('searchInp').value.toLowerCase();
+    const timeMode=document.getElementById('timeFilter').value;
+    let enriched=contacts.map(c=>({...c,...getEventCalculations(c.bday)}));
+    let sorted=enriched.sort((a,b)=>{
+        if(timeMode==='past'){if(a.pastDays===null)return 1;if(b.pastDays===null)return -1;return a.pastDays-b.pastDays;}
+        else{if(a.daysLeft===null)return 1;if(b.daysLeft===null)return -1;return a.daysLeft-b.daysLeft;}
+    });
+
+    renderHeroWidget(sorted.filter(c=>c.daysLeft!==null&&c.daysLeft>=0).sort((a,b)=>a.daysLeft-b.daysLeft)[0]);
+    renderVisualCalendar(); renderCalendarList();
+
+    const cont=document.getElementById('listContainer'); cont.innerHTML='';
+    const filtered=sorted.filter(c=>{
+        const ms=c.name.toLowerCase().includes(query);
+        const mg=currentGroupFilter==='הכל'||c.group===currentGroupFilter;
+        let mt=true;
+        if(c.bday){
+            if(timeMode==='30') mt=c.daysLeft<=30;
+            else if(timeMode==='future') mt=!c.isPastThisYear;
+            else if(timeMode==='past') mt=c.isPastThisYear;
+        } else if(timeMode!=='all') mt=false;
+        return ms&&mg&&mt;
+    });
+
+    calculateBudgets(filtered);
+    if(!filtered.length){cont.innerHTML=`<div style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:20px;">לא נמצאו אירועים התואמים לסינון זה.</div>`;return;}
+
+    filtered.forEach(c=>{
+        const icon=c.eventType==='birthday'?'🎉':c.eventType==='anniversary'?'💍':c.eventType==='memorial'?'🕯️':'📌';
+        const card=document.createElement('div'); card.className='contact-card';
+        let daysText=`📅 חסר תאריך`;
+        if(c.bday){daysText=timeMode==='past'?`📅 ${c.bday} (עבר לפני ${c.pastDays} ימים)`:`📅 ${c.bday} (בעוד ${c.daysLeft} ימים)`;}
+
+        let giftSection='';
+        if(c.giftIdea||c.giftBudget){
+            const col=c.giftStatus==='paid'?'#10b981':'#f59e0b';
+            const txt=c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע';
+            giftSection=`<div style="font-size:12px;margin-bottom:10px;background:rgba(52,211,153,0.1);padding:8px;border-radius:8px;border:1px solid rgba(52,211,153,0.2);">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="color:#34d399;">🎁 ${c.giftIdea||'-'} | 💰 ${c.giftBudget||'0'} ₪</span>
+                    <button onclick="toggleGiftStatus(${c.id})" style="background:${col};color:white;border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;">${txt}</button>
+                </div>
+                ${buildStoreLinks(c.giftIdea)}
+            </div>`;
+        }
+
+        const soundBtn=c.hasSound?`<button class="btn-play-sound" onclick="playContactSound(${c.id},${c.trimStart||0},${c.trimDuration||15})">▶️ השמע</button>`:'';
+
+        card.innerHTML=`
+            <div class="profile-img">${icon}</div>
+            <div style="font-weight:bold;font-size:18px;">${c.name} <span style="font-size:12px;font-weight:normal;color:var(--accent-color)">(${getEventLabel(c.eventType,c.customEventName)})</span></div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">${daysText}<br>🏷️ ${c.group||'ללא קבוצה'}<br>📱 ${c.phone||'-'} | ✉️ ${c.email||'-'}</div>
+            ${soundBtn}
+            ${giftSection}
+            ${c.notes?`<div style="font-size:12px;font-style:italic;background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;margin-bottom:10px;">💡 ${c.notes}</div>`:''}
+            <div id="ai-result-${c.id}" class="ai-result-box"></div>
+            <div class="card-actions">
+                <button class="btn-card btn-ai" onclick="generateAIContent(${c.id})">✨ AI</button>
+                <button class="btn-card btn-my-greet" onclick="generateMyContent(${c.id})">📝 ברכה</button>
+                <button class="btn-card btn-share" onclick="shareToAnyApp(${c.id})">📱 שתף</button>
+                <button class="btn-card btn-edit" onclick="editContact(${c.id})">✏️ ערוך</button>
+                <button class="btn-card btn-delete" onclick="openEditModal(${c.id})">⚙️ עוד</button>
+            </div>`;
+        cont.appendChild(card);
+    });
+}
+
+// ========== CSV / BACKUP ==========
+function parseCSVRow(str) {
+    let res=[],inQ=false,cur="";
+    for(let i=0;i<str.length;i++){const ch=str[i];if(ch==='"'&&str[i+1]==='"'){cur+='"';i++;}else if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){res.push(cur);cur="";}else cur+=ch;}
+    res.push(cur);return res;
+}
+function exportCSV() {
+    if(!contacts.length){alert('אין נתונים לייצוא');return;}
+    let csv="\uFEFF"+"שם,תאריך,סוג אירוע,טלפון,אימייל,קבוצה,תקציב,רעיון למתנה,סטטוס,הערות\n";
+    contacts.forEach(c=>{csv+=[c.name,c.bday,c.eventType,c.phone,c.email,c.group,c.giftBudget,c.giftIdea,c.giftStatus,c.notes].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(',')+"\n";});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})); a.download='not_forgotten.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+function importICS(e) {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        const text = ev.target.result;
+        const events = parseICS(text);
+        if(!events.length) {
+            showICSResult('לא נמצאו אירועים בקובץ.', 'error');
+            return;
+        }
+        let added = 0, skipped = 0;
+        events.forEach(ev => {
+            // Skip if already exists (same name + date)
+            const exists = contacts.some(c => c.name === ev.name && c.bday === ev.bday);
+            if(exists) { skipped++; return; }
+            contacts.push({
+                id: Date.now() + Math.random(),
+                name: ev.name,
+                bday: ev.bday,
+                eventType: ev.eventType,
+                customEventName: ev.customName || '',
+                phone: '', email: '', group: ev.group || '',
+                notes: ev.notes || 'יובא מלוח שנה',
+                giftBudget: '', giftIdea: '', giftStatus: 'pending',
+                gender: '', hasSound: false, trimStart: 0, trimDuration: 15
+            });
+            added++;
+        });
+        saveToStorage();
+        renderContacts();
+        document.getElementById('importICSFile').value = '';
+        const msg = `✅ יובאו ${added} אירועים בהצלחה!${skipped ? ` (${skipped} כבר קיימים — דולגו)` : ''}`;
+        showICSResult(msg, 'success');
+    };
+    reader.readAsText(file, 'utf-8');
+}
+
+function parseICS(text) {
+    const events = [];
+    // Unfold long lines (ICS standard: lines ending with \r\n + space/tab are continuations)
+    text = text.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
+    const blocks = text.split('BEGIN:VEVENT');
+    blocks.shift(); // remove header
+
+    blocks.forEach(block => {
+        const get = (key) => {
+            const re = new RegExp(key + '[^:]*:([^\r\n]+)', 'i');
+            const m = block.match(re);
+            return m ? decodeICSText(m[1].trim()) : '';
+        };
+
+        const summary = get('SUMMARY');
+        if(!summary) return;
+
+        // Get date — try DTSTART
+        let dateStr = get('DTSTART');
+        if(!dateStr) return;
+
+        // Parse date formats: 19850423 or 1985-04-23 or 19850423T... 
+        dateStr = dateStr.replace(/T.*/,''); // remove time part
+        let bday = '';
+        if(dateStr.includes('-')) {
+            bday = dateStr.substring(0,10);
+        } else if(dateStr.length >= 8) {
+            bday = dateStr.substring(0,4)+'-'+dateStr.substring(4,6)+'-'+dateStr.substring(6,8);
+        }
+        if(!bday || bday === '0000-00-00') return;
+
+        // Detect event type from summary
+        const s = summary.toLowerCase();
+        let eventType = 'custom';
+        let customName = summary;
+        if(s.includes('יום הולדת') || s.includes('birthday') || s.includes('ג\'יי')) {
+            eventType = 'birthday';
+            customName = '';
+        } else if(s.includes('נישואין') || s.includes('anniversary') || s.includes('חתונה')) {
+            eventType = 'anniversary';
+            customName = '';
+        } else if(s.includes('אזכרה') || s.includes('memorial') || s.includes('יארצייט') || s.includes('יאהרצייט')) {
+            eventType = 'memorial';
+            customName = '';
+        }
+
+        // Clean name — remove common prefixes like "יום הולדת של "
+        let name = summary
+            .replace(/יום הולדת של /gi, '')
+            .replace(/birthday of /gi, '')
+            .replace(/יום הולדת/gi, '')
+            .replace(/birthday/gi, '')
+            .trim() || summary;
+
+        const description = get('DESCRIPTION');
+        const location = get('LOCATION');
+        const notes = [description, location].filter(Boolean).join(' | ');
+
+        events.push({ name, bday, eventType, customName: eventType==='custom'?summary:'', group:'לוח שנה', notes: notes||'יובא מלוח שנה' });
+    });
+
+    return events;
+}
+
+function decodeICSText(str) {
+    // Decode ICS escaped characters and encoded words
+    return str
+        .replace(/\\n/g, ' ')
+        .replace(/\\,/g, ',')
+        .replace(/\\;/g, ';')
+        .replace(/\\\\/g, '\\')
+        .replace(/=([0-9A-F]{2})/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
+}
+
+function showICSResult(msg, type) {
+    const el = document.getElementById('icsImportResult');
+    el.style.display = 'block';
+    el.style.color = type === 'success' ? '#10b981' : '#ef4444';
+    el.style.background = type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+    el.style.padding = '8px 12px';
+    el.style.borderRadius = '8px';
+    el.innerHTML = msg;
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+function importCSV(e) {
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+        const rows=ev.target.result.split('\n').filter(r=>r.trim());
+        if(rows.length<=1){alert('קובץ ריק');return;}
+        let count=0;
+        for(let i=1;i<rows.length;i++){
+            const cols=parseCSVRow(rows[i]); if(cols.length<2||!cols[0]) continue;
+            contacts.push({id:Date.now()+Math.random(),name:cols[0],bday:cols[1]||'',eventType:cols[2]||'birthday',customEventName:'',phone:cols[3]||'',email:cols[4]||'',group:cols[5]||'כללי',giftBudget:cols[6]||'',giftIdea:cols[7]||'',giftStatus:cols[8]||'pending',notes:cols[9]||'',hasSound:false,trimStart:0,trimDuration:15});
+            count++;
+        }
+        saveToStorage(); renderContacts(); alert(`יובאו ${count} אירועים!`); e.target.value='';
+    };
+    reader.readAsText(file,'utf-8');
+}
+function printMonthlyReport() {
+    const today=new Date(); today.setHours(0,0,0,0);
+    const in30=new Date(today); in30.setDate(today.getDate()+30);
+    const upcoming=contacts.filter(c=>{
+        if(!c.bday) return false;
+        const ev=new Date(c.bday.split('-').length===3 ? c.bday : new Date().getFullYear()+'-'+c.bday);
+        const thisY=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
+        const nextY=new Date(today.getFullYear()+1,ev.getMonth(),ev.getDate());
+        return (thisY>=today&&thisY<=in30)||(nextY>=today&&nextY<=in30);
+    }).sort((a,b)=>{
+        const calc=c=>getEventCalculations(c.bday).daysLeft||999;
+        return calc(a)-calc(b);
+    });
+    buildAndPrintReport(upcoming, 'דוח 30 ימים קרובים');
+}
+
+function printRangeReport() {
+    const fromVal=document.getElementById('printFromDate').value;
+    const toVal=document.getElementById('printToDate').value;
+    if(!fromVal||!toVal){alert('נא לבחור תאריך התחלה וסיום.');return;}
+    const from=new Date(fromVal); from.setHours(0,0,0,0);
+    const to=new Date(toVal); to.setHours(23,59,59,999);
+    if(from>to){alert('תאריך ההתחלה חייב להיות לפני תאריך הסיום.');return;}
+
+    const filtered=contacts.filter(c=>{
+        if(!c.bday) return false;
+        // Check every year from from.year to to.year
+        for(let y=from.getFullYear(); y<=to.getFullYear()+1; y++){
+            const ev=new Date(c.bday);
+            const d=new Date(y, ev.getMonth(), ev.getDate());
+            if(d>=from && d<=to) return true;
+        }
+        return false;
+    }).sort((a,b)=>{
+        // Sort by next occurrence within range
+        const nextInRange=c=>{
+            const ev=new Date(c.bday);
+            for(let y=from.getFullYear(); y<=to.getFullYear()+1; y++){
+                const d=new Date(y, ev.getMonth(), ev.getDate());
+                if(d>=from && d<=to) return d;
+            }
+            return new Date(9999,0,1);
+        };
+        return nextInRange(a)-nextInRange(b);
+    });
+
+    const fromStr=from.toLocaleDateString('he-IL');
+    const toStr=to.toLocaleDateString('he-IL');
+    buildAndPrintReport(filtered, `דוח אירועים: ${fromStr} — ${toStr}`);
+}
+
+function buildAndPrintReport(list, title) {
+    let total=0;
+    let html=`<html lang="he" dir="rtl"><head><title>לא שכחתי — ${title}</title><style>
+        body{font-family:Arial,sans-serif;padding:20px;color:#333;}
+        h1{text-align:center;border-bottom:2px solid #6366f1;padding-bottom:10px;color:#6366f1;}
+        .subtitle{text-align:center;font-size:13px;color:#888;margin-bottom:20px;}
+        table{width:100%;border-collapse:collapse;margin-top:10px;}
+        th,td{border:1px solid #ddd;padding:10px;text-align:right;}
+        th{background:#f2f2f2;font-weight:bold;}
+        tr:nth-child(even){background:#fafafa;}
+        .total{margin-top:16px;font-weight:bold;font-size:15px;text-align:left;}
+        @media print{button{display:none;}}
+    </style></head><body>
+    <h1>לא שכחתי</h1>
+    <div class="subtitle">${title}</div>
+    <table><tr><th>שם</th><th>אירוע</th><th>תאריך</th><th>מתנה</th><th>סטטוס</th><th>תקציב ₪</th></tr>`;
+
+    if(!list.length) {
+        html+=`<tr><td colspan="6" style="text-align:center;color:#888;">אין אירועים בטווח זה</td></tr>`;
+    } else {
+        list.forEach(c=>{
+            const b=parseInt(c.giftBudget)||0;
+            total+=b;
+            const status=c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע';
+            html+=`<tr><td>${c.name}</td><td>${getEventLabel(c.eventType,c.customEventName)}</td><td>${c.bday}</td><td>${c.giftIdea||'-'}</td><td>${status}</td><td>${b||'-'}</td></tr>`;
+        });
+    }
+    html+=`</table>
+    <div class="total">סה"כ תקציב מתנות: ${total} ₪</div>
+    <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">🖨️ הדפס</button>
+    </body></html>`;
+
+    const w=window.open('','','width=850,height=650');
+    w.document.write(html);
+    w.document.close();
+}
+function exportData() {
+    const a=document.createElement('a'); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(contacts)); a.download='not_forgotten_backup.json'; document.body.appendChild(a); a.click(); a.remove();
+}
+function importData(e) {
+    const reader=new FileReader();
+    reader.onload=ev=>{
+        try{const imp=JSON.parse(ev.target.result);if(Array.isArray(imp)){contacts=imp;saveToStorage();renderContacts();alert('שוחזר בהצלחה!');}}catch{alert('שגיאה בטעינת הקובץ');}
+        e.target.value='';
+    };
+    if(e.target.files[0]) reader.readAsText(e.target.files[0]);
+}
+
+// ========== SETTINGS PAGE NAVIGATION ==========
+function openSettingsPage() {
+    document.getElementById('mainPage').classList.add('hidden');
+    document.getElementById('settingsPage').classList.add('active');
+    // Load greetings into settings inputs
+    for(let i=0;i<5;i++){
+        const el=document.getElementById('sGreet'+(i+1));
+        if(el) el.value=myCustomGreetings[i]||'';
+    }
+    // Load stores checkboxes
+    loadSettingsStores();
+    // Sync clock
+    setInterval(()=>{
+        const d=new Date();
+        const el=document.getElementById('liveClockSettings');
+        if(el) el.innerText=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+    },1000);
+    window.scrollTo(0,0);
+}
+
+function closeSettingsPage() {
+    document.getElementById('settingsPage').classList.remove('active');
+    document.getElementById('mainPage').classList.remove('hidden');
+    window.scrollTo(0,0);
+}
+
+function saveGreetingsFromSettings() {
+    for(let i=0;i<5;i++){
+        const el=document.getElementById('sGreet'+(i+1));
+        myCustomGreetings[i]=el?el.value:'';
+        // Sync back to main page inputs too
+        const mainEl=document.getElementById('myGreet'+(i+1));
+        if(mainEl) mainEl.value=myCustomGreetings[i];
+    }
+    localStorage.setItem('lc_my_greetings',JSON.stringify(myCustomGreetings));
+    alert('הברכות נשמרו! ✅');
+}
+
+function loadSettingsStores() {
+    const active=getActiveStores();
+    const all=[...new Set([...defaultStores,...active])];
+    let html='';
+    all.forEach(store=>{
+        const ch=active.includes(store)?'checked':'';
+        html+=`<label class="store-check-item"><input type="checkbox" value="${store}" ${ch}> ${store}</label>`;
+    });
+    document.getElementById('settingsStoresGrid').innerHTML=html;
+}
+
+function addCustomStoreFromSettings() {
+    const val=document.getElementById('settingsCustomStoreInp').value.trim(); if(!val) return;
+    const active=getActiveStores(); if(!active.includes(val)) active.push(val);
+    localStorage.setItem('lc_stores',JSON.stringify(active));
+    document.getElementById('settingsCustomStoreInp').value='';
+    loadSettingsStores();
+}
+
+function saveStoresFromSettings() {
+    const checked=[...document.querySelectorAll('#settingsStoresGrid input:checked')].map(el=>el.value);
+    localStorage.setItem('lc_stores',JSON.stringify(checked));
+    alert('החנויות נשמרו! ✅');
+    renderContacts();
+}
+</script>
+</body>
+</html>
