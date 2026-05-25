@@ -193,15 +193,15 @@
         </div>
 
         <input type="text" id="nameInp" placeholder="עבור מי / שם האירוע? *">
-        <div class="grid-2">
-            <input type="date" id="bdayInp" required style="color-scheme: dark; color: var(--text-main);">
-            <select id="eventTypeInp" onchange="toggleCustomEventField()">
-                <option value="birthday">🎉 יום הולדת</option>
-                <option value="anniversary">💍 יום נישואין</option>
+        <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px; margin-top:2px;">📅 תאריך האירוע *</label>
+        <input type="date" id="bdayInp" required style="color-scheme:dark; color:var(--text-main); width:100%; margin-bottom:10px;">
+        <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">🎊 סוג האירוע</label>
+        <select id="eventTypeInp" onchange="toggleCustomEventField()">
+            <option value="birthday">🎉 יום הולדת</option>
+            <option value="anniversary">💍 יום נישואין</option>
                 <option value="memorial">🕯️ אזכרה / זיכרון</option>
                 <option value="custom">✏️ אחר (מותאם אישית)...</option>
             </select>
-        </div>
         <input type="text" id="customEventInp" placeholder="הקלד את סוג האירוע..." style="display:none; border-color:#6366f1;">
         <select id="recurrenceInp" style="margin-bottom:0;">
             <option value="yearly">🔁 אירוע חוזר מדי שנה (יום הולדת, אזכרה...)</option>
