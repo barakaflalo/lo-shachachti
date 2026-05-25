@@ -682,7 +682,10 @@ function generateAIContent(id) {
     const box=document.getElementById('ai-result-'+id);
     if(aiTrackers[id]===undefined) aiTrackers[id]=0;
     const idx=aiTrackers[id];
-    const cleanNotes = (c.notes||'').replace(/יובא מ[^\|]*/g,'').replace(/\|.*$/,'').trim();
+    const rawNotes = c.notes || '';
+    const autoTexts = ['יובא מהטלפון', 'יובא מלוח שנה', 'יובא מ', 'הערות:', 'מתנה:', 'תקציב:', 'סטטוס:'];
+    const isAuto = autoTexts.some(t => rawNotes.includes(t));
+    const cleanNotes = isAuto ? '' : rawNotes.trim();
     const text=wishStyles[idx](c.name,cleanNotes,c.eventType,c.group,c.gender||'');
     generatedTexts[id]=text;
     box.innerHTML=`<span class="ai-wish-counter">✨ ברכה ${idx+1} מתוך 5 — לחץ שוב לסגנון אחר</span>🤖 <b>AI:</b><br>"${text}"`;
