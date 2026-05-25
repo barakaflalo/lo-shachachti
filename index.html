@@ -142,7 +142,7 @@
     </div>
 
     <h1>לא שכחתי</h1>
-    <div class="credit">כל הזכויות שמורות לברק וגימי אפללו</div>
+    <div class="credit">כל הזכויות שמורות לברק אפללו</div>
 
     <div class="stats-box" id="gamificationStats">התחל להוסיף אירועים כדי להתחיל לחגוג! 🎈</div>
 
@@ -206,7 +206,7 @@
                 <option value="paid">✅ נקנה</option>
             </select>
         </div>
-        <textarea id="notesInp" placeholder="הערות שחשוב לזכור (תחביבים, העדפות — עוזר לברכות AI)"></textarea>
+        <textarea id="notesInp" placeholder="הערות שלי (תחביבים, העדפות, דברים חשובים לזכור...)"></textarea>
 
         <button class="btn-submit" id="submitBtn" onclick="addContact()">💾 שמור אירוע במערכת</button>
         <button class="btn-cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">✖️ ביטול עריכה</button>
@@ -242,7 +242,7 @@
     </div>
 
     <h1 style="font-size:22px;">⚙️ הגדרות</h1>
-    <div class="credit">לא שכחתי — כל הזכויות שמורות לברק וגימי אפללו</div>
+    <div class="credit">לא שכחתי — כל הזכויות שמורות לברק אפללו</div>
 
     <!-- רובריקה 1: אנשי קשר -->
     <div class="settings-section">
@@ -411,38 +411,38 @@ dbReq.onsuccess = e => { audioDB = e.target.result; };
 
 // ========== 5 WISH STYLES (LOOP) ==========
 const wishStyles = [
-    (name, notes, type, group, gender) => {
+    (name, type, group, gender) => {
         const m=gender==='male', f=gender==='female', known=m||f;
         if(type==='memorial') return `חושב עליכם היום ביום האזכרה. מחבק מרחוק. 🕯️`;
         if(type==='anniversary') return `יום נישואין שמח ${name}! 💍 שתמשיכו לאהוב ולצמוח יחד. המון בריאות ואושר!`;
         const gl=(group||'').toLowerCase();
         if(gl.includes('עבודה')||gl.includes('הורים')) return `ל-${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, ברכות חמות. מאחל${f?'ת':''} שנת עשייה והצלחה! 🌟`;
         if(gl.includes('חבר')||gl.includes('מילואים')) return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'אח/ות'} יקר${f?'ה':''} 🍻`;
-        return `המון מזל טוב ${name}! מאחל${f?'ת':''} אושר, בריאות והצלחה! 🎈${notes?' (אגב — '+notes+' זה מדהים!)':''}`;
+        return `המון מזל טוב ${name}! מאחל${f?'ת':''} אושר, בריאות והצלחה! 🎈`;
     },
-    (name, notes, type, group, gender) => {
+    (name, type, group, gender) => {
         const m=gender==='male', f=gender==='female';
         if(type==='memorial') return `מדליק נר לזכר${f?'ה':'ו'}. איתכם בכאבכם. 🕯️`;
         if(type==='anniversary') return `מזל טוב ${name} על עוד שנה מדהימה יחד! 🥂 שתמשיכו לגדול ביחד!`;
-        return `יום הולדת שמח ${name} ${f?'היקרה':'היקר'}! 🎉 מאחל${f?'ת':''} לך שנה מלאה בחיוכים והגשמת חלומות!${notes?' ובמיוחד בתחום '+notes+'!':''}`;
+        return `יום הולדת שמח ${name} ${f?'היקרה':'היקר'}! 🎉 מאחל${f?'ת':''} לך שנה מלאה בחיוכים והגשמת חלומות!`;
     },
-    (name, notes, type, group, gender) => {
+    (name, type, group, gender) => {
         const m=gender==='male', f=gender==='female';
         if(type==='memorial') return `זוכר${f?'ת':''} איתכם היום. חיבוק חם. 🕯️`;
         if(type==='anniversary') return `${name} — מזל טוב! 💍 שהאהבה תמשיך לצמוח ולהתחזק כל שנה!`;
-        return `${name}! 🎂 מזל טוב! שהשנה תהיה העתק-הדבק של כל הדברים הטובים!${notes?' [ובמיוחד ב-'+notes+']':''}`;
+        return `${name}! 🎂 מזל טוב! שהשנה תהיה העתק-הדבק של כל הדברים הטובים!`;
     },
-    (name, notes, type, group, gender) => {
+    (name, type, group, gender) => {
         const m=gender==='male', f=gender==='female';
         if(type==='memorial') return `ביום הזה מקדיש${f?'ה':''} מחשבה. יהי${f?' זכרה':' זכרו'} ברוך${f?'ה':''}. 🕯️`;
         if(type==='anniversary') return `המון מזל טוב ${name}! 💍 זוג מדהים — שתמשיכו לחגוג ביחד שנים רבות!`;
-        return `המון מזל טוב ל-${name}! 🌟 תמשיך${f?'/י':''} להפיץ אור! מאחל${f?'ת':''} רק טוב!${notes?' '+notes+' — זה פשוט מקסים.':''}`;
+        return `המון מזל טוב ל-${name}! 🌟 תמשיך${f?'/י':''} להפיץ אור! מאחל${f?'ת':''} רק טוב!`;
     },
-    (name, notes, type, group, gender) => {
+    (name, type, group, gender) => {
         const m=gender==='male', f=gender==='female';
         if(type==='memorial') return `ביום הזיכרון — חושב${f?'ת':''} עליכם. 🕯️`;
         if(type==='anniversary') return `יום נישואין שמח! 💍 ${name} — שתמשיכו לבנות ביחד ולהנות מכל רגע!`;
-        return `יום הולדת שמח ${name}! 🥳 שתהיה שנה מאושרת, בריאה ומלאה באנרגיות טובות!${notes?' וכמובן הרבה '+notes+'!':''}`;
+        return `יום הולדת שמח ${name}! 🥳 שתהיה שנה מאושרת, בריאה ומלאה באנרגיות טובות!`;
     }
 ];
 
@@ -706,13 +706,9 @@ function generateAIContent(id) {
     const box=document.getElementById('ai-result-'+id);
     if(aiTrackers[id]===undefined) aiTrackers[id]=0;
     const idx=aiTrackers[id];
-    const rawNotes = c.notes || '';
-    const autoTexts = ['יובא מהטלפון', 'יובא מלוח שנה', 'יובא מ', 'הערות:', 'מתנה:', 'תקציב:', 'סטטוס:'];
-    const isAuto = autoTexts.some(t => rawNotes.includes(t));
-    const cleanNotes = isAuto ? '' : rawNotes.trim();
-    const text=wishStyles[idx](c.name,cleanNotes,c.eventType,c.group,c.gender||'');
+    const text=wishStyles[idx](c.name,c.eventType,c.group,c.gender||'');
     generatedTexts[id]=text;
-    box.innerHTML=`<span class="ai-wish-counter">✨ ברכה ${idx+1} מתוך 5 — לחץ שוב לסגנון אחר</span>🤖 <b>AI:</b><br>"${text}"`;
+    box.innerHTML=`<span class="ai-wish-counter">🎉 ברכה ${idx+1} מתוך 5 — לחץ שוב לסגנון אחר</span>💬 <b>ברכה קבועה:</b><br>"${text}"`;
     box.style.display='block';
     aiTrackers[id]=(idx+1)%5;
 }
@@ -947,7 +943,7 @@ function renderContacts() {
             ${c.notes?`<div style="font-size:12px;font-style:italic;background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;margin-bottom:10px;">💡 ${c.notes}</div>`:''}
             <div id="ai-result-${c.id}" class="ai-result-box"></div>
             <div class="card-actions">
-                <button class="btn-card btn-ai" onclick="generateAIContent(${c.id})">✨ AI</button>
+                <button class="btn-card btn-ai" onclick="generateAIContent(${c.id})">💬 ברכה קבועה</button>
                 <button class="btn-card btn-my-greet" onclick="generateMyContent(${c.id})">📝 ברכה</button>
                 <button class="btn-card btn-share" onclick="shareToAnyApp(${c.id})">📱 שתף</button>
                 <button class="btn-card btn-edit" onclick="editContact(${c.id})">✏️ ערוך</button>
