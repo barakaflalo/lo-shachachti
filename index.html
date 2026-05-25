@@ -505,10 +505,77 @@ function buildStoreLinks(giftIdea) {
 }
 
 // ========== INIT ==========
+// ========== SOUND EFFECTS ==========
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _audioCtx = null;
+function getAudioCtx() {
+    if(!_audioCtx) _audioCtx = new AudioCtx();
+    return _audioCtx;
+}
+
+function playSound(type) {
+    try {
+        const ctx = getAudioCtx();
+        const master = ctx.createGain();
+        master.gain.setValueAtTime(0.18, ctx.currentTime);
+        master.connect(ctx.destination);
+
+        if(type === 'save') {
+            // עליז, שתי תווים עולים
+            [[520,0,0.12],[660,0.13,0.18]].forEach(([freq,start,dur]) => {
+                const o=ctx.createOscillator(), g=ctx.createGain();
+                o.type='sine'; o.frequency.setValueAtTime(freq,ctx.currentTime+start);
+                g.gain.setValueAtTime(0.3,ctx.currentTime+start);
+                g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+start+dur);
+                o.connect(g); g.connect(master);
+                o.start(ctx.currentTime+start); o.stop(ctx.currentTime+start+dur+0.05);
+            });
+        } else if(type === 'delete') {
+            // יורד, קצר
+            const o=ctx.createOscillator(), g=ctx.createGain();
+            o.type='sine';
+            o.frequency.setValueAtTime(380,ctx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(160,ctx.currentTime+0.22);
+            g.gain.setValueAtTime(0.25,ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.22);
+            o.connect(g); g.connect(master);
+            o.start(); o.stop(ctx.currentTime+0.25);
+        } else if(type === 'splash') {
+            // 3 תווים עולים — כניסה
+            [[330,0,0.15],[440,0.16,0.15],[550,0.32,0.25]].forEach(([freq,start,dur]) => {
+                const o=ctx.createOscillator(), g=ctx.createGain();
+                o.type='triangle'; o.frequency.setValueAtTime(freq,ctx.currentTime+start);
+                g.gain.setValueAtTime(0.25,ctx.currentTime+start);
+                g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+start+dur);
+                o.connect(g); g.connect(master);
+                o.start(ctx.currentTime+start); o.stop(ctx.currentTime+start+dur+0.05);
+            });
+        } else if(type === 'greet') {
+            // פינג עדין
+            const o=ctx.createOscillator(), g=ctx.createGain();
+            o.type='sine'; o.frequency.setValueAtTime(880,ctx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(660,ctx.currentTime+0.2);
+            g.gain.setValueAtTime(0.2,ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+            o.connect(g); g.connect(master);
+            o.start(); o.stop(ctx.currentTime+0.35);
+        } else if(type === 'edit') {
+            // קליק עדין
+            const o=ctx.createOscillator(), g=ctx.createGain();
+            o.type='sine'; o.frequency.setValueAtTime(600,ctx.currentTime);
+            g.gain.setValueAtTime(0.15,ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.1);
+            o.connect(g); g.connect(master);
+            o.start(); o.stop(ctx.currentTime+0.12);
+        }
+    } catch(e) {}
+}
+
 // ========== SPLASH SCREEN ==========
 function hideSplash() {
     const s = document.getElementById('splashScreen');
     if(!s) return;
+    playSound('splash');
     s.style.opacity = '0';
     setTimeout(() => s.style.display = 'none', 600);
 }
@@ -729,7 +796,7 @@ function addContact() {
         contacts.push({id:Date.now(),name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,recurrence,hasSound:false,trimStart:0,trimDuration:15});
         clearForm();
     }
-    saveToStorage(); document.getElementById('timeFilter').value='all'; renderContacts();
+    saveToStorage(); playSound('save'); document.getElementById('timeFilter').value='all'; renderContacts();
 }
 
 function editContact(id) {
@@ -750,6 +817,7 @@ function editContact(id) {
     if(c.eventType==='custom'){document.getElementById('customEventInp').style.display='block';document.getElementById('customEventInp').value=c.customEventName||'';}
     else{document.getElementById('customEventInp').style.display='none';}
     document.getElementById('mainFormBox').classList.add('edit-mode');
+    playSound('edit');
     document.getElementById('editModeBanner').classList.add('visible');
     document.getElementById('formTitle').innerText='✏️ עריכת אירוע קיים';
     document.getElementById('submitBtn').innerText='✅ עדכן אירוע';
@@ -793,7 +861,7 @@ function deleteFromForm() {
     if(confirm('למחוק אירוע זה לצמיתות?')) {
         contacts=contacts.filter(c=>c.id!==editingId);
         cancelEdit();
-        saveToStorage(); renderContacts();
+        saveToStorage(); playSound('delete'); renderContacts();
     }
 }
 
@@ -827,6 +895,7 @@ function generateAIContent(id) {
     const idx=aiTrackers[id];
     const text=wishStyles[idx](c.name,c.eventType,c.group,c.gender||'');
     generatedTexts[id]=text;
+    playSound('greet');
     box.innerHTML=`<span class="ai-wish-counter">🎉 ברכה ${idx+1} מתוך 5 — לחץ שוב לסגנון אחר</span>💬 <b>ברכה קבועה:</b><br>"${text}"`;
     box.style.display='block';
     aiTrackers[id]=(idx+1)%5;
@@ -973,7 +1042,7 @@ function deleteFromEditModal() {
     if(!confirm('למחוק אירוע זה לצמיתות?')) return;
     contacts=contacts.filter(c=>c.id!==id);
     if(audioDB) try{audioDB.transaction(['sounds'],'readwrite').objectStore('sounds').delete(id);}catch(e){}
-    saveToStorage(); closeEditModal(); renderContacts();
+    saveToStorage(); playSound('delete'); closeEditModal(); renderContacts();
 }
 
 // ========== STORES MODAL ==========
