@@ -199,9 +199,16 @@
         <select id="eventTypeInp" onchange="toggleCustomEventField()">
             <option value="birthday">🎉 יום הולדת</option>
             <option value="anniversary">💍 יום נישואין</option>
-                <option value="memorial">🕯️ אזכרה / זיכרון</option>
-                <option value="custom">✏️ אחר (מותאם אישית)...</option>
-            </select>
+            <option value="memorial">🕯️ אזכרה / יארצייט</option>
+            <option value="barmitzvah">✡️ בר / בת מצווה</option>
+            <option value="friends">👥 מפגש חברים</option>
+            <option value="trip">✈️ טיול / חופשה</option>
+            <option value="car">🚗 טסט לרכב / טיפול</option>
+            <option value="medical">🏥 תור רפואי</option>
+            <option value="holiday">🎊 חג / מועד</option>
+            <option value="graduation">🎓 סיום לימודים / טקס</option>
+            <option value="custom">✏️ אחר (מותאם אישית)...</option>
+        </select>
         <input type="text" id="customEventInp" placeholder="הקלד את סוג האירוע..." style="display:none; border-color:#6366f1;">
         <select id="recurrenceInp" style="margin-bottom:0;">
             <option value="yearly">🔁 אירוע חוזר מדי שנה (יום הולדת, אזכרה...)</option>
@@ -480,6 +487,13 @@ const wishStyles = [
         const m=gender==='male', f=gender==='female', known=m||f;
         if(type==='memorial') return `חושב עליכם היום ביום האזכרה. מחבק מרחוק. 🕯️`;
         if(type==='anniversary') return `יום נישואין שמח ${name}! 💍 שתמשיכו לאהוב ולצמוח יחד. המון בריאות ואושר!`;
+        if(type==='barmitzvah') return `מזל טוב ${name} על הבר/בת מצווה! ✡️ יום גדול ומרגש — בהצלחה!`;
+        if(type==='friends') return `כיף לראות אותך ${name}! 👥 מפגש כזה הוא תמיד סיבה לחייך 😊`;
+        if(type==='trip') return `טיול נעים ${name}! ✈️ תהנה מכל רגע ותחזור עם הרבה זיכרונות טובים!`;
+        if(type==='car') return `${name}, אל תשכח את הטסט/טיפול לרכב! 🚗 תדאג שהכל בסדר לפני הזמן.`;
+        if(type==='medical') return `${name}, תזכור את התור הרפואי! 🏥 הבריאות קודמת לכל 💪`;
+        if(type==='holiday') return `חג שמח ${name}! 🎊 שיהיה חג מלא שמחה, משפחה ואוכל טוב!`;
+        if(type==='graduation') return `מזל טוב ${name} על הסיום! 🎓 עבודה קשה משתלמת — גאווה גדולה!`;
         const gl=(group||'').toLowerCase();
         if(gl.includes('עבודה')||gl.includes('הורים')) return `ל-${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, ברכות חמות. מאחל${f?'ת':''} שנת עשייה והצלחה! 🌟`;
         if(gl.includes('חבר')||gl.includes('מילואים')) return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'אח/ות'} יקר${f?'ה':''} 🍻`;
@@ -747,11 +761,20 @@ function toggleCustomEventField() {
     document.getElementById('customEventInp').style.display = document.getElementById('eventTypeInp').value==='custom'?'block':'none';
 }
 function getEventLabel(type,customName) {
-    if(type==='custom') return customName||'אירוע';
-    if(type==='birthday') return '🎉 יום הולדת';
-    if(type==='anniversary') return '💍 יום נישואין';
-    if(type==='memorial') return '🕯️ אזכרה / זיכרון';
-    return '✨ אירוע';
+    const labels = {
+        birthday:   '🎉 יום הולדת',
+        anniversary:'💍 יום נישואין',
+        memorial:   '🕯️ אזכרה / יארצייט',
+        barmitzvah: '✡️ בר / בת מצווה',
+        friends:    '👥 מפגש חברים',
+        trip:       '✈️ טיול / חופשה',
+        car:        '🚗 טסט לרכב / טיפול',
+        medical:    '🏥 תור רפואי',
+        holiday:    '🎊 חג / מועד',
+        graduation: '🎓 סיום לימודים / טקס',
+        custom:     customName||'אירוע'
+    };
+    return labels[type] || '✨ אירוע';
 }
 
 // ========== BUDGETS & STATS ==========
@@ -1244,7 +1267,8 @@ function renderContacts() {
     }
 
     filtered.forEach(c=>{
-        const icon=c.eventType==='birthday'?'🎉':c.eventType==='anniversary'?'💍':c.eventType==='memorial'?'🕯️':'📌';
+        const iconMap={birthday:'🎉',anniversary:'💍',memorial:'🕯️',barmitzvah:'✡️',friends:'👥',trip:'✈️',car:'🚗',medical:'🏥',holiday:'🎊',graduation:'🎓',custom:'📌'};
+        const icon=iconMap[c.eventType]||'📌';
         const card=document.createElement('div'); card.className='contact-card';
         let daysText=`📅 חסר תאריך`;
         if(c.bday){daysText=timeMode==='past'?`📅 ${c.bday} (עבר לפני ${c.pastDays} ימים)`:`📅 ${c.bday} (בעוד ${c.daysLeft} ימים)`;}
