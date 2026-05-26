@@ -187,11 +187,6 @@
 
     <div id="heroWidgetContainer"></div>
 
-    <div class="visual-calendar-wrapper">
-        <div style="font-size:12px; font-weight:bold; margin-bottom:10px; color:var(--text-muted);">מפת עומס: 30 הימים הקרובים</div>
-        <div class="visual-calendar" id="visualCalendar"></div>
-    </div>
-
     <div class="form-box" id="mainFormBox">
 
         <div class="edit-mode-banner" id="editModeBanner">✏️ מצב עריכה — משנה פרטים קיימים</div>
@@ -205,7 +200,7 @@
         <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px; margin-top:2px;">📅 תאריך האירוע *</label>
         <input type="date" id="bdayInp" required style="color-scheme:dark; color:var(--text-main); width:100%; margin-bottom:10px;">
         <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">🎊 סוג האירוע</label>
-        <select id="eventTypeInp" onchange="toggleCustomEventField()">
+        <select id="eventTypeInp" onchange="toggleCustomEventField(); autoSetRecurrence()">
             <option value="birthday">🎉 יום הולדת</option>
             <option value="anniversary">💍 יום נישואין</option>
             <option value="memorial">🕯️ אזכרה / יארצייט</option>
@@ -219,10 +214,7 @@
             <option value="custom">✏️ אחר (מותאם אישית)...</option>
         </select>
         <input type="text" id="customEventInp" placeholder="הקלד את סוג האירוע..." style="display:none; border-color:#6366f1;">
-        <select id="recurrenceInp" style="margin-bottom:0;">
-            <option value="yearly">🔁 אירוע חוזר מדי שנה (יום הולדת, אזכרה...)</option>
-            <option value="once">📌 אירוע חד פעמי (חתונה, בר מצווה...)</option>
-        </select>
+        <input type="hidden" id="recurrenceInp" value="yearly">
         <div class="grid-2">
             <input type="tel" id="phoneInp" placeholder="טלפון">
             <input type="email" id="emailInp" placeholder="אימייל">
@@ -249,27 +241,30 @@
         </select>
         <input type="text" id="groupInp" placeholder="הקלד שם קבוצה מותאם אישית..." list="groupListOptions" style="display:none;">
         <datalist id="groupListOptions"></datalist>
-        <div class="grid-2">
-            <input type="number" id="giftBudgetInp" placeholder="תקציב מתנה (₪)">
-            <select id="giftStatusInp">
-                <option value="pending">🛒 סטטוס: טרם נקנה</option>
-                <option value="paid">✅ סטטוס: נקנה</option>
-            </select>
+
+        <!-- כפתור פתיחת פרטי מתנה -->
+        <button type="button" onclick="toggleGiftSection()" id="giftToggleBtn" style="width:100%; padding:10px; background:rgba(99,102,241,0.1); border:1px dashed var(--accent-color); color:var(--accent-color); border-radius:10px; cursor:pointer; font-size:13px; margin-bottom:6px; text-align:right;">🎁 הוסף פרטי מתנה ותקציב ▼</button>
+
+        <div id="giftSection" style="display:none;">
+            <div class="grid-2">
+                <input type="number" id="giftBudgetInp" placeholder="תקציב מתנה (₪)">
+                <select id="giftStatusInp">
+                    <option value="pending">🛒 סטטוס: טרם נקנה</option>
+                    <option value="paid">✅ סטטוס: נקנה</option>
+                </select>
+            </div>
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">🎁 רעיון למתנה — בחר אחד או יותר (יחפש בחנויות אוטומטית)</label>
+            <div id="giftTagsContainer" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;"></div>
+            <input type="text" id="giftIdeaInp" placeholder="✏️ כתוב רעיון מותאם אישית למתנה..." style="margin-bottom:6px;">
+            <div id="giftSelectedDisplay" style="display:none; font-size:12px; color:#10b981; margin-bottom:8px; padding:6px 10px; background:rgba(16,185,129,0.1); border-radius:8px;"></div>
         </div>
-        <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">🎁 רעיון למתנה — בחר אחד או יותר (יחפש בחנויות אוטומטית)</label>
-        <div id="giftTagsContainer" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-        </div>
-        <input type="text" id="giftIdeaInp" placeholder="✏️ כתוב רעיון מותאם אישית למתנה..." style="margin-bottom:6px;">
-        <div id="giftSelectedDisplay" style="display:none; font-size:12px; color:#10b981; margin-bottom:8px; padding:6px 10px; background:rgba(16,185,129,0.1); border-radius:8px;"></div>
+
         <textarea id="notesInp" placeholder="הערות שלי (תחביבים, העדפות, דברים חשובים לזכור...)"></textarea>
 
         <button class="btn-submit" id="submitBtn" onclick="addContact()">💾 שמור אירוע במערכת</button>
         <button class="btn-cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">✖️ ביטול עריכה</button>
         <button id="deleteInFormBtn" onclick="deleteFromForm()" style="display:none; width:100%; padding:11px; margin-top:6px; background:rgba(239,68,68,0.15); color:#f87171; border:1px solid #f87171; border-radius:10px; font-weight:bold; cursor:pointer; font-size:14px;">🗑️ מחק אירוע זה לצמיתות</button>
     </div>
-
-    <h2>📅 פירוט אירועים (30 הימים הקרובים)</h2>
-    <div class="calendar-box" id="calendarListContainer"></div>
 
     <h2>🔎 חיפוש וסינון מתקדם</h2>
     <div class="time-filter-wrapper" style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -474,7 +469,7 @@
         </div>
         <div style="display:flex; flex-direction:column; gap:8px;">
             <button onclick="shareApp()" style="padding:10px; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#10b981; border-radius:10px; cursor:pointer; font-size:13px;">📤 שתף את האפליקציה עם חברים</button>
-            <a href="mailto:support@loshachachti.com?subject=באג / הצעה - לא שכחתי" style="padding:10px; background:rgba(99,102,241,0.15); border:1px solid var(--accent-color); color:var(--accent-color); border-radius:10px; font-size:13px; text-decoration:none; display:block;">🐛 דווח על באג / הצעה לשיפור</a>
+            <a href="mailto:barakaflalo@gmail.com?subject=באג / הצעה - לא שכחתי" style="padding:10px; background:rgba(99,102,241,0.15); border:1px solid var(--accent-color); color:var(--accent-color); border-radius:10px; font-size:13px; text-decoration:none; display:block;">🐛 דווח על באג / הצעה לשיפור</a>
         </div>
     </div>
 </div>
@@ -955,6 +950,22 @@ function savePersonalGreetings() {
 function toggleCustomEventField() {
     document.getElementById('customEventInp').style.display = document.getElementById('eventTypeInp').value==='custom'?'block':'none';
 }
+// סוגי אירועים שחוזרים שנתית
+const YEARLY_TYPES = ['birthday','anniversary','memorial','holiday'];
+// כל השאר — חד פעמי
+function autoSetRecurrence() {
+    const type = document.getElementById('eventTypeInp').value;
+    const rec = YEARLY_TYPES.includes(type) ? 'yearly' : 'once';
+    document.getElementById('recurrenceInp').value = rec;
+}
+function toggleGiftSection(forceOpen) {
+    const sec = document.getElementById('giftSection');
+    const btn = document.getElementById('giftToggleBtn');
+    const isOpen = sec.style.display !== 'none';
+    const open = forceOpen !== undefined ? forceOpen : !isOpen;
+    sec.style.display = open ? 'block' : 'none';
+    btn.innerHTML = open ? '🎁 פרטי מתנה ותקציב ▲' : '🎁 הוסף פרטי מתנה ותקציב ▼';
+}
 function toggleCustomGroup() {
     const sel = document.getElementById('groupSelectInp').value;
     document.getElementById('groupInp').style.display = sel==='custom_group'?'block':'none';
@@ -1134,6 +1145,9 @@ function editContact(id) {
     document.getElementById('notesInp').value=c.notes||'';
     document.getElementById('giftBudgetInp').value=c.giftBudget||'';
     setGiftIdeaValue(c.giftIdea||'');
+    // פתח את סקשן המתנה אם יש נתונים
+    const hasGift = c.giftIdea || c.giftBudget || c.giftStatus==='paid';
+    toggleGiftSection(!!hasGift);
     document.getElementById('giftStatusInp').value=c.giftStatus||'pending';
     document.getElementById('genderInp').value=c.gender||'';
     document.getElementById('recurrenceInp').value=c.recurrence||'yearly';
@@ -1165,6 +1179,7 @@ function cancelEdit() {
 function clearForm() {
     ['nameInp','phoneInp','emailInp','groupInp','notesInp','giftBudgetInp','giftIdeaInp','customEventInp'].forEach(id=>document.getElementById(id).value='');
     setGiftIdeaValue('');
+    toggleGiftSection(false);
     document.getElementById('groupSelectInp').value='';
     document.getElementById('groupInp').style.display='none';
     document.getElementById('bdayInp').value='';
