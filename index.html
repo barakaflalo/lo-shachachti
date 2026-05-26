@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לא שכחתי - ניהול אירועים</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6366f1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="לא שכחתי">
-    <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -55,10 +49,6 @@
         .edit-mode-banner { display: none; background: rgba(245,158,11,0.15); border: 1px solid #f59e0b; border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; font-weight: bold; color: #fbbf24; text-align: center; }
         .edit-mode-banner.visible { display: block; }
         input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        input[type="date"] { color-scheme: dark; color: var(--text-main); }
-        .light-mode input[type="date"] { color-scheme: light; }
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
-        .light-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
         .light-mode input, .light-mode select, .light-mode textarea { background: #ffffff; color: #0f172a; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .btn-submit { background: var(--accent-color); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; }
@@ -76,9 +66,6 @@
         .tag-btn { background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; color: var(--text-main); }
         .tag-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
         .contact-list { display: flex; flex-direction: column; gap: 15px; }
-        .contact-card { border: 1px solid var(--panel-border); border-radius: 14px; padding: 18px; background: var(--panel-bg); }
-        .contact-card.new-card { animation: slideIn 0.35s ease; }
-        @keyframes slideIn { from { opacity:0; transform:translateY(-16px) scale(0.97); } to { opacity:1; transform:none; } }
         .profile-img { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 20px; float: right; margin-left: 12px; }
         /* AI RESULT BOX */
         .ai-result-box { display: none; font-size: 13px; background: rgba(99,102,241,0.15); border: 1px dashed #818cf8; padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; line-height: 1.4; position: relative; }
@@ -135,31 +122,36 @@
         .settings-row .btn-backup { flex: 1; min-width: 120px; }
         .btn-back { background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
         .btn-back:hover { background: var(--accent-color); color: white; }
-        .notif-row { background: rgba(255,255,255,0.04); border:1px solid var(--border-color); border-radius:10px; padding:10px; }
-        .light-mode .notif-row { background: #f1f5f9; }
-        #splashScreen { position:fixed; inset:0; background:var(--bg-main); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.6s; }
-        #splashScreen h1 { font-size:38px; color:var(--accent-color); margin:10px 0 6px; }
-        #splashScreen p { color:var(--text-muted); font-size:14px; }
-        .splash-icon { font-size:80px; animation:pulse 1.2s infinite; }
         @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
         .countdown-urgent { background:linear-gradient(135deg,#ef4444,#f97316); color:white; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:bold; display:inline-block; margin-bottom:6px; animation:pulse 1.5s infinite; }
         .countdown-soon { background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#1a1a2e; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:bold; display:inline-block; margin-bottom:6px; }
         .countdown-normal { background:rgba(99,102,241,0.2); color:var(--accent-color); padding:3px 10px; border-radius:20px; font-size:12px; display:inline-block; margin-bottom:6px; }
         .contact-photo { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--accent-color); flex-shrink:0; cursor:pointer; }
         .contact-photo-placeholder { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--accent-color),#8b5cf6); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; color:white; font-weight:bold; cursor:pointer; }
+        .notif-row { background:rgba(255,255,255,0.04); border:1px solid var(--border-color); border-radius:10px; padding:10px; margin-bottom:6px; }
+        .contact-card { border:1px solid var(--panel-border); border-radius:14px; padding:18px; background:var(--panel-bg); }
+        .contact-card.new-card { animation:slideIn 0.35s ease; }
+        @keyframes slideIn { from{opacity:0;transform:translateY(-16px) scale(0.97);} to{opacity:1;transform:none;} }
         .gift-tag { display:inline-flex; align-items:center; gap:5px; padding:7px 12px; border-radius:20px; border:1.5px solid var(--border-color); background:rgba(255,255,255,0.04); color:var(--text-muted); cursor:pointer; font-size:13px; transition:all 0.15s; user-select:none; }
         .gift-tag:hover { border-color:var(--accent-color); color:var(--text-main); }
         .gift-tag.selected { background:rgba(99,102,241,0.25); border-color:var(--accent-color); color:var(--text-main); font-weight:bold; }
-        .light-mode .gift-tag { background:#f1f5f9; color:#64748b; }
-        .light-mode .gift-tag.selected { background:rgba(99,102,241,0.15); color:#4338ca; }
     </style>
 </head>
 <body>
 
-<div id="splashScreen">
-    <div class="splash-icon">🔔</div>
-    <h1>לא שכחתי</h1>
-    <p>ניהול אירועים חכם</p>
+<!-- About Modal -->
+<div class="modal-overlay" id="aboutModal">
+    <div class="modal-box" style="text-align:center;">
+        <button class="modal-close" onclick="document.getElementById('aboutModal').classList.remove('open')">✕</button>
+        <div style="font-size:52px; margin-bottom:10px;">🔔</div>
+        <div class="modal-title" style="font-size:22px;">לא שכחתי</div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">גרסה 1.0</div>
+        <div style="font-size:13px; line-height:1.8; color:var(--text-main); margin-bottom:16px;">אפליקציה לניהול אירועים, ימי הולדת, אזכרות ותזכורות חכמות.</div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">פותח על ידי <b style="color:var(--text-main);">ברק אפללו</b><br>כל הזכויות שמורות © 2025</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <button onclick="shareApp()" style="padding:10px; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#10b981; border-radius:10px; cursor:pointer; font-size:13px;">📤 שתף את האפליקציה עם חברים</button>
+        </div>
+    </div>
 </div>
 
 <div class="main-page" id="mainPage">
@@ -170,22 +162,22 @@
         <div style="display:flex;gap:6px;align-items:center;">
             <button onclick="shareApp()" style="background:rgba(16,185,129,0.2);border:1px solid #10b981;color:#10b981;padding:6px 10px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:bold;">📤 שתף</button>
             <button class="btn-settings-nav" onclick="openSettingsPage()">⚙️ הגדרות</button>
-            <button onclick="document.getElementById('aboutModal').classList.add('open')" style="background:rgba(255,255,255,0.08); border:1px solid var(--border-color); color:var(--text-muted); padding:6px 10px; border-radius:10px; cursor:pointer; font-size:13px;">ℹ️</button>
+            <button onclick="document.getElementById('aboutModal').classList.add('open')" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-color);color:var(--text-muted);padding:6px 10px;border-radius:10px;cursor:pointer;font-size:13px;">ℹ️</button>
         </div>
     </div>
 
     <h1>לא שכחתי</h1>
-    <div class="credit">כל הזכויות שמורות לברק אפללו</div>
+    <div class="credit">כל הזכויות שמורות לברק וגימי אפללו</div>
 
     <div class="stats-box" id="gamificationStats">התחל להוסיף אירועים כדי להתחיל לחגוג! 🎈</div>
 
-    <!-- budget values hidden, used by settings page -->
-    <div style="display:none;">
-        <div id="budgetPending">0</div>
-        <div id="budgetPaid">0</div>
+    <div class="budget-dashboard">
+        <div>💰 פתוח למתנות:<br><div class="budget-val" id="budgetPending">0 ₪</div></div>
+        <div>✅ שכבר שולם:<br><div class="budget-val" id="budgetPaid">0 ₪</div></div>
     </div>
 
     <div id="heroWidgetContainer"></div>
+
 
     <div class="form-box" id="mainFormBox">
 
@@ -197,25 +189,18 @@
         </div>
 
         <input type="text" id="nameInp" placeholder="עבור מי / שם האירוע? *">
-        <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px; margin-top:2px;">📅 תאריך האירוע *</label>
-        <input type="date" id="bdayInp" required style="color-scheme:dark; color:var(--text-main); width:100%; margin-bottom:10px;">
-        <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">🎊 סוג האירוע</label>
-        <select id="eventTypeInp" onchange="toggleCustomEventField(); autoSetRecurrence()">
-            <option value="birthday">🎉 יום הולדת</option>
-            <option value="wedding">💒 חתונה</option>
-            <option value="anniversary">💍 יום נישואין</option>
-            <option value="memorial">🕯️ אזכרה / יארצייט</option>
-            <option value="barmitzvah">✡️ בר / בת מצווה</option>
-            <option value="friends">👥 מפגש חברים</option>
-            <option value="trip">✈️ טיול / חופשה</option>
-            <option value="car">🚗 טסט לרכב / טיפול</option>
-            <option value="medical">🏥 תור רפואי</option>
-            <option value="holiday">🎊 חג / מועד</option>
-            <option value="graduation">🎓 סיום לימודים / טקס</option>
-            <option value="custom">✏️ אחר (מותאם אישית)...</option>
-        </select>
+        <div class="grid-2">
+            <input type="date" id="bdayInp" required>
+            <select id="eventTypeInp" onchange="toggleCustomEventField(); autoSetRecurrence()">
+                <option value="birthday">🎉 יום הולדת</option>
+                <option value="anniversary">💍 יום נישואין</option>
+                <option value="memorial">🕯️ אזכרה / זיכרון</option>
+                <option value="custom">✏️ אחר (מותאם אישית)...</option>
+            </select>
+        </div>
         <input type="text" id="customEventInp" placeholder="הקלד את סוג האירוע..." style="display:none; border-color:#6366f1;">
-        <input type="hidden" id="recurrenceInp" value="yearly">
+        <button type="button" onclick="toggleExtraFields()" id="extraFieldsBtn" style="width:100%; padding:9px; background:transparent; border:1px dashed rgba(255,255,255,0.2); color:var(--text-muted); border-radius:10px; cursor:pointer; font-size:12px; margin-bottom:8px; text-align:center;">＋ פרטים נוספים (טלפון, קבוצה, הערות)</button>
+        <div id="extraFieldsSection" style="display:none;">
         <div class="grid-2">
             <input type="tel" id="phoneInp" placeholder="טלפון">
             <input type="email" id="emailInp" placeholder="אימייל">
@@ -227,66 +212,48 @@
                 <option value="female">👩 נקבה</option>
                 <option value="other">🧑 אחר / לא רלוונטי</option>
             </select>
+            <input type="text" id="groupInp" placeholder="שם קבוצה (משפחה, חברים...)" list="groupListOptions">
+            <datalist id="groupListOptions"></datalist>
         </div>
-        <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">🏷️ קבוצה / קשר</label>
-        <select id="groupSelectInp" onchange="toggleCustomGroup()" style="margin-bottom:6px;">
-            <option value="">— בחר קבוצה —</option>
-            <option value="משפחה">👨‍👩‍👧‍👦 משפחה</option>
-            <option value="חברים">👫 חברים / חברות</option>
-            <option value="עבודה">💼 חברים / חברות מהעבודה</option>
-            <option value="צבא">🎖️ חברים / חברות מהצבא / מילואים</option>
-            <option value="טיול">✈️ חברים / חברות מהטיול</option>
-            <option value="לימודים">📚 חברים / חברות מהלימודים</option>
-            <option value="שכנים">🏠 שכנים</option>
-            <option value="custom_group">✏️ אחר — הקלד בעצמך</option>
-        </select>
-        <input type="text" id="groupInp" placeholder="הקלד שם קבוצה מותאם אישית..." list="groupListOptions" style="display:none;">
-        <datalist id="groupListOptions"></datalist>
-
-        <!-- כפתור פתיחת פרטי מתנה -->
-        <button type="button" onclick="toggleGiftSection()" id="giftToggleBtn" style="width:100%; padding:10px; background:rgba(99,102,241,0.1); border:1px dashed var(--accent-color); color:var(--accent-color); border-radius:10px; cursor:pointer; font-size:13px; margin-bottom:6px; text-align:right;">🎁 הוסף פרטי מתנה ותקציב ▼</button>
-
+        </div>
+        <button type="button" onclick="toggleGiftSection()" id="giftToggleBtn" style="width:100%; padding:9px; background:transparent; border:1px dashed rgba(255,255,255,0.2); color:var(--text-muted); border-radius:10px; cursor:pointer; font-size:12px; margin-bottom:8px; text-align:center;">🎁 הוסף פרטי מתנה ותקציב</button>
         <div id="giftSection" style="display:none;">
             <div class="grid-2">
                 <input type="number" id="giftBudgetInp" placeholder="תקציב מתנה (₪)">
                 <select id="giftStatusInp">
-                    <option value="pending">🛒 סטטוס: טרם נקנה</option>
-                    <option value="paid">✅ סטטוס: נקנה</option>
+                    <option value="pending">🛒 טרם נקנה</option>
+                    <option value="paid">✅ נקנה</option>
                 </select>
             </div>
-            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">🎁 רעיון למתנה — בחר אחד או יותר (יחפש בחנויות אוטומטית)</label>
-            <div id="giftTagsContainer" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;"></div>
-            <input type="text" id="giftIdeaInp" placeholder="✏️ כתוב רעיון מותאם אישית למתנה..." style="margin-bottom:6px;">
-            <div id="giftSelectedDisplay" style="display:none; font-size:12px; color:#10b981; margin-bottom:8px; padding:6px 10px; background:rgba(16,185,129,0.1); border-radius:8px;"></div>
+            <input type="text" id="giftIdeaInp" placeholder="✏️ רעיון מותאם אישית למתנה...">
         </div>
-
-        <textarea id="notesInp" placeholder="הערות שלי (תחביבים, העדפות, דברים חשובים לזכור...)"></textarea>
+        <textarea id="notesInp" placeholder="הערות שחשוב לזכור (תחביבים, העדפות — עוזר לברכות AI)"></textarea>
 
         <button class="btn-submit" id="submitBtn" onclick="addContact()">💾 שמור אירוע במערכת</button>
         <button class="btn-cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">✖️ ביטול עריכה</button>
-        <button id="deleteInFormBtn" onclick="deleteFromForm()" style="display:none; width:100%; padding:11px; margin-top:6px; background:rgba(239,68,68,0.15); color:#f87171; border:1px solid #f87171; border-radius:10px; font-weight:bold; cursor:pointer; font-size:14px;">🗑️ מחק אירוע זה לצמיתות</button>
+        <button id="deleteInFormBtn" onclick="deleteFromForm()" style="display:none;width:100%;padding:11px;margin-top:6px;background:rgba(239,68,68,0.15);color:#f87171;border:1px solid #f87171;border-radius:10px;font-weight:bold;cursor:pointer;font-size:14px;">🗑️ מחק אירוע זה לצמיתות</button>
     </div>
 
-    <h2>🔎 חיפוש וסינון מתקדם</h2>
+
+    <h2>🔎 חיפוש</h2>
     <div class="time-filter-wrapper" style="display:flex; gap:8px; flex-wrap:wrap;">
         <select id="timeFilter" onchange="renderContacts()" style="flex:2; min-width:160px;">
-            <option value="30" selected>⏳ 30 הימים הקרובים</option>
-            <option value="future">📅 כל האירועים העתידיים השנה</option>
-            <option value="past">⏪ אירועים שעברו השנה</option>
-            <option value="all">♾️ כל הרשימה (ללא סינון)</option>
+            <option value="30" selected>⏳ 30 ימים קרובים</option>
+            <option value="future">📅 עתידיים השנה</option>
+            <option value="past">⏪ שעברו השנה</option>
+            <option value="all">♾️ הכל</option>
         </select>
         <select id="sortFilter" onchange="renderContacts()" style="flex:1; min-width:130px;">
-            <option value="date">📅 מיון: לפי תאריך</option>
-            <option value="name">🔤 מיון: לפי שם</option>
-            <option value="group">🏷️ מיון: לפי קבוצה</option>
+            <option value="date">📅 לפי תאריך</option>
+            <option value="name">🔤 לפי שם</option>
+            <option value="group">🏷️ לפי קבוצה</option>
         </select>
     </div>
+    <!-- כפתור גלול למעלה -->
+    <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none; position:fixed; bottom:24px; left:20px; width:46px; height:46px; border-radius:50%; background:var(--accent-color); color:white; border:none; font-size:20px; cursor:pointer; box-shadow:0 4px 15px rgba(99,102,241,0.5); z-index:999;">↑</button>
     <input type="text" id="searchInp" oninput="renderContacts()" placeholder="חפש לפי שם...">
     <div class="filter-tags" id="filterTagsContainer"></div>
     <div class="contact-list" id="listContainer"></div>
-
-    <!-- כפתור גלול למעלה -->
-    <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none; position:fixed; bottom:24px; left:20px; width:46px; height:46px; border-radius:50%; background:var(--accent-color); color:white; border:none; font-size:20px; cursor:pointer; box-shadow:0 4px 15px rgba(99,102,241,0.5); z-index:999; transition:opacity 0.3s;">↑</button>
 
 </div>
 </div><!-- end main-page -->
@@ -301,7 +268,7 @@
     </div>
 
     <h1 style="font-size:22px;">⚙️ הגדרות</h1>
-    <div class="credit">לא שכחתי — כל הזכויות שמורות לברק אפללו</div>
+    <div class="credit">לא שכחתי — כל הזכויות שמורות לברק וגימי אפללו</div>
 
     <!-- רובריקה 1: אנשי קשר -->
     <div class="settings-section">
@@ -337,17 +304,6 @@
     <!-- רובריקה 4: ייצוא/ייבוא CSV -->
     <div class="settings-section">
         <div class="settings-section-title">📊 ייצוא וייבוא CSV (אקסל)</div>
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.6;">
-            ייצא את רשימת האירועים שלך לקובץ אקסל לעריכה במחשב, או ייבא רשימה מוכנה מאקסל.<br>
-            שימושי לעריכת הרבה אירועים בבת אחת.
-        </p>
-        <div style="background:rgba(99,102,241,0.08); border-radius:10px; padding:10px; margin-bottom:12px; font-size:11px; color:var(--text-muted); line-height:1.7;">
-            <b>איך מייבאים מאקסל?</b><br>
-            1. לחץ "ייצוא ל-CSV" כדי לקבל קובץ לדוגמה<br>
-            2. פתח אותו באקסל / Google Sheets<br>
-            3. ערוך או הוסף שורות<br>
-            4. שמור כ-CSV והעלה עם "ייבוא מ-CSV"
-        </div>
         <div class="settings-row">
             <button class="btn-backup" style="background:#10b981;" onclick="exportCSV()">📊 ייצוא ל-CSV</button>
             <button class="btn-backup" style="background:#f59e0b;" onclick="document.getElementById('importCSVFile').click()">📁 ייבוא מ-CSV</button>
@@ -377,13 +333,6 @@
     <!-- רובריקה 5: גיבוי ושחזור -->
     <div class="settings-section">
         <div class="settings-section-title">💾 שמירה ושחזור גיבוי</div>
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.6;">
-            שמור גיבוי מלא של כל האירועים, ההגדרות והתזכורות שלך.<br>
-            <b>מחליף טלפון?</b> שמור גיבוי בטלפון הישן ← שחזר בחדש — וכל המידע חוזר! 📱➡️📱
-        </p>
-        <div style="background:rgba(16,185,129,0.08); border-radius:10px; padding:10px; margin-bottom:12px; font-size:11px; color:var(--text-muted); line-height:1.7;">
-            <b>המלצה:</b> שמור גיבוי אחת לחודש ב-Google Drive / WhatsApp לעצמך / אימייל — כך המידע שלך תמיד מוגן.
-        </div>
         <div class="settings-row">
             <button class="btn-backup" onclick="exportData()">💾 שמור גיבוי</button>
             <button class="btn-backup" onclick="document.getElementById('importFile').click()">📂 שחזר מגיבוי</button>
@@ -391,39 +340,34 @@
         <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="display:none;">
     </div>
 
-    <!-- רובריקה: סיכום תקציב -->
+    <!-- סיכום תקציב -->
     <div class="settings-section">
         <div class="settings-section-title">💰 סיכום הוצאות מתנות</div>
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px; line-height:1.6;">
-            בדוק כמה הוצאת על מתנות לפי תקופה — שימושי לתכנון תקציב שנתי.
-        </p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-            <div style="flex:1; min-width:120px;">
-                <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">סנן לפי:</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <div style="flex:1;min-width:120px;">
+                <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">סנן לפי:</label>
                 <select id="budgetFilterType" onchange="updateBudgetSummary()" style="margin-bottom:0;">
                     <option value="all">📊 כל הזמן</option>
                     <option value="year">📅 לפי שנה</option>
                     <option value="month">🗓️ לפי חודש</option>
                 </select>
             </div>
-            <div id="budgetYearBox" style="flex:1; min-width:100px; display:none;">
-                <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">שנה:</label>
+            <div id="budgetYearBox" style="flex:1;min-width:100px;display:none;">
+                <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">שנה:</label>
                 <select id="budgetYear" onchange="updateBudgetSummary()" style="margin-bottom:0;"></select>
             </div>
-            <div id="budgetMonthBox" style="flex:1; min-width:100px; display:none;">
-                <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">חודש:</label>
+            <div id="budgetMonthBox" style="flex:1;min-width:100px;display:none;">
+                <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">חודש:</label>
                 <select id="budgetMonth" onchange="updateBudgetSummary()" style="margin-bottom:0;">
-                    <option value="0">ינואר</option><option value="1">פברואר</option>
-                    <option value="2">מרץ</option><option value="3">אפריל</option>
-                    <option value="4">מאי</option><option value="5">יוני</option>
-                    <option value="6">יולי</option><option value="7">אוגוסט</option>
-                    <option value="8">ספטמבר</option><option value="9">אוקטובר</option>
-                    <option value="10">נובמבר</option><option value="11">דצמבר</option>
+                    <option value="0">ינואר</option><option value="1">פברואר</option><option value="2">מרץ</option>
+                    <option value="3">אפריל</option><option value="4">מאי</option><option value="5">יוני</option>
+                    <option value="6">יולי</option><option value="7">אוגוסט</option><option value="8">ספטמבר</option>
+                    <option value="9">אוקטובר</option><option value="10">נובמבר</option><option value="11">דצמבר</option>
                 </select>
             </div>
         </div>
-        <div id="budgetSummaryResult" style="background:rgba(99,102,241,0.08); border-radius:12px; padding:14px;">
-            <div style="text-align:center; color:var(--text-muted); font-size:13px;">פתח את ההגדרות לראות סיכום</div>
+        <div id="budgetSummaryResult" style="background:rgba(99,102,241,0.08);border-radius:12px;padding:14px;">
+            <div style="text-align:center;color:var(--text-muted);font-size:13px;">פתח הגדרות לראות סיכום</div>
         </div>
     </div>
 
@@ -453,55 +397,11 @@
 </div><!-- end settings-page -->
 
 <!-- ===== MODAL עריכת איש קשר ===== -->
-<!-- About Modal -->
-<div class="modal-overlay" id="aboutModal">
-    <div class="modal-box" style="text-align:center;">
-        <button class="modal-close" onclick="document.getElementById('aboutModal').classList.remove('open')">✕</button>
-        <div style="font-size:52px; margin-bottom:10px;">🔔</div>
-        <div class="modal-title" style="font-size:22px;">לא שכחתי</div>
-        <div style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">גרסה 1.0</div>
-        <div style="font-size:13px; line-height:1.8; color:var(--text-main); margin-bottom:16px;">
-            אפליקציה לניהול אירועים, ימי הולדת, אזכרות ותזכורות חכמות.<br>
-            עם ברכות מוכנות, ניהול מתנות והתראות מותאמות אישית.
-        </div>
-        <div style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
-            פותח על ידי <b style="color:var(--text-main);">ברק אפללו</b><br>
-            כל הזכויות שמורות © 2025
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <button onclick="shareApp()" style="padding:10px; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#10b981; border-radius:10px; cursor:pointer; font-size:13px;">📤 שתף את האפליקציה עם חברים</button>
-            <a href="mailto:barakaflalo@gmail.com?subject=באג / הצעה - לא שכחתי" style="padding:10px; background:rgba(99,102,241,0.15); border:1px solid var(--accent-color); color:var(--accent-color); border-radius:10px; font-size:13px; text-decoration:none; display:block;">🐛 דווח על באג / הצעה לשיפור</a>
-        </div>
-    </div>
-</div>
-
 <div class="modal-overlay" id="editModal">
     <div class="modal-box">
         <button class="modal-close" onclick="closeEditModal()">✕</button>
         <div class="modal-title" id="editModalTitle">⚙️ הגדרות מתקדמות</div>
         <input type="hidden" id="editModalId">
-
-        <!-- תמונת איש קשר -->
-        <div class="modal-section">
-            <div class="modal-section-title">📷 תמונה לאיש קשר</div>
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div id="modalPhotoPreview"></div>
-                <div>
-                    <input type="file" id="photoFileInput" accept="image/*" onchange="handlePhotoUpload()" style="display:none;">
-                    <button onclick="document.getElementById('photoFileInput').click()" style="padding:8px 14px; background:rgba(99,102,241,0.2); border:1px solid var(--accent-color); color:var(--accent-color); border-radius:8px; cursor:pointer; font-size:12px;">📷 בחר תמונה</button>
-                    <button id="removePhotoBtn" onclick="removePhoto()" style="display:none; padding:8px 14px; background:rgba(239,68,68,0.15); border:1px solid #f87171; color:#f87171; border-radius:8px; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ הסר תמונה</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- התראות מותאמות אישית -->
-        <div class="modal-section">
-            <div class="modal-section-title">🔔 התראות לאירוע זה</div>
-            <p style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">בחר כמה התראות תקבל לפני האירוע. שימושי לקנות מתנה בזמן!</p>
-            <div id="notifList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;"></div>
-            <button onclick="addNotifRow()" style="width:100%; padding:8px; background:rgba(99,102,241,0.2); border:1px dashed var(--accent-color); color:var(--accent-color); border-radius:8px; cursor:pointer; font-size:13px;">+ הוסף התראה</button>
-            <p style="font-size:10px; color:var(--text-muted); margin-top:8px;">💡 ההתראות יישלחו כשהאפליקציה פתוחה או הדפדפן פעיל ברקע</p>
-        </div>
 
         <div class="modal-section">
             <div class="modal-section-title">🎵 צליל התראה מותאם מהטלפון</div>
@@ -558,7 +458,6 @@ let generatedTexts = {};
 let countdownInterval = null;
 let currentGroupFilter = 'הכל';
 let editingId = null;
-let _lastSavedId = null;
 
 // IndexedDB for audio
 let audioDB = null;
@@ -569,51 +468,38 @@ dbReq.onsuccess = e => { audioDB = e.target.result; };
 
 // ========== 5 WISH STYLES (LOOP) ==========
 const wishStyles = [
-    (name, type, group, gender) => {
+    (name, notes, type, group, gender) => {
         const m=gender==='male', f=gender==='female', known=m||f;
         if(type==='memorial') return `חושב עליכם היום ביום האזכרה. מחבק מרחוק. 🕯️`;
-        if(type==='wedding') return `מזל טוב ${name}! 💒 יום מיוחד ומרגש — שתתחילו את הדרך המשותפת באהבה ובאושר!`;
         if(type==='anniversary') return `יום נישואין שמח ${name}! 💍 שתמשיכו לאהוב ולצמוח יחד. המון בריאות ואושר!`;
-        if(type==='barmitzvah') return `מזל טוב ${name} על הבר/בת מצווה! ✡️ יום גדול ומרגש — בהצלחה!`;
-        if(type==='friends') return `כיף לראות אותך ${name}! 👥 מפגש כזה הוא תמיד סיבה לחייך 😊`;
-        if(type==='trip') return `טיול נעים ${name}! ✈️ תהנה מכל רגע ותחזור עם הרבה זיכרונות טובים!`;
-        if(type==='car') return `${name}, אל תשכח את הטסט/טיפול לרכב! 🚗 תדאג שהכל בסדר לפני הזמן.`;
-        if(type==='medical') return `${name}, תזכור את התור הרפואי! 🏥 הבריאות קודמת לכל 💪`;
-        if(type==='holiday') return `חג שמח ${name}! 🎊 שיהיה חג מלא שמחה, משפחה ואוכל טוב!`;
-        if(type==='graduation') return `מזל טוב ${name} על הסיום! 🎓 עבודה קשה משתלמת — גאווה גדולה!`;
         const gl=(group||'').toLowerCase();
-        if(gl==='עבודה') return `ל-${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, ברכות חמות מהעבודה. מאחל${f?'ת':''} שנת עשייה והצלחה! 🌟`;
-        if(gl==='משפחה') return `${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, המון מזל טוב מכל המשפחה! ❤️ בריאות ואושר!`;
-        if(gl==='צבא') return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'אח/ות'} יקר${f?'ה':''} מהצבא 🎖️🍻`;
-        if(gl==='טיול') return `מזל טוב ${name}! ✈️ זוכר${f?'ת':''} את הטיולים שלנו יחד — רק שמחות!`;
-        if(gl==='לימודים') return `מזל טוב ${name}! 📚 חבר${f?'ה':''} ללימודים — שתמשיך${f?'/י':''} להצליח!`;
-        if(gl==='שכנים') return `מזל טוב ${name} השכן${f?'ה':''}! 🏠 שמח${f?'ה':''} לחגוג איתך!`;
-        if(gl==='חברים'||gl.includes('חבר')) return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'חבר/ה'} יקר${f?'ה':''} 🍻`;
-        return `המון מזל טוב ${name}! מאחל${f?'ת':''} אושר, בריאות והצלחה! 🎈`;
+        if(gl.includes('עבודה')||gl.includes('הורים')) return `ל-${name} ${known?(m?'היקר':'היקרה'):'היקר/ה'}, ברכות חמות. מאחל${f?'ת':''} שנת עשייה והצלחה! 🌟`;
+        if(gl.includes('חבר')||gl.includes('מילואים')) return `יאללה ${name} מזל טוב ענק!! רק בשמחות ${known?(m?'אח':'אחות'):'אח/ות'} יקר${f?'ה':''} 🍻`;
+        return `המון מזל טוב ${name}! מאחל${f?'ת':''} אושר, בריאות והצלחה! 🎈${notes?' (אגב — '+notes+' זה מדהים!)':''}`;
     },
-    (name, type, group, gender) => {
+    (name, notes, type, group, gender) => {
         const m=gender==='male', f=gender==='female';
         if(type==='memorial') return `מדליק נר לזכר${f?'ה':'ו'}. איתכם בכאבכם. 🕯️`;
         if(type==='anniversary') return `מזל טוב ${name} על עוד שנה מדהימה יחד! 🥂 שתמשיכו לגדול ביחד!`;
-        return `יום הולדת שמח ${name} ${f?'היקרה':'היקר'}! 🎉 מאחל${f?'ת':''} לך שנה מלאה בחיוכים והגשמת חלומות!`;
+        return `יום הולדת שמח ${name} ${f?'היקרה':'היקר'}! 🎉 מאחל${f?'ת':''} לך שנה מלאה בחיוכים והגשמת חלומות!${notes?' ובמיוחד בתחום '+notes+'!':''}`;
     },
-    (name, type, group, gender) => {
+    (name, notes, type, group, gender) => {
         const m=gender==='male', f=gender==='female';
         if(type==='memorial') return `זוכר${f?'ת':''} איתכם היום. חיבוק חם. 🕯️`;
         if(type==='anniversary') return `${name} — מזל טוב! 💍 שהאהבה תמשיך לצמוח ולהתחזק כל שנה!`;
-        return `${name}! 🎂 מזל טוב! שהשנה תהיה העתק-הדבק של כל הדברים הטובים!`;
+        return `${name}! 🎂 מזל טוב! שהשנה תהיה העתק-הדבק של כל הדברים הטובים!${notes?' [ובמיוחד ב-'+notes+']':''}`;
     },
-    (name, type, group, gender) => {
+    (name, notes, type, group, gender) => {
         const m=gender==='male', f=gender==='female';
         if(type==='memorial') return `ביום הזה מקדיש${f?'ה':''} מחשבה. יהי${f?' זכרה':' זכרו'} ברוך${f?'ה':''}. 🕯️`;
         if(type==='anniversary') return `המון מזל טוב ${name}! 💍 זוג מדהים — שתמשיכו לחגוג ביחד שנים רבות!`;
-        return `המון מזל טוב ל-${name}! 🌟 תמשיך${f?'/י':''} להפיץ אור! מאחל${f?'ת':''} רק טוב!`;
+        return `המון מזל טוב ל-${name}! 🌟 תמשיך${f?'/י':''} להפיץ אור! מאחל${f?'ת':''} רק טוב!${notes?' '+notes+' — זה פשוט מקסים.':''}`;
     },
-    (name, type, group, gender) => {
+    (name, notes, type, group, gender) => {
         const m=gender==='male', f=gender==='female';
         if(type==='memorial') return `ביום הזיכרון — חושב${f?'ת':''} עליכם. 🕯️`;
         if(type==='anniversary') return `יום נישואין שמח! 💍 ${name} — שתמשיכו לבנות ביחד ולהנות מכל רגע!`;
-        return `יום הולדת שמח ${name}! 🥳 שתהיה שנה מאושרת, בריאה ומלאה באנרגיות טובות!`;
+        return `יום הולדת שמח ${name}! 🥳 שתהיה שנה מאושרת, בריאה ומלאה באנרגיות טובות!${notes?' וכמובן הרבה '+notes+'!':''}`;
     }
 ];
 
@@ -629,271 +515,172 @@ function buildStoreLinks(giftIdea) {
     let html = '<div class="store-links">';
     stores.forEach(store => {
         const q = encodeURIComponent(giftIdea + ' ' + store);
-        html += `<a href="https://www.google.com/search?q=${q}" target="_blank" class="store-link-btn">🔍 ${store}</a>`;
+        html += `<a href="https://www.google.com/search?q=${q}" target="_blank" class="store-link-btn">🔍 ${store}<\/a>`;
     });
-    html += '</div>';
+    html += '<\/div>';
     return html;
 }
 
 // ========== INIT ==========
+function toggleGiftSection(forceOpen) {
+    const sec = document.getElementById('giftSection');
+    const btn = document.getElementById('giftToggleBtn');
+    if(!sec) return;
+    const open = forceOpen !== undefined ? forceOpen : sec.style.display === 'none';
+    sec.style.display = open ? 'block' : 'none';
+    btn.innerHTML = open ? '🎁 פרטי מתנה ותקציב ▲' : '🎁 הוסף פרטי מתנה ותקציב';
+}
+function toggleExtraFields(forceOpen) {
+    const sec = document.getElementById('extraFieldsSection');
+    const btn = document.getElementById('extraFieldsBtn');
+    if(!sec) return;
+    const open = forceOpen !== undefined ? forceOpen : sec.style.display === 'none';
+    sec.style.display = open ? 'block' : 'none';
+    btn.innerHTML = open ? '▲ הסתר פרטים נוספים' : '＋ פרטים נוספים (טלפון, קבוצה, הערות)';
+}
+const YEARLY_TYPES = ['birthday','anniversary','memorial','holiday'];
+function autoSetRecurrence() {
+    const type = document.getElementById('eventTypeInp').value;
+    const el = document.getElementById('recurrenceInp');
+    if(el) el.value = YEARLY_TYPES.includes(type) ? 'yearly' : 'once';
+}
+
 // ========== SOUND EFFECTS ==========
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let _audioCtx = null;
-function getAudioCtx() {
-    if(!_audioCtx) _audioCtx = new AudioCtx();
-    return _audioCtx;
-}
-
+function getAudioCtx() { if(!_audioCtx) _audioCtx = new AudioCtx(); return _audioCtx; }
 function playSound(type) {
     try {
         const ctx = getAudioCtx();
-        const master = ctx.createGain();
-        master.gain.setValueAtTime(0.18, ctx.currentTime);
-        master.connect(ctx.destination);
-
-        if(type === 'save') {
-            // עליז, שתי תווים עולים
-            [[520,0,0.12],[660,0.13,0.18]].forEach(([freq,start,dur]) => {
-                const o=ctx.createOscillator(), g=ctx.createGain();
-                o.type='sine'; o.frequency.setValueAtTime(freq,ctx.currentTime+start);
-                g.gain.setValueAtTime(0.3,ctx.currentTime+start);
-                g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+start+dur);
-                o.connect(g); g.connect(master);
-                o.start(ctx.currentTime+start); o.stop(ctx.currentTime+start+dur+0.05);
-            });
-        } else if(type === 'delete') {
-            // יורד, קצר
-            const o=ctx.createOscillator(), g=ctx.createGain();
-            o.type='sine';
-            o.frequency.setValueAtTime(380,ctx.currentTime);
-            o.frequency.exponentialRampToValueAtTime(160,ctx.currentTime+0.22);
-            g.gain.setValueAtTime(0.25,ctx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.22);
-            o.connect(g); g.connect(master);
-            o.start(); o.stop(ctx.currentTime+0.25);
-        } else if(type === 'splash') {
-            // 3 תווים עולים — כניסה
-            [[330,0,0.15],[440,0.16,0.15],[550,0.32,0.25]].forEach(([freq,start,dur]) => {
-                const o=ctx.createOscillator(), g=ctx.createGain();
-                o.type='triangle'; o.frequency.setValueAtTime(freq,ctx.currentTime+start);
-                g.gain.setValueAtTime(0.25,ctx.currentTime+start);
-                g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+start+dur);
-                o.connect(g); g.connect(master);
-                o.start(ctx.currentTime+start); o.stop(ctx.currentTime+start+dur+0.05);
-            });
-        } else if(type === 'greet') {
-            // פינג עדין
-            const o=ctx.createOscillator(), g=ctx.createGain();
-            o.type='sine'; o.frequency.setValueAtTime(880,ctx.currentTime);
-            o.frequency.exponentialRampToValueAtTime(660,ctx.currentTime+0.2);
-            g.gain.setValueAtTime(0.2,ctx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
-            o.connect(g); g.connect(master);
-            o.start(); o.stop(ctx.currentTime+0.35);
-        } else if(type === 'edit') {
-            // קליק עדין
-            const o=ctx.createOscillator(), g=ctx.createGain();
-            o.type='sine'; o.frequency.setValueAtTime(600,ctx.currentTime);
-            g.gain.setValueAtTime(0.15,ctx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.1);
-            o.connect(g); g.connect(master);
-            o.start(); o.stop(ctx.currentTime+0.12);
+        const master = ctx.createGain(); master.gain.setValueAtTime(0.18, ctx.currentTime); master.connect(ctx.destination);
+        if(type==='save') {
+            [[520,0,0.12],[660,0.13,0.18]].forEach(([freq,start,dur]) => { const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(freq,ctx.currentTime+start); g.gain.setValueAtTime(0.3,ctx.currentTime+start); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+start+dur); o.connect(g); g.connect(master); o.start(ctx.currentTime+start); o.stop(ctx.currentTime+start+dur+0.05); });
+        } else if(type==='delete') {
+            const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(380,ctx.currentTime); o.frequency.exponentialRampToValueAtTime(160,ctx.currentTime+0.22); g.gain.setValueAtTime(0.25,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.22); o.connect(g); g.connect(master); o.start(); o.stop(ctx.currentTime+0.25);
+        } else if(type==='splash') {
+            [[330,0,0.15],[440,0.16,0.15],[550,0.32,0.25]].forEach(([freq,start,dur]) => { const o=ctx.createOscillator(),g=ctx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(freq,ctx.currentTime+start); g.gain.setValueAtTime(0.25,ctx.currentTime+start); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+start+dur); o.connect(g); g.connect(master); o.start(ctx.currentTime+start); o.stop(ctx.currentTime+start+dur+0.05); });
+        } else if(type==='greet') {
+            const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(880,ctx.currentTime); o.frequency.exponentialRampToValueAtTime(660,ctx.currentTime+0.2); g.gain.setValueAtTime(0.2,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3); o.connect(g); g.connect(master); o.start(); o.stop(ctx.currentTime+0.35);
+        } else if(type==='edit') {
+            const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(600,ctx.currentTime); g.gain.setValueAtTime(0.15,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.1); o.connect(g); g.connect(master); o.start(); o.stop(ctx.currentTime+0.12);
         }
     } catch(e) {}
 }
 
-// ========== GIFT TAGS ==========
-const GIFT_OPTIONS = [
-    {emoji:'⌚',label:'שעון'},
-    {emoji:'👕',label:'בגדים'},
-    {emoji:'👟',label:'נעליים'},
-    {emoji:'🖼️',label:'תמונה / ציור'},
-    {emoji:'📱',label:'אביזרי סלולר'},
-    {emoji:'🎮',label:'משחקים / גיימינג'},
-    {emoji:'📚',label:'ספרים'},
-    {emoji:'💄',label:'קוסמטיקה / טיפוח'},
-    {emoji:'🌸',label:'פרחים'},
-    {emoji:'🍫',label:'שוקולד / ממתקים'},
-    {emoji:'🍷',label:'יין / אלכוהול'},
-    {emoji:'☕',label:'קפה / תה'},
-    {emoji:'🎒',label:'תיק'},
-    {emoji:'💍',label:'תכשיטים'},
-    {emoji:'🏠',label:'לבית'},
-    {emoji:'🧹',label:'שואב אבק / מכשיר חשמלי'},
-    {emoji:'📺',label:'טלוויזיה / מסך'},
-    {emoji:'🎵',label:'מוזיקה / אוזניות'},
-    {emoji:'✈️',label:'חוויה / טיול'},
-    {emoji:'💆',label:'עיסוי / ספא'},
-    {emoji:'🎟️',label:'כרטיסים לאירוע'},
-    {emoji:'💰',label:'כסף / גיפט קארד'},
-];
-
-let selectedGiftTags = [];
-
-function initGiftTags() {
-    const container = document.getElementById('giftTagsContainer');
-    container.innerHTML = '';
-    selectedGiftTags = [];
-    GIFT_OPTIONS.forEach(opt => {
-        const tag = document.createElement('div');
-        tag.className = 'gift-tag';
-        tag.innerHTML = `${opt.emoji} ${opt.label}`;
-        tag.dataset.label = opt.label;
-        tag.onclick = () => toggleGiftTag(tag, opt.label);
-        container.appendChild(tag);
-    });
-    updateGiftSelectedDisplay();
-}
-
-function toggleGiftTag(el, label) {
-    const idx = selectedGiftTags.indexOf(label);
-    if(idx === -1) {
-        selectedGiftTags.push(label);
-        el.classList.add('selected');
-    } else {
-        selectedGiftTags.splice(idx, 1);
-        el.classList.remove('selected');
-    }
-    updateGiftSelectedDisplay();
-}
-
-function updateGiftSelectedDisplay() {
-    const disp = document.getElementById('giftSelectedDisplay');
-    const custom = document.getElementById('giftIdeaInp').value.trim();
-    const all = [...selectedGiftTags, ...(custom ? [custom] : [])];
-    if(all.length) {
-        disp.style.display = 'block';
-        disp.innerHTML = '🎁 נבחר: ' + all.join(' · ');
-    } else {
-        disp.style.display = 'none';
-    }
-}
-
-function getGiftIdeaValue() {
-    const custom = document.getElementById('giftIdeaInp').value.trim();
-    const all = [...selectedGiftTags, ...(custom ? [custom] : [])];
-    return all.join(', ');
-}
-
-function setGiftIdeaValue(val) {
-    // Clear tags
-    selectedGiftTags = [];
-    document.querySelectorAll('.gift-tag').forEach(t => t.classList.remove('selected'));
-    if(!val) { updateGiftSelectedDisplay(); return; }
-    // Try to match known tags
-    const parts = val.split(',').map(s=>s.trim());
-    const remaining = [];
-    parts.forEach(p => {
-        const tag = document.querySelector(`.gift-tag[data-label="${p}"]`);
-        if(tag) {
-            selectedGiftTags.push(p);
-            tag.classList.add('selected');
-        } else {
-            remaining.push(p);
-        }
-    });
-    document.getElementById('giftIdeaInp').value = remaining.join(', ');
-    updateGiftSelectedDisplay();
-}
-function hideSplash() {
-    const s = document.getElementById('splashScreen');
-    if(!s) return;
-    playSound('splash');
-    s.style.opacity = '0';
-    setTimeout(() => s.style.display = 'none', 600);
+// ========== SPLASH ==========
+// ========== SHARE ==========
+function shareApp() {
+    const text='🔔 "לא שכחתי" — האפליקציה שתזכיר לך כל יום הולדת, אזכרה ואירוע חשוב!\nבחינם לגמרי 👇\nhttps://barakaflalo.github.io/lo-shachachti';
+    if(navigator.share) { navigator.share({title:'לא שכחתי',text}).catch(()=>{}); }
+    else { navigator.clipboard.writeText(text).then(()=>alert('הקישור הועתק! 📋')); }
 }
 
 // ========== PHOTO ==========
+let _lastSavedId = null;
 function handlePhotoUpload() {
-    const file = document.getElementById('photoFileInput').files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        const id = parseInt(document.getElementById('editModalId').value);
-        const idx = contacts.findIndex(c=>c.id===id); if(idx===-1) return;
-        contacts[idx].photo = e.target.result;
-        updateModalPhotoPreview(e.target.result);
-        document.getElementById('removePhotoBtn').style.display='block';
-    };
+    const file=document.getElementById('photoFileInput').files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=e=>{ const id=parseInt(document.getElementById('editModalId').value); const idx=contacts.findIndex(c=>c.id===id); if(idx===-1) return; contacts[idx].photo=e.target.result; updateModalPhotoPreview(e.target.result); document.getElementById('removePhotoBtn').style.display='block'; };
     reader.readAsDataURL(file);
 }
 function removePhoto() {
-    const id = parseInt(document.getElementById('editModalId').value);
-    const idx = contacts.findIndex(c=>c.id===id); if(idx===-1) return;
-    contacts[idx].photo = '';
-    updateModalPhotoPreview('');
-    document.getElementById('removePhotoBtn').style.display='none';
+    const id=parseInt(document.getElementById('editModalId').value); const idx=contacts.findIndex(c=>c.id===id); if(idx===-1) return;
+    contacts[idx].photo=''; updateModalPhotoPreview(''); document.getElementById('removePhotoBtn').style.display='none';
 }
 function updateModalPhotoPreview(src) {
-    const el = document.getElementById('modalPhotoPreview');
-    if(src) {
-        el.innerHTML=`<img src="${src}" class="contact-photo" style="width:60px;height:60px;">`;
-    } else {
-        el.innerHTML=`<div class="contact-photo-placeholder" style="width:60px;height:60px;">📷</div>`;
-    }
+    const el=document.getElementById('modalPhotoPreview'); if(!el) return;
+    el.innerHTML=src?`<img src="${src}" class="contact-photo" style="width:60px;height:60px;">`:`<div class="contact-photo-placeholder" style="width:60px;height:60px;">📷<\/div>`;
 }
 
 // ========== NOTIFICATIONS ==========
 function scheduleContactNotifications(c) {
-    if(!c.bday || !c.notifications || !c.notifications.length) return;
-    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    if(!c.bday||!c.notifications||!c.notifications.length) return;
+    if(!('Notification' in window)||Notification.permission!=='granted') return;
     if(!('serviceWorker' in navigator)) return;
-    navigator.serviceWorker.ready.then(reg => {
-        const today = new Date(); today.setHours(0,0,0,0);
-        const ev = new Date(c.bday);
-        c.notifications.forEach(n => {
-            // Find next occurrence
-            let eventDate = new Date(today.getFullYear(), ev.getMonth(), ev.getDate());
-            if(eventDate < today) eventDate.setFullYear(today.getFullYear()+1);
-            // Notification date = eventDate minus n.days
-            const notifDate = new Date(eventDate);
-            notifDate.setDate(notifDate.getDate() - (n.days||0));
-            const [h,m] = (n.time||'09:00').split(':').map(Number);
-            notifDate.setHours(h, m, 0, 0);
-            const msUntil = notifDate - new Date();
-            if(msUntil < 0) return; // already passed
-            const daysLabel = n.days === 0 ? 'היום' : `בעוד ${n.days} ימים`;
-            setTimeout(() => {
-                reg.showNotification('לא שכחתי 🔔', {
-                    body: `${n.label||'תזכורת'}: ${c.name} — ${getEventLabel(c.eventType,c.customEventName)} ${daysLabel}!`,
-                    icon: 'icon-192.png',
-                    tag: `notif-${c.id}-${n.days}-${n.time}`,
-                    dir: 'rtl'
-                });
-            }, msUntil);
+    navigator.serviceWorker.ready.then(reg=>{
+        const today=new Date(); today.setHours(0,0,0,0);
+        const ev=new Date(c.bday);
+        c.notifications.forEach(n=>{
+            let eventDate=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
+            if(eventDate<today) eventDate.setFullYear(today.getFullYear()+1);
+            const notifDate=new Date(eventDate); notifDate.setDate(notifDate.getDate()-(n.days||0));
+            const [h,m]=(n.time||'09:00').split(':').map(Number); notifDate.setHours(h,m,0,0);
+            const msUntil=notifDate-new Date(); if(msUntil<0) return;
+            const daysLabel=n.days===0?'היום':`בעוד ${n.days} ימים`;
+            setTimeout(()=>{ reg.showNotification('לא שכחתי 🔔',{body:`${n.label||'תזכורת'}: ${c.name} — ${getEventLabel(c.eventType,c.customEventName)} ${daysLabel}!`,icon:'icon-192.png',tag:`notif-${c.id}-${n.days}`,dir:'rtl'}); },msUntil);
         });
     });
 }
-
 function scheduleAllNotifications() {
     if(!('Notification' in window)) return;
-    Notification.requestPermission().then(perm => {
-        if(perm !== 'granted') return;
-        contacts.forEach(c => scheduleContactNotifications(c));
+    Notification.requestPermission().then(perm=>{ if(perm==='granted') contacts.forEach(c=>scheduleContactNotifications(c)); });
+}
+
+// ========== CONFETTI ==========
+function triggerConfetti() {
+    const canvas=document.createElement('canvas'); canvas.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;'; document.body.appendChild(canvas);
+    const ctx=canvas.getContext('2d'); canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+    const pieces=Array.from({length:100},()=>({x:Math.random()*canvas.width,y:-10,w:8+Math.random()*8,h:8+Math.random()*8,color:`hsl(${Math.random()*360},90%,60%)`,vx:(Math.random()-0.5)*4,vy:2+Math.random()*3,rot:Math.random()*360,rotV:(Math.random()-0.5)*8}));
+    let frame=0;
+    function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.rotV;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});frame++;if(frame<120)requestAnimationFrame(draw);else canvas.remove();}
+    draw();
+}
+
+// ========== GIFT TAGS ==========
+const GIFT_OPTIONS=[{emoji:'⌚',label:'שעון'},{emoji:'👕',label:'בגדים'},{emoji:'👟',label:'נעליים'},{emoji:'🖼️',label:'תמונה'},{emoji:'📱',label:'אביזרי סלולר'},{emoji:'🎮',label:'גיימינג'},{emoji:'📚',label:'ספרים'},{emoji:'💄',label:'קוסמטיקה'},{emoji:'🌸',label:'פרחים'},{emoji:'🍫',label:'שוקולד'},{emoji:'🍷',label:'יין'},{emoji:'☕',label:'קפה'},{emoji:'🎒',label:'תיק'},{emoji:'💍',label:'תכשיטים'},{emoji:'🏠',label:'לבית'},{emoji:'🧹',label:'שואב אבק'},{emoji:'📺',label:'טלוויזיה'},{emoji:'🎵',label:'אוזניות'},{emoji:'✈️',label:'חוויה'},{emoji:'💆',label:'ספא'},{emoji:'🎟️',label:'כרטיסים'},{emoji:'💰',label:'גיפט קארד'}];
+let selectedGiftTags=[];
+function initGiftTags(){
+    const container=document.getElementById('giftTagsContainer'); if(!container) return;
+    container.innerHTML=''; selectedGiftTags=[];
+    GIFT_OPTIONS.forEach(opt=>{
+        const tag=document.createElement('div'); tag.className='gift-tag'; tag.innerHTML=`${opt.emoji} ${opt.label}`; tag.dataset.label=opt.label;
+        tag.onclick=()=>toggleGiftTag(tag,opt.label); container.appendChild(tag);
     });
+}
+function toggleGiftTag(el,label){const idx=selectedGiftTags.indexOf(label);if(idx===-1){selectedGiftTags.push(label);el.classList.add('selected');}else{selectedGiftTags.splice(idx,1);el.classList.remove('selected');}updateGiftSelectedDisplay();}
+function updateGiftSelectedDisplay(){const disp=document.getElementById('giftSelectedDisplay');if(!disp)return;const custom=(document.getElementById('giftIdeaInp')||{}).value||'';const all=[...selectedGiftTags,...(custom?[custom]:[])];if(all.length){disp.style.display='block';disp.innerHTML='🎁 נבחר: '+all.join(' · ');}else{disp.style.display='none';}}
+function getGiftIdeaValue(){const custom=(document.getElementById('giftIdeaInp')||{}).value||'';return [...selectedGiftTags,...(custom?[custom]:[])].join(', ');}
+function setGiftIdeaValue(val){selectedGiftTags=[];document.querySelectorAll('.gift-tag').forEach(t=>t.classList.remove('selected'));if(!val){updateGiftSelectedDisplay();return;}const parts=val.split(',').map(s=>s.trim());const remaining=[];parts.forEach(p=>{const tag=document.querySelector(`.gift-tag[data-label="${p}"]`);if(tag){selectedGiftTags.push(p);tag.classList.add('selected');}else{remaining.push(p);}});const gi=document.getElementById('giftIdeaInp');if(gi)gi.value=remaining.join(', ');updateGiftSelectedDisplay();}
+
+// ========== BUDGET SUMMARY ==========
+function updateBudgetSummary(){
+    const type=document.getElementById('budgetFilterType').value;
+    document.getElementById('budgetYearBox').style.display=(type==='year'||type==='month')?'block':'none';
+    document.getElementById('budgetMonthBox').style.display=type==='month'?'block':'none';
+    const year=parseInt(document.getElementById('budgetYear').value);
+    const month=parseInt(document.getElementById('budgetMonth').value);
+    let filtered=contacts.filter(c=>{if(!c.bday)return false;const ev=new Date(c.bday);if(type==='year')return ev.getFullYear()===year;if(type==='month')return ev.getFullYear()===year&&ev.getMonth()===month;return true;});
+    const paid=filtered.filter(c=>c.giftStatus==='paid');const pending=filtered.filter(c=>c.giftStatus!=='paid'&&c.giftBudget);
+    const paidTotal=paid.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);const pendingTotal=pending.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);
+    const el=document.getElementById('budgetSummaryResult'); if(!el) return;
+    if(!filtered.length){el.innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:13px;">אין אירועים בתקופה זו<\/div>';return;}
+    const rows=paid.map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;"><span>✅ ${c.name}<\/span><span style="color:#10b981;font-weight:bold;">${parseInt(c.giftBudget)||0} ₪<\/span><\/div>`).join('');
+    const pendingRows=pending.map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;"><span>⏳ ${c.name}<\/span><span style="color:#f59e0b;font-weight:bold;">${parseInt(c.giftBudget)||0} ₪<\/span><\/div>`).join('');
+    el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;text-align:center;"><div style="background:rgba(16,185,129,0.15);border-radius:10px;padding:10px;"><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">✅ שולם<\/div><div style="font-size:22px;font-weight:bold;color:#10b981;">${paidTotal} ₪<\/div><div style="font-size:11px;color:var(--text-muted);">${paid.length} מתנות<\/div><\/div><div style="background:rgba(245,158,11,0.15);border-radius:10px;padding:10px;"><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">⏳ פתוח<\/div><div style="font-size:22px;font-weight:bold;color:#f59e0b;">${pendingTotal} ₪<\/div><div style="font-size:11px;color:var(--text-muted);">${pending.length} מתנות<\/div><\/div><\/div><div style="font-size:13px;font-weight:bold;text-align:center;margin-bottom:10px;">סה"כ: ${paidTotal+pendingTotal} ₪<\/div>${rows}${pendingRows}`;
+}
+function initBudgetSummary(){
+    const years=[...new Set(contacts.map(c=>c.bday?new Date(c.bday).getFullYear():null).filter(Boolean))];
+    const cur=new Date().getFullYear(); if(!years.includes(cur)) years.push(cur); years.sort((a,b)=>b-a);
+    const sel=document.getElementById('budgetYear'); if(!sel) return;
+    sel.innerHTML=years.map(y=>`<option value="${y}" ${y===cur?'selected':''}>${y}<\/option>`).join('');
+    const bm=document.getElementById('budgetMonth'); if(bm) bm.value=new Date().getMonth();
+    updateBudgetSummary();
 }
 
 window.onload = function() {
     if(localStorage.getItem('lc_theme')==='light') document.body.classList.add('light-mode');
     renderContacts();
-    setInterval(()=>{const d=new Date();document.getElementById('liveClock').innerText=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});},1000);
-    // Splash screen
-    setTimeout(hideSplash, 1800);
-    // Scroll to top button
-    window.addEventListener('scroll', () => {
-        const btn = document.getElementById('scrollTopBtn');
-        if(btn) btn.style.display = window.scrollY > 300 ? 'block' : 'none';
-    });
+    setInterval(()=>{const d=new Date();const cl=document.getElementById('liveClock');if(cl)cl.innerText=d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});},1000);
     // Gift tags
     initGiftTags();
-    document.getElementById('giftIdeaInp').addEventListener('input', updateGiftSelectedDisplay);
-    // Service worker + notifications
+    const gi=document.getElementById('giftIdeaInp');
+    if(gi) gi.addEventListener('input', updateGiftSelectedDisplay);
+    // Scroll to top button
+    window.addEventListener('scroll',()=>{ const btn=document.getElementById('scrollTopBtn'); if(btn) btn.style.display=window.scrollY>300?'block':'none'; });
+    // Service worker
     if('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-            scheduleAllNotifications();
-        }).catch(e => console.log('SW:', e));
+        navigator.serviceWorker.register('sw.js').then(()=>{ scheduleAllNotifications(); }).catch(e=>console.log('SW:',e));
     }
-    // Load photo in modal if open
 };
 
 function toggleDarkMode() {
@@ -901,44 +688,6 @@ function toggleDarkMode() {
     localStorage.setItem('lc_theme', document.body.classList.contains('light-mode')?'light':'dark');
 }
 function saveToStorage() { localStorage.setItem('lc_v25_data', JSON.stringify(contacts)); }
-
-// ========== NOTIFICATIONS ==========
-async function scheduleNotifications(reg) {
-    if(!('Notification' in window)) return;
-    if(Notification.permission === 'default') {
-        const perm = await Notification.requestPermission();
-        if(perm !== 'granted') return;
-    }
-    if(Notification.permission !== 'granted') return;
-
-    // Find events in next 7 days and notify for tomorrow/today
-    const today = new Date(); today.setHours(0,0,0,0);
-    contacts.forEach(c => {
-        if(!c.bday) return;
-        const ev = new Date(c.bday);
-        const next = new Date(today.getFullYear(), ev.getMonth(), ev.getDate());
-        if(next < today) next.setFullYear(today.getFullYear()+1);
-        const daysLeft = Math.round((next - today) / 86400000);
-
-        if(daysLeft === 1) {
-            reg.showNotification('לא שכחתי ⏰', {
-                body: `מחר — ${getEventLabel(c.eventType, c.customEventName)} של ${c.name}! 🎉`,
-                icon: 'icon-192.png',
-                badge: 'icon-192.png',
-                tag: 'event-' + c.id,
-                dir: 'rtl'
-            });
-        } else if(daysLeft === 0) {
-            reg.showNotification('לא שכחתי 🎉', {
-                body: `היום — ${getEventLabel(c.eventType, c.customEventName)} של ${c.name}!`,
-                icon: 'icon-192.png',
-                badge: 'icon-192.png',
-                tag: 'event-today-' + c.id,
-                dir: 'rtl'
-            });
-        }
-    });
-}
 
 function togglePersonalGreetings() {
     const b=document.getElementById('personalGreetingsBox');
@@ -952,62 +701,25 @@ function savePersonalGreetings() {
 function toggleCustomEventField() {
     document.getElementById('customEventInp').style.display = document.getElementById('eventTypeInp').value==='custom'?'block':'none';
 }
-// סוגי אירועים שחוזרים שנתית
-const YEARLY_TYPES = ['birthday','anniversary','memorial','holiday'];
-// כל השאר — חד פעמי
-function autoSetRecurrence() {
-    const type = document.getElementById('eventTypeInp').value;
-    const rec = YEARLY_TYPES.includes(type) ? 'yearly' : 'once';
-    document.getElementById('recurrenceInp').value = rec;
-}
-function toggleGiftSection(forceOpen) {
-    const sec = document.getElementById('giftSection');
-    const btn = document.getElementById('giftToggleBtn');
-    const isOpen = sec.style.display !== 'none';
-    const open = forceOpen !== undefined ? forceOpen : !isOpen;
-    sec.style.display = open ? 'block' : 'none';
-    btn.innerHTML = open ? '🎁 פרטי מתנה ותקציב ▲' : '🎁 הוסף פרטי מתנה ותקציב ▼';
-}
-function toggleCustomGroup() {
-    const sel = document.getElementById('groupSelectInp').value;
-    document.getElementById('groupInp').style.display = sel==='custom_group'?'block':'none';
-    if(sel!=='custom_group') document.getElementById('groupInp').value='';
-}
-function getGroupValue() {
-    const sel = document.getElementById('groupSelectInp').value;
-    if(sel==='custom_group') return document.getElementById('groupInp').value.trim();
-    return sel;
-}
-function setGroupValue(val) {
-    const options = ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];
-    if(options.includes(val)) {
-        document.getElementById('groupSelectInp').value=val;
-        document.getElementById('groupInp').style.display='none';
-    } else if(val) {
-        document.getElementById('groupSelectInp').value='custom_group';
-        document.getElementById('groupInp').style.display='block';
-        document.getElementById('groupInp').value=val;
-    } else {
-        document.getElementById('groupSelectInp').value='';
-        document.getElementById('groupInp').style.display='none';
-    }
-}
 function getEventLabel(type,customName) {
-    const labels = {
-        birthday:   '🎉 יום הולדת',
-        wedding:    '💒 חתונה',
-        anniversary:'💍 יום נישואין',
-        memorial:   '🕯️ אזכרה / יארצייט',
-        barmitzvah: '✡️ בר / בת מצווה',
-        friends:    '👥 מפגש חברים',
-        trip:       '✈️ טיול / חופשה',
-        car:        '🚗 טסט לרכב / טיפול',
-        medical:    '🏥 תור רפואי',
-        holiday:    '🎊 חג / מועד',
-        graduation: '🎓 סיום לימודים / טקס',
-        custom:     customName||'אירוע'
-    };
-    return labels[type] || '✨ אירוע';
+    if(type==='custom') return customName||'אירוע';
+    if(type==='birthday') return '🎉 יום הולדת';
+    if(type==='wedding') return '💒 חתונה';
+    if(type==='anniversary') return '💍 יום נישואין';
+    if(type==='memorial') return '🕯️ אזכרה / זיכרון';
+    return '✨ אירוע';
+}
+function getEventCalculations(dateString) {
+    if(!dateString) return {daysLeft:null,pastDays:null,isPastThisYear:false};
+    const today=new Date(); today.setHours(0,0,0,0);
+    const ev=new Date(dateString);
+    const next=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
+    if(next<today) next.setFullYear(today.getFullYear()+1);
+    const daysLeft=Math.ceil((next-today)/86400000);
+    const thisY=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
+    const isPast=thisY<today;
+    const pastDays=isPast?Math.ceil((today-thisY)/86400000):0;
+    return {daysLeft,pastDays,isPastThisYear:isPast};
 }
 
 // ========== BUDGETS & STATS ==========
@@ -1015,62 +727,18 @@ function updateGameStats(list) {
     const el=document.getElementById('gamificationStats');
     if(!contacts.length){el.innerHTML="הוסף אירועים כדי להתחיל לנהל 🎈";return;}
     const today=new Date(); today.setHours(0,0,0,0);
-    const todayEvents=contacts.filter(c=>{
-        if(!c.bday) return false;
-        const ev=new Date(c.bday);
-        return ev.getMonth()===today.getMonth()&&ev.getDate()===today.getDate();
-    });
-    // חישוב ימים לכל אירוע
-    const enriched = contacts.map(c=>({...c,...getEventCalculations(c.bday,c.recurrence)}));
+    const todayEvents=contacts.filter(c=>{if(!c.bday)return false;const ev=new Date(c.bday);return ev.getMonth()===today.getMonth()&&ev.getDate()===today.getDate();});
+    const enriched=contacts.map(c=>({...c,...getEventCalculations(c.bday,c.recurrence)}));
     const upcoming30=enriched.filter(c=>c.daysLeft!==null&&c.daysLeft!==undefined&&c.daysLeft<=30&&!c.isOver).length;
     const paid=contacts.filter(c=>c.giftStatus==='paid').length;
     const totalBudget=contacts.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);
-
-    if(todayEvents.length) {
-        el.innerHTML=`🎉 <b>היום יש ${todayEvents.length} אירוע${todayEvents.length>1?'ות':''}!</b> ${todayEvents.map(c=>c.name).join(', ')} 🎂`;
+    if(todayEvents.length){
+        el.innerHTML=`🎉 <b>היום יש ${todayEvents.length} אירוע!<\/b> ${todayEvents.map(c=>c.name).join(', ')} 🎂`;
         el.style.background='linear-gradient(135deg,rgba(99,102,241,0.3),rgba(139,92,246,0.3))';
         triggerConfetti();
     } else {
         el.style.background='';
-        el.innerHTML=`📅 <b>${upcoming30}</b> אירועים ב-30 יום הקרובים &nbsp;|&nbsp; 🎁 <b>${paid}</b> מתנות שנקנו &nbsp;|&nbsp; 💰 סה"כ תקציב: <b>${totalBudget} ₪</b>`;
-    }
-}
-
-function triggerConfetti() {
-    const canvas=document.createElement('canvas');
-    canvas.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;';
-    document.body.appendChild(canvas);
-    const ctx=canvas.getContext('2d');
-    canvas.width=window.innerWidth; canvas.height=window.innerHeight;
-    const pieces=Array.from({length:120},()=>({
-        x:Math.random()*canvas.width, y:-10,
-        w:8+Math.random()*8, h:8+Math.random()*8,
-        color:`hsl(${Math.random()*360},90%,60%)`,
-        vx:(Math.random()-0.5)*4, vy:2+Math.random()*3,
-        rot:Math.random()*360, rotV:(Math.random()-0.5)*8
-    }));
-    let frame=0;
-    function draw(){
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        pieces.forEach(p=>{
-            p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV;
-            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
-            ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-            ctx.restore();
-        });
-        frame++;
-        if(frame<120) requestAnimationFrame(draw);
-        else canvas.remove();
-    }
-    draw();
-}
-
-function shareApp() {
-    const text = '🔔 "לא שכחתי" — האפליקציה שתזכיר לך כל יום הולדת, אזכרה ואירוע חשוב!\nבחינם לגמרי 👇\nhttps://barakaflalo.github.io/lo-shachachti';
-    if(navigator.share) {
-        navigator.share({title:'לא שכחתי',text}).catch(()=>{});
-    } else {
-        navigator.clipboard.writeText(text).then(()=>alert('הקישור הועתק! 📋'));
+        el.innerHTML=`📅 <b>${upcoming30}<\/b> ב-30 יום הקרובים &nbsp;|&nbsp; 🎁 <b>${paid}<\/b> מתנות &nbsp;|&nbsp; 💰 <b>${totalBudget} ₪<\/b>`;
     }
 }
 function calculateBudgets(list) {
@@ -1084,8 +752,8 @@ function calculateBudgets(list) {
 // ========== GROUPS ==========
 function updateDynamicGroups() {
     const groups=[...new Set(contacts.map(c=>c.group).filter(g=>g&&g.trim()))];
-    let html=`<button class="tag-btn ${currentGroupFilter==='הכל'?'active':''}" onclick="setGroupFilter('הכל',this)">הכל</button>`;
-    groups.forEach(g=>{html+=`<button class="tag-btn ${currentGroupFilter===g?'active':''}" onclick="setGroupFilter('${g.replace(/'/g,"\\'")}',this)">${g}</button>`;});
+    let html=`<button class="tag-btn ${currentGroupFilter==='הכל'?'active':''}" onclick="setGroupFilter('הכל',this)">הכל<\/button>`;
+    groups.forEach(g=>{html+=`<button class="tag-btn ${currentGroupFilter===g?'active':''}" onclick="setGroupFilter('${g.replace(/'/g,"\\'")}',this)">${g}<\/button>`;});
     document.getElementById('filterTagsContainer').innerHTML=html;
     const dl=document.getElementById('groupListOptions'); dl.innerHTML='';
     groups.forEach(g=>{const o=document.createElement('option');o.value=g;dl.appendChild(o);});
@@ -1103,7 +771,7 @@ async function importFromPhone() {
         const results=await navigator.contacts.select(['name','tel','email'],{multiple:true});
         if(results.length>0){
             results.forEach(c=>{contacts.push({id:Date.now()+Math.random(),name:c.name?c.name[0]:'איש קשר',bday:'',eventType:'birthday',customEventName:'',phone:c.tel?c.tel[0]:'',email:c.email?c.email[0]:'',group:'',notes:'יובא מהטלפון',giftBudget:'',giftIdea:'',giftStatus:'pending',hasSound:false,trimStart:0,trimDuration:15});});
-            saveToStorage(); document.getElementById('timeFilter').value='30'; renderContacts(); alert(`יובאו בהצלחה ${results.length} אנשי קשר!`);
+            saveToStorage(); playSound('save'); document.getElementById('timeFilter').value='30'; renderContacts(); alert(`יובאו בהצלחה ${results.length} אנשי קשר!`);
         }
     } catch(ex){console.error(ex);}
 }
@@ -1116,24 +784,21 @@ function addContact() {
     const customName=document.getElementById('customEventInp').value;
     const phone=document.getElementById('phoneInp').value;
     const email=document.getElementById('emailInp').value;
-    const group=getGroupValue();
+    const group=document.getElementById('groupInp').value;
     const notes=document.getElementById('notesInp').value;
     const budget=document.getElementById('giftBudgetInp').value;
-    const giftIdea=getGiftIdeaValue();
+    const giftIdea=document.getElementById('giftIdeaInp').value;
     const giftStatus=document.getElementById('giftStatusInp').value;
     if(!name||!bday){alert('חובה להזין שם ותאריך.');return;}
     if(type==='custom'&&!customName){alert('נא להזין את סוג האירוע.');return;}
 
     if(editingId!==null) {
         const idx=contacts.findIndex(c=>c.id===editingId);
-        if(idx!==-1) contacts[idx]={...contacts[idx],name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender:document.getElementById('genderInp').value,recurrence:document.getElementById('recurrenceInp').value};
+        if(idx!==-1) contacts[idx]={...contacts[idx],name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender:document.getElementById('genderInp').value};
         cancelEdit();
     } else {
         const gender=document.getElementById('genderInp').value;
-        const recurrence=document.getElementById('recurrenceInp').value;
-        const newId = Date.now();
-        _lastSavedId = newId;
-        contacts.push({id:newId,name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,recurrence,hasSound:false,trimStart:0,trimDuration:15});
+        contacts.push({id:Date.now(),name,bday,eventType:type,customEventName:customName,phone,email,group,notes,giftBudget:budget,giftIdea,giftStatus,gender,hasSound:false,trimStart:0,trimDuration:15});
         clearForm();
     }
     saveToStorage(); playSound('save'); document.getElementById('timeFilter').value='30'; renderContacts();
@@ -1146,21 +811,18 @@ function editContact(id) {
     document.getElementById('bdayInp').value=c.bday||'';
     document.getElementById('phoneInp').value=c.phone||'';
     document.getElementById('emailInp').value=c.email||'';
-    setGroupValue(c.group||'');
+    document.getElementById('groupInp').value=c.group||'';
     document.getElementById('notesInp').value=c.notes||'';
     document.getElementById('giftBudgetInp').value=c.giftBudget||'';
-    setGiftIdeaValue(c.giftIdea||'');
-    // פתח את סקשן המתנה אם יש נתונים
-    const hasGift = c.giftIdea || c.giftBudget || c.giftStatus==='paid';
-    toggleGiftSection(!!hasGift);
+    document.getElementById('giftIdeaInp').value=c.giftIdea||'';
     document.getElementById('giftStatusInp').value=c.giftStatus||'pending';
+    toggleGiftSection(!!(c.giftIdea||c.giftBudget||c.giftStatus==='paid'));
+    toggleExtraFields(!!(c.phone||c.email||c.group||c.notes||c.gender));
     document.getElementById('genderInp').value=c.gender||'';
-    document.getElementById('recurrenceInp').value=c.recurrence||'yearly';
     document.getElementById('eventTypeInp').value=c.eventType||'birthday';
     if(c.eventType==='custom'){document.getElementById('customEventInp').style.display='block';document.getElementById('customEventInp').value=c.customEventName||'';}
     else{document.getElementById('customEventInp').style.display='none';}
     document.getElementById('mainFormBox').classList.add('edit-mode');
-    playSound('edit');
     document.getElementById('editModeBanner').classList.add('visible');
     document.getElementById('formTitle').innerText='✏️ עריכת אירוע קיים';
     document.getElementById('submitBtn').innerText='✅ עדכן אירוע';
@@ -1183,50 +845,28 @@ function cancelEdit() {
 
 function clearForm() {
     ['nameInp','phoneInp','emailInp','groupInp','notesInp','giftBudgetInp','giftIdeaInp','customEventInp'].forEach(id=>document.getElementById(id).value='');
-    setGiftIdeaValue('');
-    toggleGiftSection(false);
-    document.getElementById('groupSelectInp').value='';
-    document.getElementById('groupInp').style.display='none';
     document.getElementById('bdayInp').value='';
     document.getElementById('genderInp').value='';
-    document.getElementById('recurrenceInp').value='yearly';
     document.getElementById('giftStatusInp').value='pending';
     document.getElementById('eventTypeInp').value='birthday';
+    toggleGiftSection(false);
+    toggleExtraFields(false);
     document.getElementById('customEventInp').style.display='none';
-}
-
-function deleteContact(id) {
-    if(confirm('למחוק אירוע זה לצמיתות?')){
-        contacts=contacts.filter(c=>c.id!==id);
-        if(editingId===id) cancelEdit();
-        saveToStorage(); renderContacts();
-    }
 }
 
 function deleteFromForm() {
     if(editingId===null) return;
     if(confirm('למחוק אירוע זה לצמיתות?')) {
         contacts=contacts.filter(c=>c.id!==editingId);
-        cancelEdit();
-        saveToStorage(); playSound('delete'); renderContacts();
+        cancelEdit(); saveToStorage(); playSound('delete'); renderContacts();
     }
 }
-
-function getEventCalculations(dateString, recurrence) {
-    if(!dateString) return {daysLeft:null,pastDays:null,isPastThisYear:false};
-    const today=new Date(); today.setHours(0,0,0,0);
-    const ev=new Date(dateString);
-    if(recurrence==='once') {
-        const actual=new Date(ev.getFullYear(),ev.getMonth(),ev.getDate());
-        if(actual<today) return {daysLeft:null,pastDays:Math.ceil((today-actual)/86400000),isPastThisYear:true,isOver:true};
-        return {daysLeft:Math.ceil((actual-today)/86400000),pastDays:0,isPastThisYear:false,isOver:false};
+function deleteContact(id) {
+    if(confirm('למחוק אירוע זה לצמיתות?')){
+        contacts=contacts.filter(c=>c.id!==id);
+        if(editingId===id) cancelEdit();
+        saveToStorage(); renderContacts();
     }
-    const next=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
-    if(next<today) next.setFullYear(today.getFullYear()+1);
-    const daysLeft=Math.ceil((next-today)/86400000);
-    const thisY=new Date(today.getFullYear(),ev.getMonth(),ev.getDate());
-    const isPast=thisY<today;
-    return {daysLeft,pastDays:isPast?Math.ceil((today-thisY)/86400000):0,isPastThisYear:isPast,isOver:false};
 }
 function toggleGiftStatus(id) {
     const idx=contacts.findIndex(c=>c.id===id); if(idx===-1) return;
@@ -1240,10 +880,9 @@ function generateAIContent(id) {
     const box=document.getElementById('ai-result-'+id);
     if(aiTrackers[id]===undefined) aiTrackers[id]=0;
     const idx=aiTrackers[id];
-    const text=wishStyles[idx](c.name,c.eventType,c.group,c.gender||'');
+    const text=wishStyles[idx](c.name,c.notes,c.eventType,c.group,c.gender||'');
     generatedTexts[id]=text;
-    playSound('greet');
-    box.innerHTML=`<span class="ai-wish-counter">🎉 ברכה ${idx+1} מתוך 5 — לחץ שוב לסגנון אחר</span>💬 <b>ברכה קבועה:</b><br>"${text}"`;
+    box.innerHTML=`<span class="ai-wish-counter">✨ ברכה ${idx+1} מתוך 5 — לחץ שוב לסגנון אחר<\/span>🤖 <b>AI:<\/b><br>"${text}"`;
     box.style.display='block';
     aiTrackers[id]=(idx+1)%5;
 }
@@ -1256,7 +895,7 @@ function generateMyContent(id) {
     if(!active.length){alert('לא הגדרת ברכות אישיות. לחץ על הגדרות הברכות למעלה.');return;}
     const text=active[aiTrackers[id]%active.length].replace(/\[שם\]/g,c.name);
     generatedTexts[id]=text;
-    box.innerHTML=`<span class="ai-wish-counter">📝 ברכה ${(aiTrackers[id]%active.length)+1} מתוך ${active.length} — לחץ שוב לסגנון אחר</span>📝 <b>הברכה שלך:</b><br>"${text}"`;
+    box.innerHTML=`<span class="ai-wish-counter">📝 ברכה ${(aiTrackers[id]%active.length)+1} מתוך ${active.length} — לחץ שוב לסגנון אחר<\/span>📝 <b>הברכה שלך:<\/b><br>"${text}"`;
     box.style.display='block';
     aiTrackers[id]=(aiTrackers[id]+1);
 }
@@ -1330,41 +969,9 @@ function openEditModal(id) {
     document.getElementById('trimStart').value=c.trimStart||0;
     document.getElementById('trimDuration').value=c.trimDuration||15;
     tempSoundBlob=null;
-    // Load photo
-    updateModalPhotoPreview(c.photo||'');
-    document.getElementById('removePhotoBtn').style.display = c.photo ? 'block' : 'none';
-    // Load notifications
-    renderNotifRows(c.notifications||[]);
     document.getElementById('editModal').classList.add('open');
 }
 function closeEditModal() { document.getElementById('editModal').classList.remove('open'); tempSoundBlob=null; }
-
-function renderNotifRows(notifs) {
-    const list = document.getElementById('notifList');
-    list.innerHTML = '';
-    (notifs.length ? notifs : []).forEach((n,i) => addNotifRow(n, i));
-}
-
-function addNotifRow(existing, idx) {
-    const list = document.getElementById('notifList');
-    const i = idx !== undefined ? idx : list.children.length;
-    const days = existing ? existing.days : 1;
-    const time = existing ? existing.time : '09:00';
-    const label = existing ? existing.label : 'תזכורת לפני האירוע';
-    const row = document.createElement('div');
-    row.className = 'notif-row';
-    row.dataset.idx = i;
-    row.innerHTML = `
-        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-            <input type="number" class="notif-days" value="${days}" min="0" max="365" style="width:60px; padding:6px; border-radius:8px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-main); font-size:13px;">
-            <span style="font-size:12px; color:var(--text-muted);">ימים לפני, בשעה</span>
-            <input type="time" class="notif-time" value="${time}" style="padding:6px; border-radius:8px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-main); font-size:13px;">
-            <button onclick="this.closest('.notif-row').remove()" style="background:rgba(239,68,68,0.2); color:#f87171; border:none; border-radius:6px; padding:4px 8px; cursor:pointer;">✕</button>
-        </div>
-        <input type="text" class="notif-label" value="${label}" placeholder="תיאור (למשל: לקנות מתנה)" style="width:100%; margin-top:6px; padding:6px; border-radius:8px; border:1px solid var(--border-color); background:var(--card-bg); color:var(--text-main); font-size:12px;">
-    `;
-    list.appendChild(row);
-}
 
 function saveEditModal() {
     const id=parseInt(document.getElementById('editModalId').value);
@@ -1372,16 +979,7 @@ function saveEditModal() {
     contacts[idx].trimStart=parseInt(document.getElementById('trimStart').value)||0;
     contacts[idx].trimDuration=parseInt(document.getElementById('trimDuration').value)||15;
     if(tempSoundBlob){ contacts[idx].hasSound=true; saveSoundToDB(id,tempSoundBlob); }
-    // Save notifications
-    const rows = document.querySelectorAll('#notifList .notif-row');
-    contacts[idx].notifications = Array.from(rows).map(row => ({
-        days: parseInt(row.querySelector('.notif-days').value)||1,
-        time: row.querySelector('.notif-time').value||'09:00',
-        label: row.querySelector('.notif-label').value||'תזכורת'
-    }));
-    saveToStorage();
-    scheduleContactNotifications(contacts[idx]);
-    closeEditModal(); renderContacts();
+    saveToStorage(); playSound('delete'); closeEditModal(); renderContacts();
 }
 
 function deleteFromEditModal() {
@@ -1399,7 +997,7 @@ function openStoresModal() {
     let html='';
     all.forEach(store=>{
         const ch=active.includes(store)?'checked':'';
-        html+=`<label class="store-check-item"><input type="checkbox" value="${store}" ${ch}> ${store}</label>`;
+        html+=`<label class="store-check-item"><input type="checkbox" value="${store}" ${ch}> ${store}<\/label>`;
     });
     document.getElementById('storesGrid').innerHTML=html;
     document.getElementById('storesModal').classList.add('open');
@@ -1420,7 +1018,7 @@ function saveStores() {
 
 // ========== RENDER ==========
 function renderVisualCalendar() {
-    const cal=document.getElementById('visualCalendar'); if(!cal) return;
+    const cal=document.getElementById('visualCalendar'); if(!cal) return; cal.innerHTML='';
     const today=new Date(); today.setHours(0,0,0,0);
     for(let i=0;i<30;i++){
         const d=new Date(today); d.setDate(today.getDate()+i);
@@ -1435,19 +1033,19 @@ function renderVisualCalendar() {
 
 function renderCalendarList() {
     const el=document.getElementById('calendarListContainer'); if(!el) return; el.innerHTML='';
-    const upcoming=contacts.map(c=>({...c,...getEventCalculations(c.bday,c.recurrence)})).filter(c=>c.bday&&c.daysLeft!==null&&!c.isOver&&c.daysLeft<=30).sort((a,b)=>a.daysLeft-b.daysLeft);
-    if(!upcoming.length){el.innerHTML=`<div style="font-size:12px;color:var(--text-muted);text-align:center;">אין אירועים ב-30 הימים הקרובים</div>`;return;}
+    const upcoming=contacts.map(c=>({...c,daysLeft:getEventCalculations(c.bday).daysLeft})).filter(c=>c.bday&&c.daysLeft!==null&&c.daysLeft<=30).sort((a,b)=>a.daysLeft-b.daysLeft);
+    if(!upcoming.length){el.innerHTML=`<div style="font-size:12px;color:var(--text-muted);text-align:center;">אין אירועים ב-30 הימים הקרובים<\/div>`;return;}
     upcoming.forEach(c=>{
         const d=document.createElement('div'); d.className='event-item';
-        d.innerHTML=`<span><strong>${c.name}</strong> (${getEventLabel(c.eventType,c.customEventName)})</span> <span class="days-left-badge">בעוד ${c.daysLeft} ימים</span>`;
+        d.innerHTML=`<span><strong>${c.name}<\/strong> (${getEventLabel(c.eventType,c.customEventName)})<\/span> <span class="days-left-badge">בעוד ${c.daysLeft} ימים<\/span>`;
         el.appendChild(d);
     });
 }
 
 function renderHeroWidget(ev) {
     const cont=document.getElementById('heroWidgetContainer'); if(countdownInterval) clearInterval(countdownInterval);
-    if(!ev||!ev.bday){cont.innerHTML=`<div class="hero-event-widget"><div style="font-size:14px;font-weight:bold;color:#fbbf24;">אין אירועים קרובים עם תאריך</div></div>`;return;}
-    cont.innerHTML=`<div class="hero-event-widget"><div style="font-size:12px;font-weight:bold;color:#fbbf24;margin-bottom:5px;">🔥 האירוע הגדול הבא מתקרב!</div><div class="hero-name">${ev.name} - ${getEventLabel(ev.eventType,ev.customEventName)}</div><div id="heroTimerDisplay" class="hero-countdown">...</div></div>`;
+    if(!ev||!ev.bday){cont.innerHTML=`<div class="hero-event-widget"><div style="font-size:14px;font-weight:bold;color:#fbbf24;">אין אירועים קרובים עם תאריך<\/div><\/div>`;return;}
+    cont.innerHTML=`<div class="hero-event-widget"><div style="font-size:12px;font-weight:bold;color:#fbbf24;margin-bottom:5px;">🔥 האירוע הגדול הבא מתקרב!<\/div><div class="hero-name">${ev.name} - ${getEventLabel(ev.eventType,ev.customEventName)}<\/div><div id="heroTimerDisplay" class="hero-countdown">...<\/div><\/div>`;
     const td=new Date(ev.bday);
     countdownInterval=setInterval(()=>{
         const el=document.getElementById('heroTimerDisplay'); if(!el) return;
@@ -1464,15 +1062,10 @@ function renderContacts() {
     updateDynamicGroups();
     const query=document.getElementById('searchInp').value.toLowerCase();
     const timeMode=document.getElementById('timeFilter').value;
-    const sortMode=document.getElementById('sortFilter').value;
-    let enriched=contacts.map(c=>({...c,...getEventCalculations(c.bday,c.recurrence)}));
+    let enriched=contacts.map(c=>({...c,...getEventCalculations(c.bday)}));
     let sorted=enriched.sort((a,b)=>{
-        if(sortMode==='name') return (a.name||'').localeCompare(b.name||'', 'he');
-        if(sortMode==='group') {
-            const cmp=(a.group||'ת').localeCompare(b.group||'ת','he');
-            if(cmp!==0) return cmp;
-        }
-        // default: date
+        if(sortMode==='name') return (a.name||'').localeCompare(b.name||'','he');
+        if(sortMode==='group'){const cmp=(a.group||'').localeCompare(b.group||'','he');if(cmp!==0)return cmp;}
         if(timeMode==='past'){if(a.pastDays===null)return 1;if(b.pastDays===null)return -1;return a.pastDays-b.pastDays;}
         else{if(a.daysLeft===null)return 1;if(b.daysLeft===null)return -1;return a.daysLeft-b.daysLeft;}
     });
@@ -1494,25 +1087,18 @@ function renderContacts() {
     });
 
     calculateBudgets(filtered);
-    if(!filtered.length) {
-        if(contacts.length === 0) {
-            // מסך כניסה ריק — אין אנשי קשר בכלל
-            cont.innerHTML=`
-                <div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
-                    <div style="font-size:72px; margin-bottom:16px; animation:pulse 2s infinite;">🔔</div>
-                    <h2 style="color:var(--text-main); font-size:22px; margin-bottom:8px;">ברוך הבא ל"לא שכחתי"!</h2>
-                    <p style="font-size:14px; line-height:1.7; margin-bottom:20px;">
-                        האפליקציה שתזכיר לך כל אירוע חשוב —<br>
-                        ימי הולדת, אזכרות, נישואין ועוד.<br>
-                        עם ברכות מוכנות, ניהול מתנות והתראות חכמות.
-                    </p>
-                    <div style="display:flex; flex-direction:column; gap:10px; max-width:280px; margin:0 auto;">
-                        <button onclick="document.getElementById('nameInp').focus(); document.getElementById('mainFormBox').scrollIntoView({behavior:'smooth'})" style="padding:14px; background:var(--accent-color); color:white; border:none; border-radius:12px; font-size:15px; font-weight:bold; cursor:pointer;">➕ הוסף אירוע ראשון</button>
-                        <button onclick="openSettingsPage()" style="padding:12px; background:rgba(99,102,241,0.15); color:var(--accent-color); border:1px solid var(--accent-color); border-radius:12px; font-size:14px; cursor:pointer;">📅 ייבוא מלוח שנה</button>
-                    </div>
-                </div>`;
+
+    // Empty state
+    if(!filtered.length){
+        if(!contacts.length){
+            cont.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+                <div style="font-size:72px;margin-bottom:16px;animation:pulse 2s infinite;">🔔<\/div>
+                <h2 style="color:var(--text-main);font-size:22px;margin-bottom:8px;">ברוך הבא!<\/h2>
+                <p style="font-size:14px;line-height:1.7;margin-bottom:20px;">האפליקציה שתזכיר לך כל אירוע חשוב<\/p>
+                <button onclick="document.getElementById('nameInp').focus()" style="padding:14px;background:var(--accent-color);color:white;border:none;border-radius:12px;font-size:15px;font-weight:bold;cursor:pointer;">➕ הוסף אירוע ראשון<\/button>
+            <\/div>`;
         } else {
-            cont.innerHTML=`<div style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:20px;">לא נמצאו אירועים התואמים לסינון זה.</div>`;
+            cont.innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:13px;margin-top:20px;">לא נמצאו אירועים<\/div>';
         }
         return;
     }
@@ -1521,70 +1107,66 @@ function renderContacts() {
         const iconMap={birthday:'🎉',wedding:'💒',anniversary:'💍',memorial:'🕯️',barmitzvah:'✡️',friends:'👥',trip:'✈️',car:'🚗',medical:'🏥',holiday:'🎊',graduation:'🎓',custom:'📌'};
         const icon=iconMap[c.eventType]||'📌';
         const card=document.createElement('div'); card.className='contact-card';
-        let daysText=`📅 חסר תאריך`;
-        if(c.bday){daysText=timeMode==='past'?`📅 ${c.bday} (עבר לפני ${c.pastDays} ימים)`:`📅 ${c.bday} (בעוד ${c.daysLeft} ימים)`;}
 
-        let giftSection='';
-        if(c.giftIdea||c.giftBudget){
-            const col=c.giftStatus==='paid'?'#10b981':'#f59e0b';
-            const txt=c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע';
-            giftSection=`<div style="font-size:12px;margin-bottom:10px;background:rgba(52,211,153,0.1);padding:8px;border-radius:8px;border:1px solid rgba(52,211,153,0.2);">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span style="color:#34d399;">🎁 ${c.giftIdea||'-'} | 💰 ${c.giftBudget||'0'} ₪</span>
-                    <button onclick="toggleGiftStatus(${c.id})" style="background:${col};color:white;border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;">${txt}</button>
-                </div>
-                ${buildStoreLinks(c.giftIdea)}
-            </div>`;
-        }
-
-        const soundBtn=c.hasSound?`<button class="btn-play-sound" onclick="playContactSound(${c.id},${c.trimStart||0},${c.trimDuration||15})">▶️ השמע</button>`:'';
-
-        // Photo or initial
-        const photoEl = c.photo
+        // Photo
+        const photoEl=c.photo
             ? `<img src="${c.photo}" class="contact-photo" onclick="openEditModal(${c.id})">`
-            : `<div class="contact-photo-placeholder" onclick="openEditModal(${c.id})">${c.name?c.name[0].toUpperCase():'?'}</div>`;
+            : `<div class="contact-photo-placeholder" onclick="openEditModal(${c.id})">${c.name?c.name[0].toUpperCase():'?'}<\/div>`;
 
-        // Countdown badge
-        let countdownBadge = '';
-        if(c.daysLeft !== null && !c.isOver) {
-            if(c.daysLeft === 0) countdownBadge = `<span class="countdown-urgent">🎉 היום!</span>`;
-            else if(c.daysLeft === 1) countdownBadge = `<span class="countdown-urgent">🔥 מחר!</span>`;
-            else if(c.daysLeft <= 7) countdownBadge = `<span class="countdown-soon">⚡ עוד ${c.daysLeft} ימים</span>`;
-            else if(c.daysLeft <= 30) countdownBadge = `<span class="countdown-normal">📅 עוד ${c.daysLeft} ימים</span>`;
+        // Countdown
+        let countdownBadge='';
+        if(c.daysLeft!==null&&!c.isOver){
+            if(c.daysLeft===0) countdownBadge='<div class="countdown-urgent">🎉 היום!<\/div>';
+            else if(c.daysLeft===1) countdownBadge='<div class="countdown-urgent">🔥 מחר!<\/div>';
+            else if(c.daysLeft<=7) countdownBadge=`<div class="countdown-soon">⚡ עוד ${c.daysLeft} ימים<\/div>`;
+            else if(c.daysLeft<=30) countdownBadge=`<div class="countdown-normal">📅 עוד ${c.daysLeft} ימים<\/div>`;
+            else countdownBadge=`<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📅 ${c.bday}<\/div>`;
+        } else if(c.isOver) {
+            countdownBadge=`<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">📌 ${c.bday} (עבר)<\/div>`;
         }
 
-        // Notifications indicator
-        const notifCount = (c.notifications||[]).length;
-        const notifBadge = notifCount ? `<span style="font-size:10px;background:rgba(99,102,241,0.2);color:var(--accent-color);padding:2px 7px;border-radius:10px;">🔔 ${notifCount} תזכורות</span>` : '';
+        // Gift
+        const hasGift=c.giftIdea||c.giftBudget;
+        const soundBtn=c.hasSound?`<button class="btn-play-sound" onclick="playContactSound(${c.id},${c.trimStart||0},${c.trimDuration||15})">▶️ השמע<\/button>`:'';
+        const notifCount=(c.notifications||[]).length;
+        const detailsId='details-'+c.id;
 
         card.innerHTML=`
-            <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:10px;">
+            <div style="display:flex;gap:12px;align-items:center;">
                 ${photoEl}
-                <div style="flex:1; min-width:0;">
-                    <div style="font-weight:bold;font-size:17px; margin-bottom:4px;">${c.name} <span style="font-size:11px;font-weight:normal;color:var(--accent-color)">(${getEventLabel(c.eventType,c.customEventName)})</span></div>
-                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">
-                        ${c.recurrence==='once'?'<span style="font-size:10px;background:rgba(239,68,68,0.2);color:#fca5a5;padding:2px 7px;border-radius:10px;">📌 חד פעמי</span>':'<span style="font-size:10px;background:rgba(16,185,129,0.2);color:#6ee7b7;padding:2px 7px;border-radius:10px;">🔁 שנתי</span>'}
-                        ${notifBadge}
-                    </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:bold;font-size:17px;">${c.name}<\/div>
+                    <div style="font-size:12px;color:var(--accent-color);">${getEventLabel(c.eventType,c.customEventName)}<\/div>
                     ${countdownBadge}
-                    <div style="font-size:12px;color:var(--text-muted);">📅 ${c.bday||'חסר תאריך'}<br>🏷️ ${c.group||'ללא קבוצה'}<br>📱 ${c.phone||'-'} | ✉️ ${c.email||'-'}</div>
-                </div>
-            </div>
-            ${soundBtn}
-            ${giftSection}
-            ${c.notes?`<div style="font-size:12px;font-style:italic;background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;margin-bottom:10px;">💡 ${c.notes}</div>`:''}
-            <div id="ai-result-${c.id}" class="ai-result-box"></div>
-            <div class="card-actions">
-                <button class="btn-card btn-ai" onclick="generateAIContent(${c.id})">💬 ברכה קבועה</button>
-                <button class="btn-card btn-my-greet" onclick="generateMyContent(${c.id})">📝 ברכה</button>
-                <button class="btn-card btn-share" onclick="shareToAnyApp(${c.id})">📱 שתף</button>
-                <button class="btn-card btn-edit" onclick="editContact(${c.id})">✏️ ערוך</button>
-                <button class="btn-card btn-delete" onclick="openEditModal(${c.id})">⚙️ עוד</button>
-            </div>`;
+                <\/div>
+                <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                    <button onclick="shareToAnyApp(${c.id})" style="background:rgba(16,185,129,0.2);color:#10b981;border:1px solid #10b981;padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;">📱 שתף<\/button>
+                    <button onclick="editContact(${c.id})" style="background:rgba(99,102,241,0.2);color:var(--accent-color);border:1px solid var(--accent-color);padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;">✏️ ערוך<\/button>
+                    <button onclick="openEditModal(${c.id})" style="background:rgba(255,255,255,0.08);color:var(--text-muted);border:1px solid var(--border-color);padding:5px 10px;border-radius:8px;font-size:12px;cursor:pointer;">⚙️ עוד<\/button>
+                <\/div>
+            <\/div>
+            <div id="${detailsId}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-color);">
+                ${c.group?`<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">🏷️ ${c.group}<\/div>`:''}
+                ${c.phone?`<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">📱 ${c.phone}<\/div>`:''}
+                ${c.notes?`<div style="font-size:12px;font-style:italic;color:var(--text-muted);margin-bottom:8px;">💡 ${c.notes}<\/div>`:''}
+                ${hasGift?`<div style="font-size:12px;background:rgba(52,211,153,0.1);padding:8px;border-radius:8px;margin-bottom:8px;"><span style="color:#34d399;">🎁 ${c.giftIdea||''} ${c.giftBudget?'| '+c.giftBudget+' ₪':''}<\/span><button onclick="toggleGiftStatus(${c.id})" style="float:left;background:${c.giftStatus==='paid'?'#10b981':'#f59e0b'};color:white;border:none;padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer;">${c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע'}<\/button><\/div>`:''}
+                ${notifCount?`<div style="font-size:11px;color:var(--accent-color);">🔔 ${notifCount} תזכורות<\/div>`:''}
+                ${soundBtn}
+                <div id="ai-result-${c.id}" class="ai-result-box"><\/div>
+                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                    <button class="btn-card btn-ai" onclick="generateAIContent(${c.id})">💬 ברכה קבועה<\/button>
+                    <button class="btn-card btn-my-greet" onclick="generateMyContent(${c.id})">📝 ברכה אישית<\/button>
+                <\/div>
+            <\/div>
+            <button onclick="toggleCardDetails('${detailsId}',this)" style="width:100%;background:transparent;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;margin-top:8px;padding:4px;">▼ פרטים נוספים<\/button>`;
         cont.appendChild(card);
-        // Animate newest card (last saved)
-        if(c.id === _lastSavedId) { card.classList.add('new-card'); _lastSavedId = null; }
+        if(c.id===_lastSavedId){card.classList.add('new-card');_lastSavedId=null;}
     });
+}
+
+function toggleCardDetails(id,btn){
+    const el=document.getElementById(id); const open=el.style.display==='none';
+    el.style.display=open?'block':'none'; btn.innerHTML=open?'▲ הסתר':'▼ פרטים נוספים';
 }
 
 // ========== CSV / BACKUP ==========
@@ -1747,7 +1329,7 @@ function printMonthlyReport() {
         const nextY=new Date(today.getFullYear()+1,ev.getMonth(),ev.getDate());
         return (thisY>=today&&thisY<=in30)||(nextY>=today&&nextY<=in30);
     }).sort((a,b)=>{
-        const calc=c=>getEventCalculations(c.bday,c.recurrence).daysLeft||999;
+        const calc=c=>getEventCalculations(c.bday).daysLeft||999;
         return calc(a)-calc(b);
     });
     buildAndPrintReport(upcoming, 'דוח 30 ימים קרובים');
@@ -1790,7 +1372,7 @@ function printRangeReport() {
 
 function buildAndPrintReport(list, title) {
     let total=0;
-    let html=`<html lang="he" dir="rtl"><head><title>לא שכחתי — ${title}</title><style>
+    let html=`<html lang="he" dir="rtl"><head><title>לא שכחתי — ${title}<\/title><style>
         body{font-family:Arial,sans-serif;padding:20px;color:#333;}
         h1{text-align:center;border-bottom:2px solid #6366f1;padding-bottom:10px;color:#6366f1;}
         .subtitle{text-align:center;font-size:13px;color:#888;margin-bottom:20px;}
@@ -1800,25 +1382,25 @@ function buildAndPrintReport(list, title) {
         tr:nth-child(even){background:#fafafa;}
         .total{margin-top:16px;font-weight:bold;font-size:15px;text-align:left;}
         @media print{button{display:none;}}
-    </style></head><body>
-    <h1>לא שכחתי</h1>
-    <div class="subtitle">${title}</div>
-    <table><tr><th>שם</th><th>אירוע</th><th>תאריך</th><th>מתנה</th><th>סטטוס</th><th>תקציב ₪</th></tr>`;
+    <\/style><\/head><body>
+    <h1>לא שכחתי<\/h1>
+    <div class="subtitle">${title}<\/div>
+    <table><tr><th>שם<\/th><th>אירוע<\/th><th>תאריך<\/th><th>מתנה<\/th><th>סטטוס<\/th><th>תקציב ₪<\/th><\/tr>`;
 
     if(!list.length) {
-        html+=`<tr><td colspan="6" style="text-align:center;color:#888;">אין אירועים בטווח זה</td></tr>`;
+        html+=`<tr><td colspan="6" style="text-align:center;color:#888;">אין אירועים בטווח זה<\/td><\/tr>`;
     } else {
         list.forEach(c=>{
             const b=parseInt(c.giftBudget)||0;
             total+=b;
             const status=c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע';
-            html+=`<tr><td>${c.name}</td><td>${getEventLabel(c.eventType,c.customEventName)}</td><td>${c.bday}</td><td>${c.giftIdea||'-'}</td><td>${status}</td><td>${b||'-'}</td></tr>`;
+            html+=`<tr><td>${c.name}<\/td><td>${getEventLabel(c.eventType,c.customEventName)}<\/td><td>${c.bday}<\/td><td>${c.giftIdea||'-'}<\/td><td>${status}<\/td><td>${b||'-'}<\/td><\/tr>`;
         });
     }
-    html+=`</table>
-    <div class="total">סה"כ תקציב מתנות: ${total} ₪</div>
-    <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">🖨️ הדפס</button>
-    </body></html>`;
+    html+=`<\/table>
+    <div class="total">סה"כ תקציב מתנות: ${total} ₪<\/div>
+    <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#6366f1;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">🖨️ הדפס<\/button>
+    <\/body><\/html>`;
 
     const w=window.open('','','width=850,height=650');
     w.document.write(html);
@@ -1837,53 +1419,6 @@ function importData(e) {
 }
 
 // ========== SETTINGS PAGE NAVIGATION ==========
-function updateBudgetSummary() {
-    const type = document.getElementById('budgetFilterType').value;
-    document.getElementById('budgetYearBox').style.display = (type==='year'||type==='month') ? 'block' : 'none';
-    document.getElementById('budgetMonthBox').style.display = type==='month' ? 'block' : 'none';
-    const year = parseInt(document.getElementById('budgetYear').value);
-    const month = parseInt(document.getElementById('budgetMonth').value);
-    let filtered = contacts.filter(c => {
-        if(!c.bday) return false;
-        const ev = new Date(c.bday);
-        if(type==='year') return ev.getFullYear()===year;
-        if(type==='month') return ev.getFullYear()===year && ev.getMonth()===month;
-        return true;
-    });
-    const paid = filtered.filter(c=>c.giftStatus==='paid');
-    const pending = filtered.filter(c=>c.giftStatus!=='paid' && c.giftBudget);
-    const paidTotal = paid.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);
-    const pendingTotal = pending.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);
-    const el = document.getElementById('budgetSummaryResult');
-    if(!filtered.length){el.innerHTML=`<div style="text-align:center;color:var(--text-muted);font-size:13px;">אין אירועים בתקופה זו</div>`;return;}
-    const rows = paid.map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;"><span>✅ ${c.name} — ${getEventLabel(c.eventType,c.customEventName)}</span><span style="color:#10b981;font-weight:bold;">${parseInt(c.giftBudget)||0} ₪</span></div>`).join('');
-    const pendingRows = pending.map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;"><span>⏳ ${c.name} — ${getEventLabel(c.eventType,c.customEventName)}</span><span style="color:#f59e0b;font-weight:bold;">${parseInt(c.giftBudget)||0} ₪</span></div>`).join('');
-    el.innerHTML=`
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;text-align:center;">
-            <div style="background:rgba(16,185,129,0.15);border-radius:10px;padding:10px;">
-                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">✅ שולם</div>
-                <div style="font-size:22px;font-weight:bold;color:#10b981;">${paidTotal} ₪</div>
-                <div style="font-size:11px;color:var(--text-muted);">${paid.length} מתנות</div>
-            </div>
-            <div style="background:rgba(245,158,11,0.15);border-radius:10px;padding:10px;">
-                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">⏳ עדיין פתוח</div>
-                <div style="font-size:22px;font-weight:bold;color:#f59e0b;">${pendingTotal} ₪</div>
-                <div style="font-size:11px;color:var(--text-muted);">${pending.length} מתנות</div>
-            </div>
-        </div>
-        <div style="font-size:13px;font-weight:bold;text-align:center;margin-bottom:10px;color:var(--text-main);">סה"כ תקציב מתוכנן: ${paidTotal+pendingTotal} ₪</div>
-        ${rows}${pendingRows}`;
-}
-function initBudgetSummary() {
-    const years=[...new Set(contacts.map(c=>c.bday?new Date(c.bday).getFullYear():null).filter(Boolean))];
-    const cur=new Date().getFullYear();
-    if(!years.includes(cur)) years.push(cur);
-    years.sort((a,b)=>b-a);
-    document.getElementById('budgetYear').innerHTML=years.map(y=>`<option value="${y}" ${y===cur?'selected':''}>${y}</option>`).join('');
-    document.getElementById('budgetMonth').value=new Date().getMonth();
-    updateBudgetSummary();
-}
-
 function openSettingsPage() {
     document.getElementById('mainPage').classList.add('hidden');
     document.getElementById('settingsPage').classList.add('active');
@@ -1928,7 +1463,7 @@ function loadSettingsStores() {
     let html='';
     all.forEach(store=>{
         const ch=active.includes(store)?'checked':'';
-        html+=`<label class="store-check-item"><input type="checkbox" value="${store}" ${ch}> ${store}</label>`;
+        html+=`<label class="store-check-item"><input type="checkbox" value="${store}" ${ch}> ${store}<\/label>`;
     });
     document.getElementById('settingsStoresGrid').innerHTML=html;
 }
