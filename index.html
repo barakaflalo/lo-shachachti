@@ -202,6 +202,7 @@
         <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">🎊 סוג האירוע</label>
         <select id="eventTypeInp" onchange="toggleCustomEventField(); autoSetRecurrence()">
             <option value="birthday">🎉 יום הולדת</option>
+            <option value="wedding">💒 חתונה</option>
             <option value="anniversary">💍 יום נישואין</option>
             <option value="memorial">🕯️ אזכרה / יארצייט</option>
             <option value="barmitzvah">✡️ בר / בת מצווה</option>
@@ -571,6 +572,7 @@ const wishStyles = [
     (name, type, group, gender) => {
         const m=gender==='male', f=gender==='female', known=m||f;
         if(type==='memorial') return `חושב עליכם היום ביום האזכרה. מחבק מרחוק. 🕯️`;
+        if(type==='wedding') return `מזל טוב ${name}! 💒 יום מיוחד ומרגש — שתתחילו את הדרך המשותפת באהבה ובאושר!`;
         if(type==='anniversary') return `יום נישואין שמח ${name}! 💍 שתמשיכו לאהוב ולצמוח יחד. המון בריאות ואושר!`;
         if(type==='barmitzvah') return `מזל טוב ${name} על הבר/בת מצווה! ✡️ יום גדול ומרגש — בהצלחה!`;
         if(type==='friends') return `כיף לראות אותך ${name}! 👥 מפגש כזה הוא תמיד סיבה לחייך 😊`;
@@ -993,6 +995,7 @@ function setGroupValue(val) {
 function getEventLabel(type,customName) {
     const labels = {
         birthday:   '🎉 יום הולדת',
+        wedding:    '💒 חתונה',
         anniversary:'💍 יום נישואין',
         memorial:   '🕯️ אזכרה / יארצייט',
         barmitzvah: '✡️ בר / בת מצווה',
@@ -1017,7 +1020,9 @@ function updateGameStats(list) {
         const ev=new Date(c.bday);
         return ev.getMonth()===today.getMonth()&&ev.getDate()===today.getDate();
     });
-    const upcoming30=contacts.filter(c=>c.daysLeft!==undefined&&c.daysLeft<=30&&c.daysLeft!==null&&!c.isOver).length;
+    // חישוב ימים לכל אירוע
+    const enriched = contacts.map(c=>({...c,...getEventCalculations(c.bday,c.recurrence)}));
+    const upcoming30=enriched.filter(c=>c.daysLeft!==null&&c.daysLeft!==undefined&&c.daysLeft<=30&&!c.isOver).length;
     const paid=contacts.filter(c=>c.giftStatus==='paid').length;
     const totalBudget=contacts.reduce((s,c)=>s+(parseInt(c.giftBudget)||0),0);
 
@@ -1513,7 +1518,7 @@ function renderContacts() {
     }
 
     filtered.forEach(c=>{
-        const iconMap={birthday:'🎉',anniversary:'💍',memorial:'🕯️',barmitzvah:'✡️',friends:'👥',trip:'✈️',car:'🚗',medical:'🏥',holiday:'🎊',graduation:'🎓',custom:'📌'};
+        const iconMap={birthday:'🎉',wedding:'💒',anniversary:'💍',memorial:'🕯️',barmitzvah:'✡️',friends:'👥',trip:'✈️',car:'🚗',medical:'🏥',holiday:'🎊',graduation:'🎓',custom:'📌'};
         const icon=iconMap[c.eventType]||'📌';
         const card=document.createElement('div'); card.className='contact-card';
         let daysText=`📅 חסר תאריך`;
