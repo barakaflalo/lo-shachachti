@@ -1415,7 +1415,7 @@ function saveStores() {
 
 // ========== RENDER ==========
 function renderVisualCalendar() {
-    const cal=document.getElementById('visualCalendar'); cal.innerHTML='';
+    const cal=document.getElementById('visualCalendar'); if(!cal) return;
     const today=new Date(); today.setHours(0,0,0,0);
     for(let i=0;i<30;i++){
         const d=new Date(today); d.setDate(today.getDate()+i);
