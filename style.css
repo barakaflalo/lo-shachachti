@@ -828,6 +828,63 @@ input[type="date"].form-input { color-scheme: dark; }
 /* ===== VERSION ===== */
 .version-txt { font-size: 11px; color: var(--muted2); text-align: center; margin-top: 12px; }
 
+/* ===== APPEARANCE MODE CARDS ===== */
+.appearance-mode-card {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 5px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.appearance-mode-card.active { border: 2px solid var(--accent); }
+
+/* ===== LIGHT MODE ===== */
+body.light-mode {
+  --bg: #f5f5f7;
+  --panel: #ffffff;
+  --card: #ffffff;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #1a1a2e;
+  --muted: #888;
+  --muted2: #bbb;
+}
+body.light-mode .topbar { border-bottom-color: rgba(0,0,0,0.08); }
+body.light-mode .form-input,
+body.light-mode .form-select,
+body.light-mode .form-textarea { background: white; color: #1a1a2e; }
+
+/* ===== LARGE FONT ===== */
+body.large-font { font-size: 18px; }
+body.large-font .menu-title { font-size: 15px; }
+body.large-font .event-card .card-btn { font-size: 13px; }
+
+/* ===== GOLD BUTTONS ===== */
+.topbar-btn {
+  background: rgba(234,179,8,0.12);
+  border: 1px solid rgba(234,179,8,0.35);
+  color: #fbbf24;
+}
+.topbar-btn:hover { background: rgba(234,179,8,0.22); }
+.back-btn {
+  background: rgba(234,179,8,0.1);
+  border: 1px solid rgba(234,179,8,0.3);
+  color: #fbbf24;
+}
+.card-btn {
+  background: rgba(234,179,8,0.08);
+  border: 1px solid rgba(234,179,8,0.25);
+  color: #fbbf24;
+}
+.card-btn.share { color: #34d399; border-color: rgba(52,211,153,0.35); background: rgba(52,211,153,0.08); }
+.card-btn.edit { color: #a5b4fc; border-color: rgba(99,102,241,0.35); background: rgba(99,102,241,0.08); }
+.collapse-btn { border-color: rgba(234,179,8,0.2); color: #fbbf24; }
+.collapse-btn:hover { border-color: rgba(234,179,8,0.5); }
+.settings-bottom-btn { color: #fbbf24; border-color: rgba(234,179,8,0.2); }
+.details-toggle { color: #fbbf24; }
+.menu-arrow { color: #fbbf24; }
+
 /* ===== ANIMATIONS ===== */
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-14px) scale(0.98); }
