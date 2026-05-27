@@ -276,7 +276,17 @@
       <span class="menu-icon">💾</span>
       <div style="flex:1;"><div class="menu-title">גיבוי והדפסה</div><div class="menu-sub">ייצוא, שחזור, דוחות</div></div>
       <span class="menu-arrow">›</span>
-        <div class="menu-item" onclick="alert('תמיכה בשפות נוספות בקרוב!')">
+        <div class="menu-item" onclick="openScreen('screen-stores')">
+      <span class="menu-icon">🛒</span>
+      <div style="flex:1;"><div class="menu-title">חנויות מועדפות</div><div class="menu-sub">Amazon, KSP, זאפ...</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openScreen('screen-budget-settings')">
+      <span class="menu-icon">💰</span>
+      <div style="flex:1;"><div class="menu-title">הגדרות תקציב</div><div class="menu-sub">ערוך, חשב, הדפס</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="alert('תמיכה בשפות נוספות בקרוב!')">
       <span class="menu-icon">🌐</span>
       <div style="flex:1;"><div class="menu-title">שפה</div><div class="menu-sub">עברית</div></div>
       <span class="menu-arrow">›</span>
@@ -374,18 +384,8 @@
       <div style="flex:1;"><div class="menu-title">ברכות אישיות</div><div class="menu-sub">ברכות שכתבת בעצמך</div></div>
       <span class="menu-arrow">›</span>
     </div>
-    <div class="section-lbl" style="margin-top:10px;">חנויות וקישורים</div>
-    <div class="menu-item" onclick="openScreen('screen-stores')">
-      <span class="menu-icon">🛒</span>
-      <div style="flex:1;"><div class="menu-title">חנויות מועדפות</div><div class="menu-sub">Amazon, KSP, זאפ...</div></div>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="section-lbl" style="margin-top:10px;">כלים נוספים</div>
-    <div class="menu-item" onclick="openScreen('screen-budget-settings')">
-      <span class="menu-icon">💰</span>
-      <div style="flex:1;"><div class="menu-title">הגדרות תקציב</div><div class="menu-sub">ערוך, חשב, הדפס</div></div>
-      <span class="menu-arrow">›</span>
-    </div>
+
+
     <div class="section-lbl" style="margin-top:10px;">מראה וחוויה</div>
     <div class="toggle-row">
       <div><div class="toggle-label">🎵 צלילים</div></div>
@@ -417,7 +417,7 @@
 ======================================== -->
 <div class="screen" id="screen-stores">
   <div class="topbar">
-    <button class="back-btn" onclick="openScreen('screen-system-settings')">← חזרה</button>
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
     <span style="font-size:15px;font-weight:600;">🛒 חנויות</span>
   </div>
   <div style="padding:12px 0;">
@@ -476,8 +476,15 @@
       </div>
     </div>
 
-    <div class="toggle-row">
-      <div><div class="toggle-label">🎁 תזכורת מתנה</div><div class="toggle-sub" id="giftReminderSub">שבועיים לפני</div></div>
+    <div style="background:rgba(255,255,255,0.04);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:7px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div><div class="toggle-label">🎁 תזכורת מתנה</div><div class="toggle-sub" id="giftReminderSub">שבועיים לפני</div></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="editGiftReminder()" style="font-size:11px;color:var(--accent);background:rgba(99,102,241,0.15);border:1px solid var(--accent-border);border-radius:var(--radius-full);padding:3px 10px;cursor:pointer;">✏️ ערוך</button>
+          <div class="toggle on" id="toggle-gift-reminder" onclick="toggleSetting('giftReminder',this)"></div>
+        </div>
+      </div>
+    </div>
       <div class="toggle on" id="toggle-gift-reminder" onclick="toggleSetting('giftReminder',this)"></div>
     </div>
 
@@ -700,7 +707,7 @@
 ======================================== -->
 <div class="screen" id="screen-budget-settings">
   <div class="topbar">
-    <button class="back-btn" onclick="openScreen('screen-system-settings')">← חזרה</button>
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
     <span style="font-size:15px;font-weight:600;">💰 הגדרות תקציב</span>
   </div>
   <div style="padding:12px 0;">

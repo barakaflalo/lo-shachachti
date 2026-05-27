@@ -1176,11 +1176,19 @@ window.addEventListener('DOMContentLoaded', () => {
     printScreen.innerHTML =
       '<div class="topbar"><button class="back-btn" onclick="openScreen(\'screen-backup\')">← חזרה</button><span style="font-size:15px;font-weight:600;">🖨️ הדפס דוח</span></div>' +
       '<div style="padding:12px 0;">' +
+      '<div class="section-lbl">סוג דוח</div>' +
+      '<div class="filter-row" id="reportTypeRow">' +
+      '<div class="chip on" onclick="setReportType(this,\'all\')">📋 הכל</div>' +
+      '<div class="chip" onclick="setReportType(this,\'upcoming\')">⏳ קרובים</div>' +
+      '<div class="chip" onclick="setReportType(this,\'group\')">🏷️ לפי קבוצה</div>' +
+      '<div class="chip" onclick="setReportType(this,\'budget\')">💰 תקציב</div>' +
+      '</div>' +
       '<div class="section-lbl">טווח תאריכים</div>' +
       '<div class="form-grid-2">' +
-      '<div><label class="form-label">מתאריך</label><input type="date" class="form-input" id="printFrom"></div>' +
-      '<div><label class="form-label">עד תאריך</label><input type="date" class="form-input" id="printTo"></div>' +
+      '<div><label class="form-label">מתאריך</label><input type="date" class="form-input" id="printFrom" oninput="updateReportPreview()"></div>' +
+      '<div><label class="form-label">עד תאריך</label><input type="date" class="form-input" id="printTo" oninput="updateReportPreview()"></div>' +
       '</div>' +
+      '<div id="reportPreview" style="margin-bottom:12px;"></div>' +
       '<button class="btn-primary" onclick="printReport()">🖨️ הדפס</button>' +
       '</div>';
     document.body.insertBefore(printScreen, document.getElementById('scrollTopBtn'));
@@ -1586,3 +1594,125 @@ function openScreen(id) {
   if (id === 'screen-search') { setTimeout(() => document.getElementById('searchInput').focus(), 100); renderSearchFilters(); }
   if (id === 'screen-appearance') initAppearanceScreen();
 }
+
+// ========== REPORT TYPE ==========
+let currentReportType = 'all';
+function setReportType(el, type) {
+  currentReportType = type;
+  document.querySelectorAll('#reportTypeRow .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  updateReportPreview();
+}
+
+function updateReportPreview() {
+  const from = (document.getElementById('printFrom')||{}).value || '';
+  const to = (document.getElementById('printTo')||{}).value || '';
+  let list = [...contacts];
+  if (from) list = list.filter(c => (c.date||'') >= from);
+  if (to)   list = list.filter(c => (c.date||'') <= to);
+  if (currentReportType === 'upcoming') {
+    list = list.map(c => ({...c,...calcDays(c.date,getRecurrence(c.type))}))
+               .filter(c => c.daysLeft !== null && c.daysLeft <= 30)
+               .sort((a,b) => a.daysLeft - b.daysLeft);
+  } else if (currentReportType === 'group') {
+    list.sort((a,b) => (a.group||'').localeCompare(b.group||'','he'));
+  } else if (currentReportType === 'budget') {
+    list = list.filter(c => c.budget);
+  }
+  const preview = document.getElementById('reportPreview');
+  if (!preview) return;
+  preview.innerHTML = '<div class="info-box"><div class="info-box-title">תצוגה מקדימה — ' + list.length + ' אירועים</div>' +
+    list.slice(0,4).map(c => '<div class="detail-row"><span>' + (c.name||'') + '</span><span style="color:var(--muted);font-size:11px;">' + (c.date||'') + '</span></div>').join('') +
+    (list.length > 4 ? '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;">ועוד ' + (list.length-4) + ' נוספים...</div>' : '') +
+    '</div>';
+}
+
+// ========== PRINT REPORT OVERRIDE ==========
+function printReport() {
+  const from = (document.getElementById('printFrom')||{}).value || '';
+  const to = (document.getElementById('printTo')||{}).value || '';
+  let list = [...contacts];
+  if (from) list = list.filter(c => (c.date||'') >= from);
+  if (to)   list = list.filter(c => (c.date||'') <= to);
+  if (currentReportType === 'upcoming') {
+    list = list.map(c => ({...c,...calcDays(c.date,getRecurrence(c.type))}))
+               .filter(c => c.daysLeft !== null && c.daysLeft <= 30)
+               .sort((a,b) => a.daysLeft - b.daysLeft);
+  } else if (currentReportType === 'group') {
+    list.sort((a,b) => (a.group||'').localeCompare(b.group||'','he'));
+  } else if (currentReportType === 'budget') {
+    list = list.filter(c => c.budget);
+  }
+  const typeLabels = {all:'הכל', upcoming:'קרובים', group:'לפי קבוצה', budget:'תקציב'};
+  const win = window.open('');
+  win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;">');
+  win.document.write('<h2>לא שכחתי — דוח ' + (typeLabels[currentReportType]||'') + '</h2>');
+  if (from || to) win.document.write('<p style="color:#888;">תקופה: ' + (from||'') + ' עד ' + (to||'') + '</p>');
+  win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>סוג</th><th>קבוצה</th><th>תקציב</th><th>סטטוס</th></tr>');
+  list.forEach(c => win.document.write(
+    '<tr><td>' + (c.name||'') + '</td><td>' + (c.date||'') + '</td><td>' + getLabel(c.type,c.customType) +
+    '</td><td>' + (c.group||'') + '</td><td>' + (c.budget?c.budget+'₪':'') +
+    '</td><td>' + (c.giftStatus==='paid'?'✅':'') + '</td></tr>'
+  ));
+  win.document.write('</table></body></html>');
+  win.print();
+}
+
+// ========== GIFT REMINDER CUSTOM ==========
+function editGiftReminder() {
+  const current = settings.giftReminderDays || 14;
+  const days = prompt('כמה ימים לפני האירוע לשלוח תזכורת מתנה?', current);
+  if (days === null) return;
+  const n = parseInt(days);
+  if (isNaN(n) || n < 1) { alert('הכנס מספר ימים תקין'); return; }
+  settings.giftReminderDays = n;
+  saveAllSettings();
+  const lbl = document.getElementById('giftReminderSub');
+  if (lbl) lbl.textContent = n + ' ימים לפני';
+}
+
+// ========== LARGE FONT FIX ==========
+function applyLargeFont() {
+  if (settings.largeFont) {
+    document.documentElement.style.fontSize = '18px';
+    document.body.classList.add('large-font');
+  } else {
+    document.documentElement.style.fontSize = '';
+    document.body.classList.remove('large-font');
+  }
+}
+
+// ========== SEARCH FIX — group click shows contacts ==========
+function setSearchGroup(g) {
+  searchGroupFilter = g;
+  renderSearchFilters();
+  if (g) {
+    // show contacts in this group directly
+    const list = contacts.filter(c => c.group === g).map(c => ({...c,...calcDays(c.date,getRecurrence(c.type))}));
+    const cont = document.getElementById('searchResults');
+    const header = '<div style="font-size:11px;color:var(--muted2);margin-bottom:8px;">' + g + ' — ' + list.length + ' אנשים</div>';
+    cont.innerHTML = header + list.map(c => {
+      const [bg,fg] = avatarColor(c.name);
+      return '<div class="event-card" onclick="openEventDetail(' + c.id + ')" style="cursor:pointer;">' +
+        '<div class="event-card-main">' +
+        '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';">' + (c.name||'?')[0].toUpperCase() + '</div>' +
+        '<div style="flex:1;"><div style="font-weight:600;">' + (c.name||'') + '</div>' +
+        '<div style="font-size:12px;color:var(--accent);">' + getLabel(c.type,c.customType) + '</div></div>' +
+        urgencyBadge(c.daysLeft,c.isOver) + '</div></div>';
+    }).join('');
+  } else {
+    onSearch();
+  }
+}
+
+// apply on init
+document.addEventListener('DOMContentLoaded', () => {
+  applyLargeFont();
+  if (settings.giftReminderDays && settings.giftReminderDays !== 14) {
+    const lbl = document.getElementById('giftReminderSub');
+    if (lbl) lbl.textContent = settings.giftReminderDays + ' ימים לפני';
+  }
+});
+
+// fix print report screen creation
+const _origInit = window.onload;
