@@ -247,38 +247,19 @@
     <span style="font-size:15px;font-weight:600;">הגדרות</span>
   </div>
   <div style="padding: 12px 0;">
-    <div class="menu-item highlight" onclick="openScreen('screen-user-settings')">
-      <span class="menu-icon">👤</span>
-      <div style="flex:1;"><div class="menu-title">הגדרות משתמש</div><div class="menu-sub">התאם את המסך הראשי</div></div>
-      <span class="menu-arrow">›</span>
-    </div>
     <div class="menu-item" onclick="openScreen('screen-contacts')">
       <span class="menu-icon">👥</span>
       <div style="flex:1;"><div class="menu-title">אנשי קשר שלי</div><div class="menu-sub">כל הפרטים במקום אחד</div></div>
       <span class="menu-arrow">›</span>
     </div>
+    <div class="menu-item highlight" onclick="openScreen('screen-user-settings')">
+      <span class="menu-icon">👤</span>
+      <div style="flex:1;"><div class="menu-title">הגדרות משתמש</div><div class="menu-sub">מסך ראשי, מראה, צלילים</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
     <div class="menu-item" onclick="openScreen('screen-system-settings')">
       <span class="menu-icon">⚙️</span>
-      <div style="flex:1;"><div class="menu-title">הגדרות מערכת</div><div class="menu-sub">ברכות, חנויות, שפה</div></div>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openScreen('screen-notifications')">
-      <span class="menu-icon">🔔</span>
-      <div style="flex:1;"><div class="menu-title">התראות</div><div class="menu-sub">ניהול כל ההתראות</div></div>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openScreen('screen-import')">
-      <span class="menu-icon">📅</span>
-      <div style="flex:1;"><div class="menu-title">ייבוא לוח שנה</div><div class="menu-sub">ICS, גוגל, פייסבוק</div></div>
-      <span class="menu-arrow">›</span>
-    </div>
-    <div class="menu-item" onclick="openScreen('screen-backup')">
-      <span class="menu-icon">💾</span>
-      <div style="flex:1;"><div class="menu-title">גיבוי והדפסה</div><div class="menu-sub">ייצוא, שחזור, דוחות</div></div>
-      <span class="menu-arrow">›</span>
-        <div class="menu-item" onclick="openScreen('screen-stores')">
-      <span class="menu-icon">🛒</span>
-      <div style="flex:1;"><div class="menu-title">חנויות מועדפות</div><div class="menu-sub">Amazon, KSP, זאפ...</div></div>
+      <div style="flex:1;"><div class="menu-title">הגדרות מערכת</div><div class="menu-sub">ברכות, התראות, ייבוא</div></div>
       <span class="menu-arrow">›</span>
     </div>
     <div class="menu-item" onclick="openScreen('screen-budget-settings')">
@@ -286,11 +267,15 @@
       <div style="flex:1;"><div class="menu-title">הגדרות תקציב</div><div class="menu-sub">ערוך, חשב, הדפס</div></div>
       <span class="menu-arrow">›</span>
     </div>
-    <div class="menu-item" onclick="alert('תמיכה בשפות נוספות בקרוב!')">
-      <span class="menu-icon">🌐</span>
-      <div style="flex:1;"><div class="menu-title">שפה</div><div class="menu-sub">עברית</div></div>
+    <div class="menu-item" onclick="openScreen('screen-backup')">
+      <span class="menu-icon">🖨️</span>
+      <div style="flex:1;"><div class="menu-title">גיבוי והדפסה</div><div class="menu-sub">ייצוא, שחזור, דוחות</div></div>
       <span class="menu-arrow">›</span>
     </div>
+    <div class="menu-item" onclick="openScreen('screen-stores')">
+      <span class="menu-icon">🛒</span>
+      <div style="flex:1;"><div class="menu-title">חנויות מועדפות</div><div class="menu-sub">Amazon, KSP, זאפ...</div></div>
+      <span class="menu-arrow">›</span>
     </div>
     <div class="settings-bottom">
       <div class="settings-bottom-btn" onclick="shareApp()">📤 שתף</div>
@@ -331,6 +316,19 @@
     <div class="toggle-row" id="toggle-notifications">
       <div><div class="toggle-label">🔔 התראות אחרונות</div></div>
       <div class="toggle" onclick="toggleSetting('showNotifPanel',this)"></div>
+    </div>
+    <div class="section-lbl" style="margin-top:14px;">מראה וחוויה</div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">🎵 צלילים</div></div>
+      <div class="toggle on" id="toggle-sounds" onclick="toggleSetting('sounds',this)"></div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">🎊 קונפטי ביום אירוע</div></div>
+      <div class="toggle on" id="toggle-confetti" onclick="toggleSetting('confetti',this)"></div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">🔤 גופן גדול</div></div>
+      <div class="toggle" id="toggle-large-font2" onclick="toggleSetting('largeFont',this);applyLargeFont()"></div>
     </div>
     <div class="section-lbl" style="margin-top:14px;">סינון ברירת מחדל</div>
     <select class="form-select" id="defaultFilter">
@@ -376,7 +374,7 @@
     <div class="section-lbl">ברכות ותוכן</div>
     <div class="menu-item" onclick="openScreen('screen-greetings')">
       <span class="menu-icon">💬</span>
-      <div style="flex:1;"><div class="menu-title">ברכות קבועות</div><div class="menu-sub">5 ברכות לפי סוג</div></div>
+      <div style="flex:1;"><div class="menu-title">ברכות קבועות</div><div class="menu-sub">5 וריאנטים לכל סוג</div></div>
       <span class="menu-arrow">›</span>
     </div>
     <div class="menu-item" onclick="openScreen('screen-my-greetings')">
@@ -384,16 +382,22 @@
       <div style="flex:1;"><div class="menu-title">ברכות אישיות</div><div class="menu-sub">ברכות שכתבת בעצמך</div></div>
       <span class="menu-arrow">›</span>
     </div>
-
-
-    <div class="section-lbl" style="margin-top:10px;">מראה וחוויה</div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">🎵 צלילים</div></div>
-      <div class="toggle on" id="toggle-sounds" onclick="toggleSetting('sounds',this)"></div>
+    <div class="section-lbl" style="margin-top:10px;">התראות וייבוא</div>
+    <div class="menu-item" onclick="openScreen('screen-notifications')">
+      <span class="menu-icon">🔔</span>
+      <div style="flex:1;"><div class="menu-title">התראות</div><div class="menu-sub">ניהול כל ההתראות</div></div>
+      <span class="menu-arrow">›</span>
     </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">🎊 קונפטי ביום אירוע</div></div>
-      <div class="toggle on" id="toggle-confetti" onclick="toggleSetting('confetti',this)"></div>
+    <div class="menu-item" onclick="openScreen('screen-import')">
+      <span class="menu-icon">📅</span>
+      <div style="flex:1;"><div class="menu-title">ייבוא לוח שנה</div><div class="menu-sub">ICS, גוגל, פייסבוק</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="section-lbl" style="margin-top:10px;">שפה</div>
+    <div class="menu-item" onclick="alert('תמיכה בשפות נוספות בקרוב!')">
+      <span class="menu-icon">🌐</span>
+      <div style="flex:1;"><div class="menu-title">שפה</div><div class="menu-sub">עברית</div></div>
+      <span class="menu-arrow">›</span>
     </div>
   </div>
 </div>
