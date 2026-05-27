@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#12121f">
+  <title>לא שכחתי</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="calPopupModal">
+  <div class="modal-box info" style="border-color:var(--accent-border);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-size:12px;color:#818cf8;" id="calPopupDate"></span>
+      <span style="cursor:pointer;color:var(--muted);font-size:16px;" onclick="closeModal('calPopupModal')">✕</span>
+    </div>
+    <div id="calPopupEvents"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deletedEventModal">
+  <div class="modal-box">
+    <div class="modal-icon">🗓️</div>
+    <div class="modal-title" id="deletedEventTitle">אירוע נמחק מגוגל</div>
+    <div class="modal-sub">לא נמצא בלוח השנה שלך בגוגל. אולי נמחק בטעות?</div>
+    <div id="deletedEventContent"></div>
+    <button class="btn-ghost" style="margin-top:4px;" onclick="closeModal('deletedEventModal')">✅ שמור באפליקציה</button>
+    <button class="btn-danger" onclick="confirmDeleteFromGoogle()">🗑️ הסר גם מהאפליקציה</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal-box info" style="text-align:center;">
+    <div style="font-size:48px;margin-bottom:10px;">🔔</div>
+    <div style="font-size:18px;font-weight:600;margin-bottom:4px;">לא שכחתי</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">גרסה 1.0</div>
+    <div style="font-size:13px;line-height:1.8;color:var(--text);margin-bottom:16px;">האפליקציה שתזכיר לך כל אירוע חשוב</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">פותח על ידי <b style="color:var(--text);">ברק אפללו</b><br>כל הזכויות שמורות © 2026</div>
+    <a href="mailto:loshachachti.app@gmail.com?subject=באג / הצעה — לא שכחתי" style="display:block;padding:10px;background:rgba(99,102,241,0.1);border:1px solid var(--accent-border);color:var(--accent);border-radius:var(--radius-sm);font-size:12px;text-decoration:none;text-align:center;margin-bottom:10px;">🐛 דווח על באג / הצעה לשיפור</a>
+    <button class="btn-primary" onclick="shareApp()">📤 שתף את האפליקציה</button>
+    <button class="btn-ghost" onclick="closeModal('aboutModal')">סגור</button>
+  </div>
+</div>
+
+<!-- ===== SCROLL TO TOP ===== -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ========================================
+     מסך 1 — ראשי
+======================================== -->
+<div class="screen active" id="screen-main">
+  <div class="topbar">
+    <span class="topbar-title">לא שכחתי 🔔</span>
+    <div class="topbar-actions">
+      <button class="topbar-btn" onclick="openScreen('screen-search')" title="חיפוש">🔍</button>
+      <button class="topbar-btn" onclick="openScreen('screen-settings')" title="הגדרות">⚙️</button>
+    </div>
+  </div>
+
+  <div style="padding: 12px 0 0;">
+    <div class="stat-grid" id="statsGrid"></div>
+    <button class="add-event-btn" onclick="openScreen('screen-add-event')">➕ הוסף אירוע</button>
+    <div class="cal-wrap" id="calendarSection">
+      <div class="cal-header">
+        <span class="cal-nav" onclick="changeMonth(-1)">›</span>
+        <span id="calMonthLabel"></span>
+        <span class="cal-nav" onclick="changeMonth(1)">‹</span>
+      </div>
+      <div class="cal-days-header">
+        <div class="cal-day-name">א</div><div class="cal-day-name">ב</div><div class="cal-day-name">ג</div>
+        <div class="cal-day-name">ד</div><div class="cal-day-name">ה</div><div class="cal-day-name">ו</div>
+        <div class="cal-day-name">ש</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="cal-popup" id="calPopup">
+      <div class="cal-popup-header">
+        <span id="calPopupTitle"></span>
+        <span class="cal-popup-close" onclick="closeCalPopup()">✕</span>
+      </div>
+      <div id="calPopupList"></div>
+    </div>
+    <div id="heroWidget"></div>
+    <div class="filter-row" id="groupFilterRow"></div>
+    <div id="eventsList"></div>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 2 — הוספת אירוע
+======================================== -->
+<div class="screen" id="screen-add-event">
+  <div class="topbar">
+    <button class="back-btn" onclick="cancelForm()">← ביטול</button>
+    <span id="formTitle" style="font-size:15px;font-weight:600;">אירוע חדש</span>
+  </div>
+  <div class="form-section">
+    <input type="hidden" id="editingId" value="">
+    <label class="form-label">שם האדם / האירוע *</label>
+    <input type="text" class="form-input" id="inp-name" placeholder="שם האדם / האירוע">
+
+    <label class="form-label">תאריך *</label>
+    <input type="date" class="form-input" id="inp-date">
+
+    <label class="form-label">סוג האירוע</label>
+    <select class="form-select" id="inp-type" onchange="onTypeChange()">
+      <option value="birthday">🎉 יום הולדת</option>
+      <option value="wedding">💒 חתונה</option>
+      <option value="anniversary">💍 יום נישואין</option>
+      <option value="memorial">🕯️ אזכרה / יארצייט</option>
+      <option value="barmitzvah">✡️ בר / בת מצווה</option>
+      <option value="friends">👥 מפגש חברים</option>
+      <option value="trip">✈️ טיול / חופשה</option>
+      <option value="car">🚗 טסט לרכב</option>
+      <option value="medical">🏥 תור רפואי</option>
+      <option value="holiday">🎊 חג / מועד</option>
+      <option value="graduation">🎓 סיום לימודים</option>
+      <option value="custom">✏️ אחר...</option>
+    </select>
+    <input type="text" class="form-input" id="inp-custom-type" placeholder="הקלד סוג אירוע..." style="display:none;">
+    <input type="hidden" id="inp-recurrence" value="yearly">
+
+    <hr class="form-divider">
+
+    <!-- פרטים נוספים -->
+    <button class="collapse-btn" id="btn-extra" onclick="toggleCollapse('extra')">
+      <span>＋ פרטים נוספים (טלפון, קבוצה, מין, הערות)</span>
+      <span>▼</span>
+    </button>
+    <div class="collapse-content" id="collapse-extra">
+      <div class="form-grid-2">
+        <div>
+          <label class="form-label">טלפון</label>
+          <input type="tel" class="form-input" id="inp-phone" placeholder="050-0000000">
+        </div>
+        <div>
+          <label class="form-label">מין</label>
+          <select class="form-select" id="inp-gender">
+            <option value="">לא צוין</option>
+            <option value="male">👨 זכר</option>
+            <option value="female">👩 נקבה</option>
+            <option value="other">🧑 אחר</option>
+          </select>
+        </div>
+      </div>
+      <label class="form-label">קבוצה</label>
+      <select class="form-select" id="inp-group-select" onchange="onGroupSelectChange()">
+        <option value="">— בחר קבוצה —</option>
+        <option value="משפחה">👨‍👩‍👧‍👦 משפחה</option>
+        <option value="חברים">👫 חברים</option>
+        <option value="עבודה">💼 עבודה</option>
+        <option value="צבא">🎖️ צבא / מילואים</option>
+        <option value="טיול">✈️ מהטיול</option>
+        <option value="לימודים">📚 לימודים</option>
+        <option value="שכנים">🏠 שכנים</option>
+        <option value="custom">✏️ אחר</option>
+      </select>
+      <input type="text" class="form-input" id="inp-group-custom" placeholder="הקלד שם קבוצה..." style="display:none;">
+      <label class="form-label">הערות</label>
+      <textarea class="form-textarea" id="inp-notes" placeholder="תחביבים, העדפות, דברים חשובים..."></textarea>
+    </div>
+
+    <!-- מתנה ותקציב -->
+    <button class="collapse-btn" id="btn-gift" onclick="toggleCollapse('gift')">
+      <span>🎁 הוסף פרטי מתנה ותקציב</span>
+      <span>▼</span>
+    </button>
+    <div class="collapse-content" id="collapse-gift">
+      <div class="form-grid-2">
+        <div>
+          <label class="form-label">תקציב (₪)</label>
+          <input type="number" class="form-input" id="inp-budget" placeholder="0">
+        </div>
+        <div>
+          <label class="form-label">סטטוס</label>
+          <select class="form-select" id="inp-gift-status">
+            <option value="pending">🛒 טרם נקנה</option>
+            <option value="paid">✅ נקנה</option>
+          </select>
+        </div>
+      </div>
+      <label class="form-label">רעיון למתנה</label>
+      <div class="gift-tags" id="giftTagsContainer"></div>
+      <input type="text" class="form-input" id="inp-gift-idea" placeholder="✏️ רעיון אחר...">
+      <div id="giftSelectedDisplay" style="display:none;font-size:12px;color:var(--green);padding:7px 10px;background:rgba(16,185,129,0.1);border-radius:8px;margin-bottom:10px;"></div>
+    </div>
+
+    <hr class="form-divider">
+    <button class="btn-primary" onclick="saveEvent()">💾 שמור אירוע</button>
+    <button class="btn-secondary" onclick="saveAndEdit()">💾 שמור וערוך פרטים נוספים</button>
+    <button class="btn-danger" id="btn-delete-form" style="display:none;" onclick="deleteCurrentEvent()">🗑️ מחק אירוע לצמיתות</button>
+    <button class="btn-ghost" onclick="cancelForm()">ביטול</button>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 3 — פרטי אירוע מלא
+======================================== -->
+<div class="screen" id="screen-event-detail">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-main')">← חזרה</button>
+    <button class="back-btn" onclick="editCurrentEvent()" style="color:var(--accent);border-color:var(--accent-border);">✏️ ערוך</button>
+  </div>
+  <div style="padding: 12px 0;" id="eventDetailContent"></div>
+</div>
+
+<!-- ========================================
+     מסך 4 — חיפוש
+======================================== -->
+<div class="screen" id="screen-search">
+  <div class="topbar">
+    <div class="search-bar" style="flex:1;margin:0;">
+      <input type="text" class="search-input" id="searchInput" placeholder="חפש שם, סוג אירוע..." oninput="onSearch()">
+      <span class="search-cancel" onclick="openScreen('screen-main')">ביטול</span>
+    </div>
+  </div>
+  <div style="padding: 12px 0;">
+    <div class="filter-row" id="searchFilterRow"></div>
+    <div id="searchResults"></div>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 5 — הגדרות ראשי
+======================================== -->
+<div class="screen" id="screen-settings">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-main')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">הגדרות</span>
+  </div>
+  <div style="padding: 12px 0;">
+    <div class="menu-item highlight" onclick="openScreen('screen-user-settings')">
+      <span class="menu-icon">👤</span>
+      <div style="flex:1;"><div class="menu-title">הגדרות משתמש</div><div class="menu-sub">התאם את המסך הראשי</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openScreen('screen-contacts')">
+      <span class="menu-icon">👥</span>
+      <div style="flex:1;"><div class="menu-title">אנשי קשר שלי</div><div class="menu-sub">כל הפרטים במקום אחד</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openScreen('screen-system-settings')">
+      <span class="menu-icon">⚙️</span>
+      <div style="flex:1;"><div class="menu-title">הגדרות מערכת</div><div class="menu-sub">ברכות, חנויות, שפה</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openScreen('screen-notifications')">
+      <span class="menu-icon">🔔</span>
+      <div style="flex:1;"><div class="menu-title">התראות</div><div class="menu-sub">ניהול כל ההתראות</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openScreen('screen-import')">
+      <span class="menu-icon">📅</span>
+      <div style="flex:1;"><div class="menu-title">ייבוא לוח שנה</div><div class="menu-sub">ICS, גוגל, פייסבוק</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openScreen('screen-backup')">
+      <span class="menu-icon">💾</span>
+      <div style="flex:1;"><div class="menu-title">גיבוי והדפסה</div><div class="menu-sub">ייצוא, שחזור, דוחות</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="settings-bottom">
+      <div class="settings-bottom-btn" onclick="shareApp()">📤 שתף</div>
+      <div class="settings-bottom-btn" onclick="openModal('aboutModal')">ℹ️ אודות</div>
+      <div class="settings-bottom-btn" onclick="openScreen('screen-appearance')">🌓 מראה</div>
+      <div class="settings-bottom-btn">© זכויות</div>
+    </div>
+    <div class="version-txt">לא שכחתי · גרסה 1.0 · ברק אפללו</div>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 6 — הגדרות משתמש
+======================================== -->
+<div class="screen" id="screen-user-settings">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">הגדרות משתמש</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div class="section-lbl">מה יוצג במסך הראשי</div>
+    <div class="toggle-row" id="toggle-stats">
+      <div><div class="toggle-label">📊 סטטיסטיקות</div></div>
+      <div class="toggle on" onclick="toggleSetting('showStats',this)"></div>
+    </div>
+    <div class="toggle-row" id="toggle-hero">
+      <div><div class="toggle-label">🔥 האירוע הגדול הבא</div></div>
+      <div class="toggle on" onclick="toggleSetting('showHero',this)"></div>
+    </div>
+    <div class="toggle-row" id="toggle-budget">
+      <div><div class="toggle-label">💰 תקציב מתנות</div></div>
+      <div class="toggle" onclick="toggleSetting('showBudget',this)"></div>
+    </div>
+    <div class="toggle-row" id="toggle-calendar">
+      <div><div class="toggle-label">📅 לוח שנה</div></div>
+      <div class="toggle on" onclick="toggleSetting('showCalendar',this)"></div>
+    </div>
+    <div class="toggle-row" id="toggle-notifications">
+      <div><div class="toggle-label">🔔 התראות אחרונות</div></div>
+      <div class="toggle" onclick="toggleSetting('showNotifPanel',this)"></div>
+    </div>
+    <div class="section-lbl" style="margin-top:14px;">סינון ברירת מחדל</div>
+    <select class="form-select" id="defaultFilter">
+      <option value="30" selected>⏳ 30 הימים הקרובים</option>
+      <option value="future">📅 עתידיים השנה</option>
+      <option value="all">♾️ כל הרשימה</option>
+    </select>
+    <div class="section-lbl">מיון ברירת מחדל</div>
+    <select class="form-select" id="defaultSort">
+      <option value="date" selected>📅 לפי תאריך</option>
+      <option value="name">🔤 לפי שם</option>
+      <option value="group">🏷️ לפי קבוצה</option>
+    </select>
+    <button class="btn-primary" onclick="saveUserSettings()">💾 שמור</button>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 7 — אנשי קשר
+======================================== -->
+<div class="screen" id="screen-contacts">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">אנשי קשר</span>
+  </div>
+  <div style="padding:12px 0;">
+    <input type="text" class="form-input" id="contactsSearch" placeholder="🔍 חיפוש..." oninput="renderContactsList()">
+    <div class="filter-row" id="contactsFilterRow"></div>
+    <div id="contactsList"></div>
+    <button class="btn-primary" onclick="openScreen('screen-add-event')">➕ הוסף איש קשר</button>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 8 — הגדרות מערכת
+======================================== -->
+<div class="screen" id="screen-system-settings">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">הגדרות מערכת</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div class="section-lbl">ברכות ותוכן</div>
+    <div class="menu-item" onclick="openScreen('screen-greetings')">
+      <span class="menu-icon">💬</span>
+      <div style="flex:1;"><div class="menu-title">ברכות קבועות</div><div class="menu-sub">5 ברכות לפי סוג</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="menu-item" onclick="openScreen('screen-my-greetings')">
+      <span class="menu-icon">📝</span>
+      <div style="flex:1;"><div class="menu-title">ברכות אישיות</div><div class="menu-sub">ברכות שכתבת בעצמך</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="section-lbl" style="margin-top:10px;">חנויות וקישורים</div>
+    <div class="menu-item" onclick="openScreen('screen-stores')">
+      <span class="menu-icon">🛒</span>
+      <div style="flex:1;"><div class="menu-title">חנויות מועדפות</div><div class="menu-sub">Amazon, KSP, זאפ...</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="section-lbl" style="margin-top:10px;">מראה וחוויה</div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">🎵 צלילים</div></div>
+      <div class="toggle on" id="toggle-sounds" onclick="toggleSetting('sounds',this)"></div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">🎊 קונפטי ביום אירוע</div></div>
+      <div class="toggle on" id="toggle-confetti" onclick="toggleSetting('confetti',this)"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 9 — ברכות קבועות
+======================================== -->
+<div class="screen" id="screen-greetings">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-system-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">💬 ברכות קבועות</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">ברכות לפי סוג אירוע ומין. לחץ לעריכה.</div>
+    <div id="greetingsList"></div>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 10 — חנויות
+======================================== -->
+<div class="screen" id="screen-stores">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-system-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">🛒 חנויות</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">בחר חנויות לחיפוש מתנות. יופיעו על כרטיס האירוע.</div>
+    <div class="gift-tags" id="storeTagsContainer"></div>
+    <div style="margin-top:10px;margin-bottom:14px;">
+      <input type="text" class="form-input" id="inp-custom-store" placeholder="＋ הוסף חנות בעצמך">
+      <button class="btn-secondary" onclick="addCustomStore()">הוסף</button>
+    </div>
+    <button class="btn-primary" onclick="saveStores()">💾 שמור</button>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 11 — התראות
+======================================== -->
+<div class="screen" id="screen-notifications">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">התראות</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div class="section-lbl">הגדרות כלליות</div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">🔔 התראות מופעלות</div><div class="toggle-sub">הפעל או כבה הכל</div></div>
+      <div class="toggle on" id="toggle-notif-master" onclick="toggleSetting('notifEnabled',this)"></div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">🎵 צלילי התראה</div></div>
+      <div class="toggle on" id="toggle-notif-sound" onclick="toggleSetting('notifSound',this)"></div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">📳 רטט</div></div>
+      <div class="toggle" id="toggle-notif-vibrate" onclick="toggleSetting('notifVibrate',this)"></div>
+    </div>
+
+    <div class="section-lbl" style="margin-top:14px;">ברירת מחדל לאירועים חדשים</div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">📅 יום לפני</div><div class="toggle-sub">בשעה 09:00</div></div>
+      <div class="toggle on" id="toggle-day-before" onclick="toggleSetting('defaultDayBefore',this)"></div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">⏰ שבוע לפני</div><div class="toggle-sub">בשעה 09:00</div></div>
+      <div class="toggle" id="toggle-week-before" onclick="toggleSetting('defaultWeekBefore',this)"></div>
+    </div>
+
+    <!-- מותאם אישית -->
+    <div style="background:rgba(99,102,241,0.08);border:1px solid var(--accent-border);border-radius:var(--radius-sm);padding:12px 13px;margin-bottom:7px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+        <span style="font-size:13px;color:#a5b4fc;">✏️ מותאם אישית</span>
+        <div class="toggle" id="toggle-custom-notif" onclick="toggleCustomNotif(this)"></div>
+      </div>
+      <div id="customNotifTags" style="display:none;">
+        <div class="gift-tags" id="customNotifList"></div>
+        <button class="btn-secondary" style="padding:7px;" onclick="openAddCustomNotif()">＋ הוסף תזכורת</button>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div><div class="toggle-label">🎁 תזכורת מתנה</div><div class="toggle-sub">שבועיים לפני</div></div>
+      <div class="toggle on" id="toggle-gift-reminder" onclick="toggleSetting('giftReminder',this)"></div>
+    </div>
+
+    <div class="menu-item" style="margin-top:10px;" onclick="editQuietHours()">
+      <div style="flex:1;"><div class="menu-title">🔕 שעות שקט</div><div class="menu-sub" id="quietHoursLabel">23:00 — 08:00</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 12 — ייבוא
+======================================== -->
+<div class="screen" id="screen-import">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">ייבוא</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">בחר מאיפה לייבא</div>
+    <div class="section-lbl">לוח שנה</div>
+    <div class="import-option" onclick="openScreen('screen-import-ics')">
+      <span class="import-icon">📅</span>
+      <div style="flex:1;"><div class="import-title">קובץ ICS</div><div class="import-sub">גוגל קלנדר, אפל, אאוטלוק</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="import-option" onclick="openScreen('screen-google-calendar')">
+      <span class="import-icon">🗓️</span>
+      <div style="flex:1;"><div class="import-title">גוגל קלנדר</div><div class="import-sub">סינכרון ישיר לחשבון</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="section-lbl" style="margin-top:10px;">אנשי קשר</div>
+    <div class="import-option" onclick="importFromPhone()">
+      <span class="import-icon">👥</span>
+      <div style="flex:1;"><div class="import-title">אנשי קשר מהטלפון</div><div class="import-sub">ייבוא ישיר מהמכשיר</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="import-option" onclick="openScreen('screen-import-csv')">
+      <span class="import-icon">📊</span>
+      <div style="flex:1;"><div class="import-title">קובץ CSV</div><div class="import-sub">אקסל, Google Sheets</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="import-option facebook" onclick="openScreen('screen-import-facebook')">
+      <span class="import-icon">📘</span>
+      <div style="flex:1;"><div class="import-title" style="color:#93c5fd;">פייסבוק</div><div class="import-sub">חברים וימי הולדת</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 13 — ייבוא ICS
+======================================== -->
+<div class="screen" id="screen-import-ics">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-import')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">ייבוא ICS</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div class="info-box">
+      <div class="info-box-title">איך מייצאים מגוגל קלנדר?</div>
+      <div class="info-step"><div class="step-num">1</div>כנס ל-calendar.google.com במחשב</div>
+      <div class="info-step"><div class="step-num">2</div>הגדרות ← ייצוא</div>
+      <div class="info-step"><div class="step-num">3</div>פתח את קובץ ה-ZIP</div>
+      <div class="info-step"><div class="step-num">4</div>העלה את קובץ ה-.ics כאן</div>
+    </div>
+    <div class="upload-zone" onclick="document.getElementById('icsFileInput').click()">
+      <div class="upload-zone-icon">📂</div>
+      <div class="upload-zone-title">גרור קובץ ICS לכאן</div>
+      <div class="upload-zone-sub">או לחץ לבחירת קובץ</div>
+    </div>
+    <input type="file" id="icsFileInput" accept=".ics" style="display:none;" onchange="importICS(this)">
+    <button class="btn-primary" onclick="document.getElementById('icsFileInput').click()">📂 בחר קובץ ICS</button>
+    <button class="btn-ghost" onclick="openScreen('screen-import')">← חזרה לבחירת מקור</button>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 14 — גוגל קלנדר
+======================================== -->
+<div class="screen" id="screen-google-calendar">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-import')">← חזרה</button>
+    <span style="font-size:14px;font-weight:600;">🗓️ גוגל קלנדר</span>
+  </div>
+  <div style="padding:12px 0;" id="googleCalContent">
+    <div style="text-align:center;padding:20px 0 24px;">
+      <div style="font-size:48px;margin-bottom:12px;">🗓️</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:5px;">התחבר לגוגל קלנדר</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;">ייבא אירועים מהיר וקל<br>ישירות מחשבון הגוגל שלך</div>
+    </div>
+    <div class="info-box">
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;">האפליקציה תבקש גישת קריאה בלבד. לא יתבצע שום שינוי בנתונים שלך בגוגל.</div>
+    </div>
+    <button class="btn-primary" style="background:white;color:#1a1a1a;font-size:14px;" onclick="connectGoogleCalendar()">
+      <span style="font-weight:700;color:#4285f4;">G</span>  התחבר עם גוגל
+    </button>
+    <button class="btn-ghost" onclick="openScreen('screen-import')">← חזרה</button>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 15 — ייבוא פייסבוק
+======================================== -->
+<div class="screen" id="screen-import-facebook">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-import')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">📘 פייסבוק</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div style="background:rgba(29,119,242,0.1);border:1px solid rgba(29,119,242,0.25);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:12px;font-size:12px;color:#93c5fd;line-height:1.6;">
+      פייסבוק לא מאפשרת גישה ישירה לנתונים. יש להוריד ידנית ולהעלות כאן.
+    </div>
+    <div class="info-box">
+      <div class="info-box-title" style="color:#93c5fd;">איך מורידים מפייסבוק?</div>
+      <div class="info-step"><div class="step-num" style="background:rgba(29,119,242,0.25);color:#93c5fd;">1</div>פתח פייסבוק ← הגדרות ← מידע שלי</div>
+      <div class="info-step"><div class="step-num" style="background:rgba(29,119,242,0.25);color:#93c5fd;">2</div>לחץ "הורד עותק של המידע שלך"</div>
+      <div class="info-step"><div class="step-num" style="background:rgba(29,119,242,0.25);color:#93c5fd;">3</div>בחר: חברים + ימי הולדת בלבד</div>
+      <div class="info-step"><div class="step-num" style="background:rgba(29,119,242,0.25);color:#93c5fd;">4</div>הורד JSON והעלה כאן</div>
+    </div>
+    <div class="upload-zone" style="border-color:rgba(29,119,242,0.35);" onclick="document.getElementById('fbFileInput').click()">
+      <div class="upload-zone-icon">📘</div>
+      <div class="upload-zone-title">גרור קובץ JSON לכאן</div>
+      <div class="upload-zone-sub">או לחץ לבחירת קובץ</div>
+    </div>
+    <input type="file" id="fbFileInput" accept=".json" style="display:none;" onchange="importFacebook(this)">
+    <button class="btn-primary" style="background:rgba(29,119,242,0.3);border:1px solid rgba(29,119,242,0.5);" onclick="document.getElementById('fbFileInput').click()">📂 בחר קובץ JSON</button>
+    <button class="btn-ghost" onclick="openScreen('screen-import')">← חזרה</button>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 16 — גיבוי והדפסה
+======================================== -->
+<div class="screen" id="screen-backup">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">גיבוי והדפסה</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div class="section-lbl">גיבוי נתונים</div>
+    <div class="import-option" onclick="exportJSON()">
+      <span class="import-icon">📤</span>
+      <div style="flex:1;"><div class="import-title">ייצוא קובץ גיבוי</div><div class="import-sub">JSON — לשחזור מלא</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="import-option" onclick="document.getElementById('restoreInput').click()">
+      <span class="import-icon">📥</span>
+      <div style="flex:1;"><div class="import-title">שחזור מגיבוי</div><div class="import-sub">טלפון חדש? שחזר כאן</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <input type="file" id="restoreInput" accept=".json" style="display:none;" onchange="restoreBackup(this)">
+    <div class="import-option" onclick="exportCSV()">
+      <span class="import-icon">📊</span>
+      <div style="flex:1;"><div class="import-title">ייצוא CSV</div><div class="import-sub">לאקסל או גוגל שיטס</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+
+    <div class="section-lbl" style="margin-top:10px;">דוחות</div>
+    <div class="import-option" onclick="openScreen('screen-print-report')">
+      <span class="import-icon">🖨️</span>
+      <div style="flex:1;"><div class="import-title">הדפס דוח</div><div class="import-sub">לפי תאריך או קבוצה</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+    <div class="import-option" onclick="openScreen('screen-budget-summary')">
+      <span class="import-icon">💰</span>
+      <div style="flex:1;"><div class="import-title">סיכום תקציב</div><div class="import-sub">הוצאות מתנות לפי תקופה</div></div>
+      <span class="menu-arrow">›</span>
+    </div>
+
+    <hr class="form-divider" style="margin-top:14px;">
+    <button class="btn-danger" onclick="confirmDeleteAll()">🗑️ מחק את כל הנתונים</button>
+  </div>
+</div>
+
+<!-- ========================================
+     מסך 17 — מראה
+======================================== -->
+<div class="screen" id="screen-appearance">
+  <div class="topbar">
+    <button class="back-btn" onclick="openScreen('screen-settings')">← חזרה</button>
+    <span style="font-size:15px;font-weight:600;">מראה</span>
+  </div>
+  <div style="padding:12px 0;">
+    <div class="section-lbl">מצב תצוגה</div>
+    <div style="display:flex;gap:10px;margin-bottom:18px;">
+      <div class="appearance-mode-card active" id="mode-dark" onclick="setMode('dark')">
+        <div style="background:#12121f;border-radius:6px;height:50px;margin-bottom:6px;"></div>
+        <div style="font-size:11px;color:#a5b4fc;text-align:center;">🌙 כהה</div>
+      </div>
+      <div class="appearance-mode-card" id="mode-light" onclick="setMode('light')">
+        <div style="background:#f5f5f7;border-radius:6px;height:50px;margin-bottom:6px;"></div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;">☀️ בהיר</div>
+      </div>
+      <div class="appearance-mode-card" id="mode-auto" onclick="setMode('auto')">
+        <div style="background:linear-gradient(135deg,#12121f 50%,#f5f5f7 50%);border-radius:6px;height:50px;margin-bottom:6px;"></div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;">📱 אוטו</div>
+      </div>
+    </div>
+    <div class="section-lbl">ערכת צבעים</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;" id="themeGrid"></div>
+    <div class="section-lbl">נוסף</div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">🔤 גופן גדול</div><div class="toggle-sub">הגדל טקסט לנוחות קריאה</div></div>
+      <div class="toggle" id="toggle-large-font" onclick="toggleSetting('largeFont',this)"></div>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">✨ אנימציות</div></div>
+      <div class="toggle on" id="toggle-animations" onclick="toggleSetting('animations',this)"></div>
+    </div>
+    <button class="btn-primary" onclick="saveAppearance()">💾 שמור מראה</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
