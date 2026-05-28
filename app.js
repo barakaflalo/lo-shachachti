@@ -34,19 +34,6 @@ function saveAllSettings() { localStorage.setItem('ls_v1_settings', JSON.stringi
 
 // ========== SCREEN NAVIGATION ==========
 let _history = ['screen-main'];
-function openScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-  window.scrollTo(0, 0);
-  _history.push(id);
-  if (id === 'screen-main') renderMain();
-  if (id === 'screen-contacts') renderContactsList();
-  if (id === 'screen-greetings') renderGreetings();
-  if (id === 'screen-stores') renderStores();
-  if (id === 'screen-budget-summary') renderBudgetSummary();
-  if (id === 'screen-search') { setTimeout(() => document.getElementById('searchInput').focus(), 100); renderSearchFilters(); }
-}
 
 // ========== SOUNDS ==========
 let _actx = null;
@@ -276,26 +263,6 @@ function onCalDayClick(d, m, y) {
 function closeCalPopup() { document.getElementById('calPopup').classList.remove('open'); }
 
 // ========== HERO WIDGET ==========
-function renderHero(enriched) {
-  const upcoming = enriched.filter(c => c.daysLeft !== null).sort((a,b) => a.daysLeft - b.daysLeft);
-  if (!upcoming.length) { document.getElementById('heroWidget').innerHTML = ''; return; }
-  const c = upcoming[0];
-  const [bg, fg] = avatarColor(c.name);
-  document.getElementById('heroWidget').innerHTML =
-    '<div class="hero-card" onclick="openEventDetail(' + c.id + ')">' +
-    '<div class="hero-label">הבא בתור</div>' +
-    '<div style="display:flex;align-items:center;gap:12px;">' +
-    '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';">' + (c.name||'?')[0].toUpperCase() + '</div>' +
-    '<div><div class="hero-name">' + (c.name||'') + '</div>' +
-    '<div style="font-size:11px;color:#818cf8;margin-top:2px;">' + getLabel(c.type, c.customType) + '</div></div>' +
-    '</div>' +
-    '<span class="hero-badge">' + (c.daysLeft === 0 ? '🎉 היום!' : c.daysLeft === 1 ? '🔥 מחר!' : '📅 עוד ' + c.daysLeft + ' ימים') + '</span>' +
-    '</div>';
-
-  // confetti on event day
-  const todayEvents = enriched.filter(c => c.daysLeft === 0);
-  if (todayEvents.length) setTimeout(triggerConfetti, 500);
-}
 
 // ========== GROUP FILTERS ==========
 let activeGroupFilter = '';
@@ -362,60 +329,6 @@ function renderEventsList(enriched, filter, sort) {
   cont.innerHTML = list.map(c => buildEventCard(c)).join('');
 }
 
-function buildEventCard(c) {
-  const [bg, fg] = avatarColor(c.name);
-  const letter = (c.name||'?')[0].toUpperCase();
-  const hasGift = c.giftIdea || c.budget;
-  const notifCount = (c.notifications || []).length;
-
-  const storeLinksHtml = c.giftIdea ? activeStores.map(s =>
-    '<a href="https://www.google.com/search?q=' + encodeURIComponent(c.giftIdea + ' ' + s) + '" target="_blank" class="store-link">🔍 ' + s + '</a>'
-  ).join('') : '';
-
-  const giftHtml = hasGift ? (
-    '<div class="gift-box">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-    '<span class="gift-title">🎁 ' + (c.giftIdea || '') + (c.budget ? ' | ' + c.budget + ' ₪' : '') + '</span>' +
-    '<button onclick="event.stopPropagation();toggleGiftStatus(' + c.id + ')" style="background:' + (c.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:3px 9px;border-radius:var(--radius-full);font-size:11px;cursor:pointer;">' +
-    (c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע') + '</button>' +
-    '</div>' +
-    '<div class="store-links">' + storeLinksHtml + '</div>' +
-    '</div>'
-  ) : '';
-
-  const greetingText = buildGreeting(c);
-
-  return '<div class="event-card new-card" id="card-' + c.id + '">' +
-    '<div class="event-card-main">' +
-    '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';">' + letter + '</div>' +
-    '<div style="flex:1;min-width:0;">' +
-    '<div style="font-weight:600;font-size:16px;">' + (c.name||'') + '</div>' +
-    '<div style="font-size:12px;color:var(--accent);margin-top:1px;">' + getLabel(c.type, c.customType) + '</div>' +
-    '<div style="margin-top:4px;">' + countdownBadge(c.daysLeft, c.isOver) + '</div>' +
-    '</div>' +
-    urgencyBadge(c.daysLeft, c.isOver) +
-    '</div>' +
-    '<div class="event-card-actions">' +
-    '<button class="card-btn share" onclick="event.stopPropagation();shareEvent(' + c.id + ')">📱 שתף</button>' +
-    '<button class="card-btn edit" onclick="event.stopPropagation();editEvent(' + c.id + ')">✏️ ערוך</button>' +
-    '<button class="card-btn" onclick="event.stopPropagation();toggleDetails(' + c.id + ',this)">⚙️ עוד ▼</button>' +
-    '</div>' +
-    '<div class="details-panel" id="details-' + c.id + '">' +
-    (c.group ? '<div class="detail-row"><span class="detail-label">🏷️ קבוצה</span><span>' + c.group + '</span></div>' : '') +
-    (c.phone ? '<div class="detail-row"><span class="detail-label">📱 טלפון</span><a href="tel:' + c.phone + '" style="color:var(--accent);">' + c.phone + '</a></div>' : '') +
-    (c.notes ? '<div style="font-size:12px;font-style:italic;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);">💡 ' + c.notes + '</div>' : '') +
-    (notifCount ? '<div class="detail-row"><span class="detail-label">🔔 תזכורות</span><span style="color:var(--accent);">' + notifCount + '</span></div>' : '') +
-    giftHtml +
-    '<div class="greet-box">' +
-    '<div class="greet-label">💬 ברכה מוכנה</div>' +
-    '<div class="greet-text">' + greetingText + '</div>' +
-    '<div class="greet-actions">' +
-    '<button class="greet-btn" onclick="sendWhatsApp(' + c.id + ')">📱 וואטסאפ</button>' +
-    '<button class="greet-btn secondary" onclick="copyGreeting(' + c.id + ')">📋 העתק</button>' +
-    '</div></div>' +
-    '</div>' +
-    '</div>';
-}
 
 function toggleDetails(id, btn) {
   const panel = document.getElementById('details-' + id);
@@ -425,17 +338,6 @@ function toggleDetails(id, btn) {
 }
 
 // ========== GREETING ==========
-function buildGreeting(c) {
-  const type = c.type;
-  const gender = c.gender;
-  const name = c.name || '';
-  if (type === 'memorial') return greetings.memorial;
-  if (type === 'anniversary') return greetings.anniversary.replace('!', ' ' + name + '!');
-  if (type === 'wedding') return greetings.wedding.replace('!', ' ' + name + '!');
-  // birthday based on gender
-  const key = 'birthday_' + (gender === 'male' ? 'male' : gender === 'female' ? 'female' : 'other');
-  return greetings[key].replace('!', ' ' + name + '!');
-}
 
 function sendWhatsApp(id) {
   const c = contacts.find(x => x.id === id); if (!c) return;
@@ -727,14 +629,6 @@ function deleteEventDirect(id) {
 
 // ========== SEARCH ==========
 let searchGroupFilter = '';
-function renderSearchFilters() {
-  const groups = ['', ...new Set(contacts.map(c => c.group).filter(Boolean))];
-  document.getElementById('searchFilterRow').innerHTML = groups.map(g =>
-    '<div class="chip' + (searchGroupFilter === g ? ' active' : '') + '" onclick="setSearchGroup(\'' + g.replace(/'/g,'\\\'') + '\')">' + (g||'הכל') + '</div>'
-  ).join('');
-}
-
-function setSearchGroup(g) { searchGroupFilter = g; renderSearchFilters(); onSearch(); }
 
 function onSearch() {
   const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
@@ -787,64 +681,8 @@ function addFromSearch(name) {
 }
 
 // ========== CONTACTS SCREEN ==========
-function renderContactsList() {
-  const q = (document.getElementById('contactsSearch').value || '').toLowerCase();
-  const cont = document.getElementById('contactsList');
-
-  const groups = ['', ...new Set(contacts.map(c => c.group).filter(Boolean))];
-  document.getElementById('contactsFilterRow').innerHTML = groups.map(g =>
-    '<div class="chip' + (activeGroupFilter === g ? ' active' : '') + '" onclick="setGroupFilter(\'' + g.replace(/'/g,'\\\'') + '\');renderContactsList();">' + (g||'הכל') + '</div>'
-  ).join('');
-
-  let list = contacts.filter(c => !q || (c.name||'').toLowerCase().includes(q));
-  if (activeGroupFilter) list = list.filter(c => c.group === activeGroupFilter);
-
-  // group by group
-  const byGroup = {};
-  list.forEach(c => {
-    const g = c.group || 'ללא קבוצה';
-    if (!byGroup[g]) byGroup[g] = [];
-    byGroup[g].push(c);
-  });
-
-  let html = '';
-  Object.entries(byGroup).forEach(([group, items]) => {
-    html += '<div class="section-lbl">' + group + ' — ' + items.length + '</div>';
-    html += items.map(c => {
-      const calc = calcDays(c.date, getRecurrence(c.type));
-      const [bg, fg] = avatarColor(c.name);
-      return '<div class="contact-row" onclick="openEventDetail(' + c.id + ')">' +
-        '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';width:36px;height:36px;font-size:14px;">' + (c.name||'?')[0].toUpperCase() + '</div>' +
-        '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + (c.name||'') + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);">' + getLabel(c.type, c.customType) + (c.date ? ' — ' + c.date : '') + '</div></div>' +
-        (calc.daysLeft !== null ? urgencyBadge(calc.daysLeft, calc.isOver) : '') +
-        '<span class="contact-row-arrow">›</span></div>';
-    }).join('');
-  });
-
-  cont.innerHTML = html || '<div style="text-align:center;padding:20px;color:var(--muted);">לא נמצאו אנשי קשר</div>';
-}
 
 // ========== GREETINGS ==========
-function renderGreetings() {
-  const items = [
-    { key:'birthday_male', label:'🎉 יום הולדת — זכר' },
-    { key:'birthday_female', label:'🎉 יום הולדת — נקבה' },
-    { key:'birthday_other', label:'🎉 יום הולדת — כללי' },
-    { key:'memorial', label:'🕯️ אזכרה' },
-    { key:'anniversary', label:'💍 יום נישואין' },
-    { key:'wedding', label:'💒 חתונה' },
-  ];
-  document.getElementById('greetingsList').innerHTML = items.map(item =>
-    '<div class="card" style="margin-bottom:10px;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-    '<span style="font-size:13px;font-weight:500;">' + item.label + '</span>' +
-    '<button onclick="editGreeting(\'' + item.key + '\')" style="font-size:11px;color:var(--accent);background:transparent;border:none;cursor:pointer;">✏️ ערוך</button>' +
-    '</div>' +
-    '<div style="font-size:12px;color:var(--muted);line-height:1.6;">' + (greetings[item.key]||'') + '</div>' +
-    '</div>'
-  ).join('');
-}
 
 function editGreeting(key) {
   const current = greetings[key] || '';
@@ -885,12 +723,6 @@ function saveStores() {
 }
 
 // ========== SETTINGS ==========
-function toggleSetting(key, el) {
-  settings[key] = !settings[key];
-  if (settings[key]) el.classList.add('on'); else el.classList.remove('on');
-  saveAllSettings();
-  renderMain();
-}
 
 function saveUserSettings() {
   settings.defaultFilter = document.getElementById('defaultFilter').value;
@@ -997,24 +829,9 @@ function applyTheme(key) {
   root.style.setProperty('--accent-light', t.light);
 }
 
-function setMode(mode) {
-  settings.mode = mode;
-  ['dark','light','auto'].forEach(m => {
-    const el = document.getElementById('mode-' + m);
-    if (el) el.style.border = m === mode ? '2px solid var(--accent)' : '1px solid var(--border)';
-  });
-}
 
-function saveAppearance() {
-  saveAllSettings();
-  alert('המראה נשמר ✅');
-  openScreen('screen-settings');
-}
 
 // ========== IMPORT ==========
-function importFromPhone() {
-  alert('פתח את אנשי הקשר בטלפון ← שתף ← בחר "לא שכחתי"');
-}
 
 function importICS(input) {
   const file = input.files[0]; if (!file) return;
@@ -1284,20 +1101,6 @@ function saveMyGreetings() {
   alert('הברכות האישיות נשמרו ✅');
 }
 
-function printReport() {
-  const from = document.getElementById('printFrom').value;
-  const to = document.getElementById('printTo').value;
-  let list = contacts;
-  if (from) list = list.filter(c => c.date >= from);
-  if (to)   list = list.filter(c => c.date <= to);
-  list.sort((a,b) => (a.date||'').localeCompare(b.date||''));
-  const win = window.open('');
-  win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;"><h2>לא שכחתי — דוח</h2>');
-  win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>סוג</th><th>קבוצה</th><th>תקציב</th></tr>');
-  list.forEach(c => win.document.write('<tr><td>' + (c.name||'') + '</td><td>' + (c.date||'') + '</td><td>' + getLabel(c.type,c.customType) + '</td><td>' + (c.group||'') + '</td><td>' + (c.budget||'') + '</td></tr>'));
-  win.document.write('</table></body></html>');
-  win.print();
-}
 
 // ========== APPEARANCE FIX ==========
 function setMode(mode) {
