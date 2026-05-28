@@ -316,7 +316,7 @@ function renderCalendar(enriched) {
     const hasEv = evDays[d];
     const isUrgent = hasEv && hasEv.some(e => e.daysLeft !== null && e.daysLeft <= 7);
     let cls = 'cal-day';
-    if (isToday && isWelcome) cls += ' welcome-day';
+    if (isToday && events.length === 0) cls += ' welcome-day';
     else if (isToday) cls += ' today';
     if (hasEv) cls += ' has-event';
     if (isUrgent) cls += ' urgent';
@@ -345,7 +345,8 @@ function changeMonth(delta) {
 function onCalDay(d, m, y) {
   const today = new Date();
   const isWelcome = settings.isFirstTime && events.length === 0;
-  if (isWelcome && d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) {
+  // לחיצה על היום הנוכחי כשאין אירועים → פתח מדריך
+  if (d === today.getDate() && m === today.getMonth() && y === today.getFullYear() && events.length === 0) {
     openModal('modal-welcome-guide'); return;
   }
   const dayEvents = events.filter(ev => {
@@ -445,7 +446,13 @@ function renderEventsList(enriched) {
   const el = document.getElementById('main-events-list');
   if (!list.length) {
     if (!events.length) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">עדיין אין אירועים</div><div class="empty-sub">לחץ "הוסף אירוע" כדי להתחיל</div></div>';
+      el.innerHTML = '<div class="empty-state">' +
+        '<div class="empty-icon">📭</div>' +
+        '<div class="empty-title">עדיין אין אירועים</div>' +
+        '<div class="empty-sub">לחץ "הוסף אירוע" כדי להתחיל<br><span style="font-size:11px;color:var(--muted);">או לחץ על היום בלוח השנה למדריך</span></div>' +
+        '<button class="btn-secondary" style="max-width:220px;margin:0 auto 8px;" onclick="openModal(\'modal-welcome-guide\')">📖 מדריך למתחילים</button>' +
+        '<button class="btn-primary" style="max-width:220px;margin:0 auto;" onclick="openAddForm()">➕ הוסף אירוע ראשון</button>' +
+        '</div>';
     } else {
       el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">לא נמצאו אירועים בטווח זה</div>';
     }
@@ -1623,7 +1630,7 @@ const DAILY_TIPS = [
 ];
 
 function renderGuide() {
-  const tip = DAILY_TIPS[Math.floor(Math.random() * DAILY_TIPS.length)];
+  const tip = DAILY_TIPS[new Date().getDay() % DAILY_TIPS.length];
   const el = document.getElementById('daily-tip');
   if (el) el.innerHTML = '<div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;">💡 טיפ יומי</div><div style="font-size:11px;color:var(--muted);">' + tip + '</div>';
 }
