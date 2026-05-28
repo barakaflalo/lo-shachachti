@@ -7,6 +7,29 @@
 <title>לא שכחתי</title>
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "2f06bdf0-3450-4c3f-9718-934b912f14f4",
+      notifyButton: { enable: false },
+      promptOptions: {
+        slidedown: {
+          prompts: [{
+            type: "push",
+            autoPrompt: false,
+            text: {
+              actionMessage: "לא שכחתי רוצה לשלוח לך תזכורות על אירועים קרובים",
+              acceptButton: "אפשר",
+              cancelButton: "אחר כך"
+            }
+          }]
+        }
+      }
+    });
+  });
+</script>
 </head>
 <body>
 

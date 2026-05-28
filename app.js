@@ -1701,6 +1701,27 @@ function openGuideChapter(key) {
 }
 
 // ========== NOTIFICATIONS ==========
+// ========== OneSignal ==========
+function requestOneSignalPermission() {
+  if (typeof OneSignalDeferred === 'undefined') return;
+  OneSignalDeferred.push(async function(OneSignal) {
+    try {
+      await OneSignal.Slidedown.promptPush();
+    } catch(e) {}
+  });
+}
+
+function sendOneSignalNotif(title, message, delayMs) {
+  // OneSignal Web Push — נשלח דרך הדשבורד או API
+  // לא ניתן לשלוח מ-client בלי שרת, אבל ניתן לתזמן דרך tags
+  if (typeof OneSignalDeferred === 'undefined') return;
+  OneSignalDeferred.push(async function(OneSignal) {
+    try {
+      await OneSignal.User.addTags({ lastEvent: title, lastEventDate: new Date().toISOString() });
+    } catch(e) {}
+  });
+}
+
 function scheduleNotif(ev) {
   if (!settings.notifEnabled || !('serviceWorker' in navigator)) return;
   if (Notification.permission !== 'granted') return;
@@ -1771,6 +1792,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  // בקש הרשאת OneSignal אחרי 3 שניות
+  setTimeout(() => requestOneSignalPermission(), 3000);
 
   // scroll to top button
   window.addEventListener('scroll', () => {
