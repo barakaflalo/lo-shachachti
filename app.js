@@ -97,12 +97,15 @@ function getRecurrence(type) { return YEARLY.includes(type) ? 'yearly' : 'once';
 function calcDays(ev) {
   if (!ev.date) return { daysLeft: null, isOver: false };
   const today = new Date(); today.setHours(0,0,0,0);
-  const d = new Date(ev.date);
+  // פרסור ידני כדי למנוע בעיות טיימזון
+  const parts = ev.date.split('-');
+  const evYear = parseInt(parts[0]), evMonth = parseInt(parts[1])-1, evDay = parseInt(parts[2]);
   if (getRecurrence(ev.type) === 'yearly') {
-    let next = new Date(today.getFullYear(), d.getMonth(), d.getDate());
-    if (next < today) next.setFullYear(next.getFullYear() + 1);
+    let next = new Date(today.getFullYear(), evMonth, evDay);
+    if (next < today) next.setFullYear(today.getFullYear() + 1);
     return { daysLeft: Math.round((next - today) / 86400000), isOver: false, nextDate: next };
   }
+  const d = new Date(evYear, evMonth, evDay);
   const diff = Math.round((d - today) / 86400000);
   return { daysLeft: diff >= 0 ? diff : null, isOver: diff < 0 };
 }
@@ -465,26 +468,26 @@ function buildCard(ev) {
     (ev.email ? '<div class="detail-row"><span class="detail-label">✉️ מייל</span><a href="mailto:' + ev.email + '" style="color:var(--acc-light);">' + ev.email + '</a></div>' : '') +
     (ev.notes ? '<div style="font-size:12px;color:var(--muted);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">💡 ' + ev.notes + '</div>' : '') +
     giftHtml +
-    '<div class="greet-box">' +
-    '<div class="greet-label"><span>💬 ברכה</span>' +
-    '<div style="display:flex;gap:5px;">' +
-    '<button class="greet-next-btn" onclick="nextVariant(' + ev.id + ')">הבא ›</button>' +
-    '<button class="greet-next-btn" onclick="openFreeGreet(' + ev.id + ')" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);">✏️ חופשי</button>' +
-    '</div></div>' +
+    // חלון 1 — ברכות קבועות
+    '<div class="greet-box" style="margin-bottom:8px;">' +
+    '<div class="greet-label"><span>💬 ברכות קבועות</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ')">הבא ›</button></div>' +
     '<div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div>' +
-    '<div id="free-greet-' + ev.id + '" style="display:none;margin-bottom:8px;">' +
-    '<textarea id="free-greet-ta-' + ev.id + '" class="form-textarea" style="min-height:60px;margin-bottom:6px;" placeholder="כתוב ברכה חופשית..."></textarea>' +
-    '<div style="display:flex;gap:6px;">' +
-    '<button class="greet-btn" onclick="sendFreeGreet(' + ev.id + ')">📱 שלח</button>' +
-    '<button class="greet-btn sec" onclick="copyFreeGreet(' + ev.id + ')">📋 העתק</button>' +
-    '</div></div>' +
     '<div class="greet-actions">' +
     '<button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button>' +
     '<button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button>' +
+    '</div></div>' +
+    // חלון 2 — ברכות אישיות + חופשי
+    '<div class="greet-box">' +
+    '<div class="greet-label"><span>📝 ברכה אישית</span>' +
+    (myGreetings.some(g=>g) ? '<button class="greet-next-btn" onclick="nextMyGreet(' + ev.id + ')">הבא ›</button>' : '') +
     '</div>' +
-    (myGreetings.some(g=>g) ? '<div style="margin-top:8px;"><div style="font-size:10px;color:var(--muted);margin-bottom:5px;">ברכות אישיות:</div>' +
-    myGreetings.filter(g=>g).map((g,i) => '<div style="font-size:11px;color:#c4b5fd;padding:5px 8px;background:rgba(99,102,241,0.08);border-radius:6px;margin-bottom:4px;cursor:pointer;" onclick="useMyGreeting(' + ev.id + ',' + i + ')">' + g.slice(0,50) + (g.length>50?'...':'') + '</div>').join('') + '</div>' : '') +
-    '</div>' +
+    '<div class="greet-text" id="my-greet-text-' + ev.id + '">' + (myGreetings.find(g=>g) ? myGreetings.find(g=>g).replace(/{name}/g, ev.name||'') : 'לחץ ✏️ לכתיבת ברכה חופשית') + '</div>' +
+    '<textarea id="free-greet-ta-' + ev.id + '" class="form-textarea" style="min-height:55px;margin-bottom:8px;display:none;" placeholder="כתוב ברכה חופשית..."></textarea>' +
+    '<div class="greet-actions">' +
+    '<button class="greet-btn" onclick="sendMyGreetOrFree(' + ev.id + ')">📱 וואטסאפ</button>' +
+    '<button class="greet-btn sec" onclick="copyMyGreetOrFree(' + ev.id + ')">📋 העתק</button>' +
+    '<button class="greet-btn sec" onclick="toggleFreeGreet(' + ev.id + ')" style="flex:0;padding:8px 10px;">✏️</button>' +
+    '</div></div>' +
     '</div></div>';
 }
 
@@ -826,9 +829,19 @@ function shareApp() {
 let searchGroupFilter = '';
 
 function initSearch() {
+  searchGroupFilter = '';
   renderSearchFilters();
   document.getElementById('search-input').value = '';
-  document.getElementById('search-results').innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;">🔍</div><div>הקלד שם או בחר קבוצה</div></div>';
+  // הצג את כל האירועים מיד
+  const list = events.map(e => ({...e,...calcDays(e)})).sort((a,b) => {
+    if (a.daysLeft===null) return 1; if (b.daysLeft===null) return -1; return a.daysLeft-b.daysLeft;
+  });
+  const cont = document.getElementById('search-results');
+  if (!list.length) {
+    cont.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;">🔍</div><div>אין אירועים עדיין</div></div>';
+  } else {
+    cont.innerHTML = '<div class="section-lbl">כל האירועים — ' + list.length + '</div>' + list.map(e => searchRow(e, '')).join('');
+  }
   setTimeout(() => document.getElementById('search-input').focus(), 100);
 }
 
@@ -968,7 +981,8 @@ function togSetting(key, el) {
   settings[key] = !settings[key];
   el.classList.toggle('on', settings[key]);
   saveSettings();
-  renderMain();
+  if (key === 'largeFont') { applyFont(); return; }
+  if (key !== 'sounds' && key !== 'confetti' && key !== 'animations') renderMain();
 }
 
 function applyFont() {
@@ -1647,15 +1661,13 @@ function renderFilterBar() {
   const filter = settings.defaultFilter || '30';
   const sort = settings.defaultSort || 'date';
   el.innerHTML =
-    '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
     '<div class="chip' + (filter==='30'?' active':'') + '" onclick="setQuickFilter(\'30\')">⏳ 30 יום</div>' +
     '<div class="chip' + (filter==='future'?' active':'') + '" onclick="setQuickFilter(\'future\')">📅 עתידיים</div>' +
     '<div class="chip' + (filter==='all'?' active':'') + '" onclick="setQuickFilter(\'all\')">♾️ הכל</div>' +
     '<div class="chip' + (filter==='past'?' active':'') + '" onclick="setQuickFilter(\'past\')">📂 שעברו</div>' +
-    '<div style="margin-right:auto;display:flex;gap:6px;">' +
     '<div class="chip' + (sort==='date'?' active':'') + '" onclick="setQuickSort(\'date\')">📅 תאריך</div>' +
     '<div class="chip' + (sort==='name'?' active':'') + '" onclick="setQuickSort(\'name\')">🔤 שם</div>' +
-    '</div>' +
     '</div>';
 }
 
@@ -1673,4 +1685,64 @@ function setQuickSort(s) {
   const enriched = events.map(ev => ({ ...ev, ...calcDays(ev) }));
   renderFilterBar();
   renderEventsList(enriched);
+}
+
+// ========== ברכות אישיות בכרטיס ==========
+const myGreetCardIdx = {};
+
+function nextMyGreet(id) {
+  const filtered = myGreetings.filter(g=>g);
+  if (!filtered.length) return;
+  myGreetCardIdx[id] = ((myGreetCardIdx[id]||0) + 1) % filtered.length;
+  const ev = events.find(e=>e.id===id); if (!ev) return;
+  const text = filtered[myGreetCardIdx[id]||0].replace(/{name}/g, ev.name||'');
+  const el = document.getElementById('my-greet-text-'+id);
+  if (el) el.textContent = text;
+  // גם עדכן textarea
+  const ta = document.getElementById('free-greet-ta-'+id);
+  if (ta && ta.style.display !== 'none') ta.value = text;
+  playSound('greet');
+}
+
+function toggleFreeGreet(id) {
+  const ta = document.getElementById('free-greet-ta-'+id);
+  const disp = document.getElementById('my-greet-text-'+id);
+  if (!ta) return;
+  const isOpen = ta.style.display !== 'none';
+  ta.style.display = isOpen ? 'none' : 'block';
+  if (disp) disp.style.display = isOpen ? 'block' : 'none';
+  if (!isOpen) {
+    // מלא textarea עם הטקסט הנוכחי
+    const curText = disp ? disp.textContent : '';
+    ta.value = curText === 'לחץ ✏️ לכתיבת ברכה חופשית' ? '' : curText;
+    ta.focus();
+  } else {
+    // שמור טקסט חופשי ב-display
+    if (disp && ta.value.trim()) disp.textContent = ta.value.trim();
+  }
+}
+
+function getMyGreetText(id) {
+  const ta = document.getElementById('free-greet-ta-'+id);
+  const disp = document.getElementById('my-greet-text-'+id);
+  if (ta && ta.style.display !== 'none' && ta.value.trim()) return ta.value.trim();
+  if (disp && disp.textContent !== 'לחץ ✏️ לכתיבת ברכה חופשית') return disp.textContent;
+  return '';
+}
+
+function sendMyGreetOrFree(id) {
+  const ev = events.find(e=>e.id===id); if (!ev) return;
+  const text = getMyGreetText(id);
+  if (!text) { alert('אין ברכה. לחץ ✏️ לכתיבת ברכה או בחר ברכה אישית.'); return; }
+  playSound('greet');
+  const phone = (ev.phone||'').replace(/\D/g,'');
+  const url = phone ? 'https://wa.me/972'+phone.replace(/^0/,'')+'?text='+encodeURIComponent(text) : 'https://wa.me/?text='+encodeURIComponent(text);
+  window.open(url, '_blank');
+}
+
+function copyMyGreetOrFree(id) {
+  const text = getMyGreetText(id);
+  if (!text) { alert('אין ברכה. לחץ ✏️ לכתיבת ברכה.'); return; }
+  playSound('greet');
+  navigator.clipboard.writeText(text).then(() => alert('הועתק! 📋'));
 }
