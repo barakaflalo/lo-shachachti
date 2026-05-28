@@ -246,6 +246,9 @@ function renderMain() {
   if (settings.showHero) { heroEl.style.display = ''; renderHero(enriched); }
   else heroEl.style.display = 'none';
 
+  // filter/sort bar
+  renderFilterBar();
+
   // group filters
   renderGroupFilters(enriched);
 
@@ -402,10 +405,15 @@ function setGroupFilter(g) {
 function renderEventsList(enriched) {
   let list = [...enriched];
   if (activeGroupFilter) list = list.filter(e => e.group === activeGroupFilter);
-  const filter = settings.defaultFilter;
+  const filter = settings.defaultFilter || '30';
   if (filter === '30') list = list.filter(e => e.daysLeft !== null && e.daysLeft <= 30);
-  else if (filter === 'future') list = list.filter(e => e.daysLeft !== null);
-  list.sort((a,b) => {
+  else if (filter === 'future') list = list.filter(e => !e.isOver && e.daysLeft !== null);
+  else if (filter === 'past') list = list.filter(e => e.isOver);
+  // all — show everything
+  const sortBy = settings.defaultSort || 'date';
+  if (sortBy === 'name') { list.sort((a,b) => (a.name||'').localeCompare(b.name||'','he')); }
+  else if (sortBy === 'group') { list.sort((a,b) => (a.group||'').localeCompare(b.group||'','he')); }
+  else list.sort((a,b) => {
     if (a.daysLeft === null && b.daysLeft === null) return 0;
     if (a.daysLeft === null) return 1;
     if (b.daysLeft === null) return -1;
@@ -458,12 +466,25 @@ function buildCard(ev) {
     (ev.notes ? '<div style="font-size:12px;color:var(--muted);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">💡 ' + ev.notes + '</div>' : '') +
     giftHtml +
     '<div class="greet-box">' +
-    '<div class="greet-label"><span>💬 ברכה</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ')">הבא ›</button></div>' +
+    '<div class="greet-label"><span>💬 ברכה</span>' +
+    '<div style="display:flex;gap:5px;">' +
+    '<button class="greet-next-btn" onclick="nextVariant(' + ev.id + ')">הבא ›</button>' +
+    '<button class="greet-next-btn" onclick="openFreeGreet(' + ev.id + ')" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);">✏️ חופשי</button>' +
+    '</div></div>' +
     '<div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div>' +
+    '<div id="free-greet-' + ev.id + '" style="display:none;margin-bottom:8px;">' +
+    '<textarea id="free-greet-ta-' + ev.id + '" class="form-textarea" style="min-height:60px;margin-bottom:6px;" placeholder="כתוב ברכה חופשית..."></textarea>' +
+    '<div style="display:flex;gap:6px;">' +
+    '<button class="greet-btn" onclick="sendFreeGreet(' + ev.id + ')">📱 שלח</button>' +
+    '<button class="greet-btn sec" onclick="copyFreeGreet(' + ev.id + ')">📋 העתק</button>' +
+    '</div></div>' +
     '<div class="greet-actions">' +
     '<button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button>' +
     '<button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button>' +
-    '</div></div>' +
+    '</div>' +
+    (myGreetings.some(g=>g) ? '<div style="margin-top:8px;"><div style="font-size:10px;color:var(--muted);margin-bottom:5px;">ברכות אישיות:</div>' +
+    myGreetings.filter(g=>g).map((g,i) => '<div style="font-size:11px;color:#c4b5fd;padding:5px 8px;background:rgba(99,102,241,0.08);border-radius:6px;margin-bottom:4px;cursor:pointer;" onclick="useMyGreeting(' + ev.id + ',' + i + ')">' + g.slice(0,50) + (g.length>50?'...':'') + '</div>').join('') + '</div>' : '') +
+    '</div>' +
     '</div></div>';
 }
 
@@ -561,7 +582,7 @@ function clearForm() {
   });
 }
 
-function cancelForm() { clearForm(); openScreen('screen-main'); }
+function cancelForm() { clearForm(); setTimeout(() => openScreen('screen-main'), 50); }
 
 function onTypeChange() {
   const t = document.getElementById('inp-type').value;
@@ -610,27 +631,37 @@ function getGiftIdea() {
 }
 
 function saveEvent() {
-  const name = document.getElementById('inp-name').value.trim();
-  const date = document.getElementById('inp-date').value;
+  // קרא ערכים בצורה בטוחה לאייפון
+  const nameEl = document.getElementById('inp-name');
+  const dateEl = document.getElementById('inp-date');
+  const name = nameEl ? nameEl.value.trim() : '';
+  const date = dateEl ? dateEl.value : '';
   if (!name || !date) { alert('שם ותאריך הם שדות חובה'); return; }
+
   const gSel = document.getElementById('inp-group-select').value;
-  const group = gSel === 'custom' ? document.getElementById('inp-group-custom').value.trim() : gSel;
+  const groupCustomEl = document.getElementById('inp-group-custom');
+  const group = gSel === 'custom' ? (groupCustomEl ? groupCustomEl.value.trim() : '') : gSel;
+
+  const getVal = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const getSelVal = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+
   const data = {
     name, date,
-    type: document.getElementById('inp-type').value,
-    customType: document.getElementById('inp-custom-type').value,
-    gender: document.getElementById('inp-gender').value,
-    phone: document.getElementById('inp-phone').value.trim(),
-    phone2: document.getElementById('inp-phone2').value.trim(),
-    email: document.getElementById('inp-email').value.trim(),
+    type: getSelVal('inp-type'),
+    customType: getVal('inp-custom-type'),
+    gender: getSelVal('inp-gender') || 'male',
+    phone: getVal('inp-phone'),
+    phone2: getVal('inp-phone2'),
+    email: getVal('inp-email'),
     group,
-    notes: document.getElementById('inp-notes').value.trim(),
-    budget: document.getElementById('inp-budget').value,
+    notes: getVal('inp-notes'),
+    budget: getVal('inp-budget'),
     giftIdea: getGiftIdea(),
-    giftStatus: document.getElementById('inp-gift-status').value,
+    giftStatus: getSelVal('inp-gift-status') || 'pending',
     photo: _formPhoto || null,
     emoji: _formEmoji || null,
   };
+
   const editId = document.getElementById('editing-id').value;
   if (editId) {
     const i = events.findIndex(e => e.id === parseInt(editId));
@@ -642,7 +673,12 @@ function saveEvent() {
     if (settings.isFirstTime) { settings.isFirstTime = false; saveSettings(); }
     scheduleNotif(data);
   }
-  saveEvents(); playSound('save'); clearForm(); openScreen('screen-main');
+  saveEvents();
+  playSound('save');
+  clearForm();
+  // נווט למסך הראשי בצורה בטוחה לכל דפדפן
+  setTimeout(() => openScreen('screen-main'), 50);
+  return false;
 }
 
 function saveAndEdit() {
@@ -807,7 +843,19 @@ function renderSearchFilters() {
 function setSearchGroup(g) {
   searchGroupFilter = g;
   renderSearchFilters();
-  if (g) {
+  const q = (document.getElementById('search-input').value || '').trim().toLowerCase();
+  if (!g) {
+    // הכל — הצג את כל האירועים
+    let list = events.map(e => ({...e,...calcDays(e)}));
+    if (q) list = list.filter(e => (e.name||'').toLowerCase().includes(q));
+    list.sort((a,b) => { if (a.daysLeft===null) return 1; if (b.daysLeft===null) return -1; return a.daysLeft-b.daysLeft; });
+    const cont = document.getElementById('search-results');
+    if (!list.length) {
+      cont.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;">🔍</div><div>אין אירועים עדיין</div></div>';
+      return;
+    }
+    cont.innerHTML = '<div class="section-lbl">כל האירועים — ' + list.length + '</div>' + list.map(e => searchRow(e, q)).join('');
+  } else {
     const list = events.filter(e => e.group === g).map(e => ({...e,...calcDays(e)}));
     const cont = document.getElementById('search-results');
     if (!list.length) {
@@ -816,11 +864,8 @@ function setSearchGroup(g) {
     }
     cont.innerHTML = '<div class="section-lbl">' + g + ' — ' + list.length + ' אנשים</div>' +
       list.map(e => searchRow(e)).join('');
-  } else {
-    onSearch();
   }
 }
-
 function onSearch() {
   const q = (document.getElementById('search-input').value || '').trim().toLowerCase();
   if (!q && !searchGroupFilter) {
@@ -927,8 +972,28 @@ function togSetting(key, el) {
 }
 
 function applyFont() {
-  if (settings.largeFont) { document.documentElement.style.fontSize='18px'; document.body.classList.add('large-font'); }
-  else { document.documentElement.style.fontSize=''; document.body.classList.remove('large-font'); }
+  if (settings.largeFont) {
+    const size = settings.fontSizePx || 18;
+    document.documentElement.style.fontSize = size + 'px';
+    document.body.classList.add('large-font');
+  } else {
+    document.documentElement.style.fontSize = '16px';
+    document.body.classList.remove('large-font');
+  }
+}
+
+function changeFontSize() {
+  const cur = settings.fontSizePx || 18;
+  const val = prompt('גודל גופן (14-24):', cur);
+  if (!val) return;
+  const n = parseInt(val);
+  if (n < 14 || n > 24) { alert('הכנס מספר בין 14 ל-24'); return; }
+  settings.fontSizePx = n;
+  settings.largeFont = true;
+  saveSettings(); applyFont();
+  // עדכן toggle
+  const tog = document.getElementById('tog-font');
+  if (tog) tog.classList.add('on');
 }
 
 function saveUserSettings() {
@@ -1029,8 +1094,13 @@ function saveMyGreetings() {
 
 // ========== STORES ==========
 function renderStores() {
-  document.getElementById('stores-container').innerHTML = ALL_STORES.map(s =>
-    '<div class="gift-tag' + ((settings.activeStores||[]).includes(s) ? ' selected' : '') + '" onclick="toggleStore(this,\'' + s + '\')">' + s + '</div>'
+  if (!settings.activeStores) settings.activeStores = ['Amazon','KSP','זאפ'];
+  const customStores = (settings.customStores || []);
+  const allToShow = [...ALL_STORES, ...customStores.filter(s => !ALL_STORES.includes(s))];
+  const cont = document.getElementById('stores-container');
+  if (!cont) return;
+  cont.innerHTML = allToShow.map(s =>
+    '<div class="gift-tag' + (settings.activeStores.includes(s) ? ' selected' : '') + '" onclick="toggleStore(this,\'' + s.replace(/'/g,"\\'") + '\')">' + s + '</div>'
   ).join('');
 }
 
@@ -1042,19 +1112,29 @@ function toggleStore(el, name) {
 }
 
 function addCustomStore() {
-  const name = document.getElementById('inp-custom-store').value.trim(); if (!name) return;
+  const inp = document.getElementById('inp-custom-store');
+  const name = inp ? inp.value.trim() : '';
+  if (!name) return;
+  if (!settings.customStores) settings.customStores = [];
+  if (!settings.customStores.includes(name)) settings.customStores.push(name);
   if (!settings.activeStores) settings.activeStores = [];
   if (!settings.activeStores.includes(name)) settings.activeStores.push(name);
-  document.getElementById('inp-custom-store').value = '';
+  if (inp) inp.value = '';
+  saveSettings();
   renderStores();
 }
 
 function saveStores() { saveSettings(); alert('חנויות נשמרו ✅'); }
-
 // ========== BUDGET ==========
 function renderBudgetSettings() {
   const from = (document.getElementById('budget-from')||{}).value || '';
   const to = (document.getElementById('budget-to')||{}).value || '';
+  // מלא רשימת קבוצות
+  const groupSel = document.getElementById('budget-group-filter');
+  if (groupSel && groupSel.options.length <= 1) {
+    const groups = [...new Set(events.map(e=>e.group).filter(Boolean))];
+    groups.forEach(g => { const o=document.createElement('option'); o.value=g; o.textContent=g; groupSel.appendChild(o); });
+  }
   let list = events.filter(e => e.budget);
   if (from) list = list.filter(e => (e.date||'') >= from);
   if (to) list = list.filter(e => (e.date||'') <= to);
@@ -1075,12 +1155,20 @@ function renderBudgetSettings() {
   ).join('');
 }
 
-function printBudgetReport() {
-  const list = events.filter(e => e.budget);
+function printBudgetReport(groupFilter) {
+  let list = events.filter(e => e.budget);
+  if (groupFilter) list = list.filter(e => e.group === groupFilter);
+  const paidTotal = list.filter(e=>e.giftStatus==='paid').reduce((s,e)=>s+(parseInt(e.budget)||0),0);
+  const total = list.reduce((s,e)=>s+(parseInt(e.budget)||0),0);
   const win = window.open('');
-  win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;"><h2>לא שכחתי — דוח תקציב</h2>');
-  win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>תקציב</th><th>סטטוס</th></tr>');
-  list.forEach(e => win.document.write('<tr><td>'+(e.name||'')+'</td><td>'+(e.date||'')+'</td><td>'+(e.budget||'')+'₪</td><td>'+(e.giftStatus==='paid'?'✅':'⏳')+'</td></tr>'));
+  win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;">');
+  win.document.write('<h2>לא שכחתי — דוח תקציב' + (groupFilter ? ' (' + groupFilter + ')' : '') + '</h2>');
+  win.document.write('<p>שולם: <b>' + paidTotal + '₪</b> | סה"כ: <b>' + total + '₪</b></p>');
+  win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>קבוצה</th><th>תקציב</th><th>סטטוס</th></tr>');
+  list.forEach(e => win.document.write(
+    '<tr><td>'+(e.name||'')+'</td><td>'+(e.date||'')+'</td><td>'+(e.group||'')+'</td><td>'+(e.budget||'')+'₪</td>' +
+    '<td>'+(e.giftStatus==='paid'?'✅ נקנה':'⏳ טרם נקנה')+'</td></tr>'
+  ));
   win.document.write('</table></body></html>'); win.print();
 }
 
@@ -1432,22 +1520,40 @@ function openGuideChapter(key) {
 function scheduleNotif(ev) {
   if (!settings.notifEnabled || !('serviceWorker' in navigator)) return;
   if (Notification.permission !== 'granted') return;
-  const days = settings.notifDayBefore ? [1] : [];
-  if (settings.notifWeekBefore) days.push(7);
+  const notifDays = [];
+  if (settings.notifDayBefore) notifDays.push(1);
+  if (settings.notifWeekBefore) notifDays.push(7);
+  if (settings.giftReminder) notifDays.push(settings.giftReminderDays || 14);
+  if (!notifDays.length) return;
+
   navigator.serviceWorker.ready.then(reg => {
     const today = new Date(); today.setHours(0,0,0,0);
-    const d = new Date(ev.date);
-    days.forEach(n => {
-      let next = new Date(today.getFullYear(), d.getMonth(), d.getDate());
-      if (next < today) next.setFullYear(next.getFullYear()+1);
-      next.setDate(next.getDate() - n);
-      next.setHours(9,0,0,0);
-      const ms = next - new Date();
-      if (ms < 0) return;
+    // חשב את תאריך האירוע הבא בצורה נכונה
+    const parts = ev.date.split('-');
+    const evMonth = parseInt(parts[1]) - 1;
+    const evDay = parseInt(parts[2]);
+    const evYear = parseInt(parts[0]);
+
+    notifDays.forEach(n => {
+      let eventDate;
+      if (getRecurrence(ev.type) === 'yearly') {
+        // אירוע שנתי — מצא את המועד הבא
+        eventDate = new Date(today.getFullYear(), evMonth, evDay);
+        if (eventDate <= today) eventDate.setFullYear(today.getFullYear() + 1);
+      } else {
+        // אירוע חד פעמי
+        eventDate = new Date(evYear, evMonth, evDay);
+      }
+      const notifDate = new Date(eventDate);
+      notifDate.setDate(notifDate.getDate() - n);
+      notifDate.setHours(9, 0, 0, 0);
+      const ms = notifDate - new Date();
+      if (ms < 0) return; // תאריך עבר
       setTimeout(() => {
         reg.showNotification('לא שכחתי 🔔', {
-          body: ev.name + ' — ' + getLabel(ev.type, ev.customType) + (n===1?' מחר!':' בעוד '+n+' ימים'),
-          icon: 'icon-192.png', tag: 'ev-' + ev.id, dir: 'rtl',
+          body: ev.name + ' — ' + getLabel(ev.type, ev.customType) +
+            (n === 1 ? ' מחר!' : ' בעוד ' + n + ' ימים'),
+          icon: 'icon-192.png', tag: 'ev-' + ev.id + '-' + n, dir: 'rtl',
         });
       }, ms);
     });
@@ -1466,7 +1572,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // apply theme & mode
   applyTheme(settings.theme || 'purple');
   if (settings.mode === 'light') document.body.classList.add('light-mode');
-  if (settings.largeFont) { document.documentElement.style.fontSize='18px'; document.body.classList.add('large-font'); }
+  if (settings.largeFont) { const sz = settings.fontSizePx || 18; document.documentElement.style.fontSize=sz+'px'; document.body.classList.add('large-font'); }
 
   // init gift tags
   initGiftTags();
@@ -1488,6 +1594,83 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.style.display = window.scrollY > 300 ? 'block' : 'none';
   });
 
+  // עדכן מצב toggle גופן גדול
+  const togFont = document.getElementById('tog-font');
+  if (togFont && settings.largeFont) togFont.classList.add('on');
+
   // render main
   renderMain();
 });
+
+// ========== ברכה חופשית ==========
+function openFreeGreet(id) {
+  const el = document.getElementById('free-greet-' + id);
+  if (el) { el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
+}
+
+function sendFreeGreet(id) {
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  const ta = document.getElementById('free-greet-ta-' + id);
+  const text = ta ? ta.value.trim() : '';
+  if (!text) { alert('הכנס ברכה'); return; }
+  playSound('greet');
+  const phone = (ev.phone || '').replace(/\D/g,'');
+  const url = phone ? 'https://wa.me/972' + phone.replace(/^0/,'') + '?text=' + encodeURIComponent(text) : 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+}
+
+function copyFreeGreet(id) {
+  const ta = document.getElementById('free-greet-ta-' + id);
+  const text = ta ? ta.value.trim() : '';
+  if (!text) { alert('הכנס ברכה'); return; }
+  playSound('greet');
+  navigator.clipboard.writeText(text).then(() => alert('הועתק! 📋'));
+}
+
+function useMyGreeting(id, idx) {
+  const g = myGreetings.filter(x=>x)[idx];
+  if (!g) return;
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  // פתח שדה חופשי עם הברכה
+  const freeEl = document.getElementById('free-greet-' + id);
+  if (freeEl) {
+    freeEl.style.display = 'block';
+    const ta = document.getElementById('free-greet-ta-' + id);
+    if (ta) ta.value = g.replace(/{name}/g, ev.name || '');
+  }
+}
+
+// ========== סינון ומיון מהיר במסך הראשי ==========
+function renderFilterBar() {
+  const el = document.getElementById('main-filter-bar');
+  if (!el) return;
+  const filter = settings.defaultFilter || '30';
+  const sort = settings.defaultSort || 'date';
+  el.innerHTML =
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+    '<div class="chip' + (filter==='30'?' active':'') + '" onclick="setQuickFilter(\'30\')">⏳ 30 יום</div>' +
+    '<div class="chip' + (filter==='future'?' active':'') + '" onclick="setQuickFilter(\'future\')">📅 עתידיים</div>' +
+    '<div class="chip' + (filter==='all'?' active':'') + '" onclick="setQuickFilter(\'all\')">♾️ הכל</div>' +
+    '<div class="chip' + (filter==='past'?' active':'') + '" onclick="setQuickFilter(\'past\')">📂 שעברו</div>' +
+    '<div style="margin-right:auto;display:flex;gap:6px;">' +
+    '<div class="chip' + (sort==='date'?' active':'') + '" onclick="setQuickSort(\'date\')">📅 תאריך</div>' +
+    '<div class="chip' + (sort==='name'?' active':'') + '" onclick="setQuickSort(\'name\')">🔤 שם</div>' +
+    '</div>' +
+    '</div>';
+}
+
+function setQuickFilter(f) {
+  settings.defaultFilter = f;
+  saveSettings();
+  const enriched = events.map(ev => ({ ...ev, ...calcDays(ev) }));
+  renderFilterBar();
+  renderEventsList(enriched);
+}
+
+function setQuickSort(s) {
+  settings.defaultSort = s;
+  saveSettings();
+  const enriched = events.map(ev => ({ ...ev, ...calcDays(ev) }));
+  renderFilterBar();
+  renderEventsList(enriched);
+}

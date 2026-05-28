@@ -143,6 +143,7 @@
       <div id="cal-popup-list"></div>
     </div>
     <div id="main-hero"></div>
+    <div id="main-filter-bar" style="margin-bottom:8px;"></div>
     <div class="filter-row" id="main-group-filters"></div>
     <div id="main-events-list"></div>
   </div>
@@ -347,7 +348,7 @@
     <div class="section-lbl" style="margin-top:14px;">מראה וחוויה</div>
     <div class="toggle-row"><div><div style="font-size:13px;">🎵 צלילים</div></div><div class="toggle on" id="tog-sounds" onclick="togSetting('sounds',this)"></div></div>
     <div class="toggle-row"><div><div style="font-size:13px;">🎊 קונפטי ביום אירוע</div></div><div class="toggle on" id="tog-confetti" onclick="togSetting('confetti',this)"></div></div>
-    <div class="toggle-row"><div><div style="font-size:13px;">🔤 גופן גדול</div><div style="font-size:11px;color:var(--muted);">הגדל טקסט לנוחות קריאה</div></div><div class="toggle" id="tog-font" onclick="togSetting('largeFont',this);applyFont()"></div></div>
+    <div class="toggle-row"><div><div style="font-size:13px;">🔤 גופן גדול</div><div style="font-size:11px;color:var(--muted);">הגדל טקסט לנוחות קריאה</div></div><div style="display:flex;gap:8px;align-items:center;"><button onclick="changeFontSize()" style="font-size:11px;color:var(--acc-light);background:rgba(var(--acc-rgb),0.15);border:1px solid var(--acc-border);border-radius:var(--rf);padding:3px 9px;cursor:pointer;">גודל</button><div class="toggle" id="tog-font" onclick="togSetting('largeFont',this);applyFont()"></div></div></div>
     <div class="toggle-row"><div><div style="font-size:13px;">✨ אנימציות</div></div><div class="toggle on" id="tog-anim" onclick="togSetting('animations',this)"></div></div>
     <div class="section-lbl" style="margin-top:14px;">סינון ומיון ברירת מחדל</div>
     <select class="form-select" id="default-filter" style="margin-bottom:8px;">
@@ -578,8 +579,13 @@
     </div>
     <div id="budget-list"></div>
     <hr class="form-divider">
-    <button class="btn-primary" onclick="printBudgetReport()">🖨️ הדפס תקציב</button>
-    <button class="btn-secondary" onclick="exportBudgetCSV()">📊 ייצא לאקסל</button>
+    <div class="section-lbl">הדפסה</div>
+    <button class="btn-primary" onclick="printBudgetReport()">🖨️ הדפס הכל</button>
+    <select class="form-select" id="budget-group-filter" style="margin-bottom:8px;">
+      <option value="">כל הקבוצות</option>
+    </select>
+    <button class="btn-secondary" onclick="printBudgetReport(document.getElementById('budget-group-filter').value)">🖨️ הדפס לפי קבוצה</button>
+    <button class="btn-ghost" onclick="exportBudgetCSV()">📊 ייצא לאקסל</button>
   </div>
 </div>
 
