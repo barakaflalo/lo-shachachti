@@ -766,7 +766,7 @@ function initAppearanceScreen() {
         '<input type="color" id="customColorPicker" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;" onchange="applyCustomColor(this.value)">' +
         '</div>';
     }
-    return '<div onclick="selectTheme('' + t.key + '')" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--radius-sm);padding:10px 6px;text-align:center;cursor:pointer;">' +
+    return '<div onclick="selectTheme(\'' + t.key + '\')" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--radius-sm);padding:10px 6px;text-align:center;cursor:pointer;">' +
       '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,' + t.from + ',' + t.to + ');margin:0 auto 5px;"></div>' +
       '<div style="font-size:10px;color:' + (isActive?'var(--accent-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
       '</div>';
