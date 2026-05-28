@@ -5,11 +5,13 @@
   "start_url": "/lo-shachachti/",
   "scope": "/lo-shachachti/",
   "display": "standalone",
+  "display_override": ["standalone","minimal-ui","browser"],
   "background_color": "#12121f",
   "theme_color": "#12121f",
   "orientation": "portrait",
   "lang": "he",
   "dir": "rtl",
+  "permissions": ["contacts"],
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }

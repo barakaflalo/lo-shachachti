@@ -1,39 +1,170 @@
-// ===== לא שכחתי — app.js =====
+// ===== לא שכחתי v2 — app.js =====
 
-// ========== DATA ==========
-let contacts = JSON.parse(localStorage.getItem('ls_v1_contacts') || '[]');
-let settings = JSON.parse(localStorage.getItem('ls_v1_settings') || '{}');
-let greetings = JSON.parse(localStorage.getItem('ls_v1_greetings') || 'null') || {
-  birthday_male:   'יום הולדת שמח! שהשנה תביא לך בריאות, אושר והצלחה 🎂',
-  birthday_female: 'יום הולדת שמח! שתמשיכי לקרן ולהאיר לכולנו 🌟',
-  birthday_other:  'יום הולדת שמח! שהשנה תביא לך את כל הטוב 🎉',
-  memorial:        'זכרו יהיה ברוך לעד. מחבק מרחוק 🕯️',
-  anniversary:     'יום נישואין שמח! שתמשיכו לאהוב ולצמוח יחד 💍',
-  wedding:         'מזל טוב! שתתחילו את דרכם המשותפת באהבה ובאושר 💒',
+// ========== STORAGE ==========
+let events = JSON.parse(localStorage.getItem('ls2_events') || '[]');
+let settings = Object.assign({
+  showStats:true, showHero:true, showBudget:false, showCalendar:true,
+  sounds:true, confetti:true, largeFont:false, animations:true,
+  notifEnabled:true, notifSound:true, notifVibrate:false,
+  notifDayBefore:true, notifWeekBefore:false, giftReminder:true, giftReminderDays:14,
+  defaultFilter:'30', defaultSort:'date',
+  theme:'purple', mode:'dark',
+  customColor:null, isFirstTime:true,
+  activeStores:['Amazon','KSP','זאפ'],
+  quietStart:'23:00', quietEnd:'08:00',
+}, JSON.parse(localStorage.getItem('ls2_settings') || '{}'));
+
+let greetings = Object.assign({
+  birthday:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר והצלחה 🎂','מזל טוב {name}! עוד שנה של הצלחות ושמחות 🎉','{name} היקר/ה, יום הולדת שמח! שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגוג עוד הרבה שנים {name} 🎈'],
+  memorial:['חושב עליכם היום ביום האזכרה. מחבק מרחוק 🕯️','זכרו יהיה ברוך לעד 🕯️','זיכרון לברכה. מחשבותינו אתכם 🕯️','בעצב ובכבוד, מציין/ת את יום האזכרה 🕯️','לנצח בלבנו 🕯️'],
+  anniversary:['יום נישואין שמח {name}! שתמשיכו לאהוב ולצמוח יחד 💍','מזל טוב! עוד שנה של אהבה 💍','שנה נוספת של אהבה ושמחה {name}! 💑','יום נישואין שמח! שתמשיכו יחד לנצח 💍','ברכות חמות ליום הנישואין! 💞'],
+  wedding:['מזל טוב {name}! שתתחילו את דרכם המשותפת באהבה ובאושר 💒','ברכות לחתונה! יום מרגש ומיוחד 💒','מזל טוב לחתן ולכלה! 🥂','שתהיה חתונה שמחה ויפה! 🎊','ברכות מכל הלב ליום המיוחד! 💒'],
+  barmitzvah:['מזל טוב על בר/בת המצווה! ✡️','ברכות לאבן הדרך המיוחדת! ✡️','מזל טוב! יום גדול ומשמעותי ✨','ברכות חמות לאירוע המיוחד! ✡️','מזל טוב! שתמשיך בדרך טובה ✡️'],
+  friends:['מחכה לפגישה! 😊','יהיה כיף לראות אותך! 🤗','מצפה למפגש! 👋','יאללה נתראה! 😄','מחכה בקוצר רוח! 🎉'],
+  trip:['טיסה טובה {name}! ✈️ שתהיה חופשה נהדרת','נסיעה טובה! 🌍 תהנה/י','חופשה מענגת! ✈️','שתחזור/י בריא/ה ושלם/ה! 🧳','טיול נעים {name}! 🏖️'],
+  car:['בהצלחה בטסט! 🚗','יעבור חלק! 🔧','בהצלחה! 🚙','הכל יהיה בסדר גמור! 🔑','יצא מהטסט עם פס ירוק! ✅'],
+  medical:['בהצלחה בתור! 🏥 הבריאות קודמת','שיהיה בסדר! 💊','בריאות מעל הכל! 🏥','שתרגיש/י טוב! 💙','בהצלחה! שיהיה בשורות טובות 🌿'],
+  holiday:['חג שמח! 🎊','מועדים לשמחה! 🕎','חג שמח וכשר! ✨','ברכות לחג! 🎉','שיהיה חג מאושר {name}! 🌟'],
+  graduation:['מזל טוב על הסיום {name}! 🎓 עתיד מזהיר לפניך','ברכות על הגמר! 🎓','מזל טוב! כל הכבוד על ההשגה 🎓','ברכות חמות על סיום הלימודים! 📚','מזל טוב! הצלחה בדרך הבאה 🌟'],
+  custom:['מזל טוב! 🎉','ברכות! ✨','כל הכבוד! 👏','שיהיה בהצלחה! 🌟','ברכות חמות! 💙'],
+}, JSON.parse(localStorage.getItem('ls2_greetings') || '{}'));
+
+let myGreetings = JSON.parse(localStorage.getItem('ls2_my_greetings') || '["","","","",""]');
+const greetVariants = {};
+
+function saveEvents() { localStorage.setItem('ls2_events', JSON.stringify(events)); }
+function saveSettings() { localStorage.setItem('ls2_settings', JSON.stringify(settings)); }
+function saveGreetings() { localStorage.setItem('ls2_greetings', JSON.stringify(greetings)); }
+
+// ========== CONSTANTS ==========
+const EVENT_LABELS = {
+  birthday:'🎉 יום הולדת', wedding:'💒 חתונה', anniversary:'💍 יום נישואין',
+  memorial:'🕯️ אזכרה', barmitzvah:'✡️ בר/בת מצווה', friends:'👥 מפגש',
+  trip:'✈️ טיול', car:'🚗 טסט רכב', medical:'🏥 תור רפואי',
+  holiday:'🎊 חג', graduation:'🎓 סיום לימודים', custom:'✨ אירוע'
 };
-let myGreetings = JSON.parse(localStorage.getItem('ls_v1_my_greetings') || '["","","","",""]');
-let activeStores = JSON.parse(localStorage.getItem('ls_v1_stores') || '["Amazon","KSP","זאפ"]');
+const FIXED_GROUPS = ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];
+const YEARLY = ['birthday','anniversary','memorial','holiday','barmitzvah','graduation'];
+const ALL_STORES = ['Amazon','KSP','זאפ','IVORY','BUG','Etsy','ASOS','iDigital','Walmart','eBay','AliExpress'];
+const GIFT_OPTIONS = [
+  {e:'⌚',l:'שעון'},{e:'👕',l:'בגדים'},{e:'👟',l:'נעליים'},{e:'🖼️',l:'תמונה'},
+  {e:'📱',l:'סלולר'},{e:'🎮',l:'גיימינג'},{e:'📚',l:'ספרים'},{e:'💄',l:'קוסמטיקה'},
+  {e:'🌸',l:'פרחים'},{e:'🍫',l:'שוקולד'},{e:'🍷',l:'יין'},{e:'☕',l:'קפה'},
+  {e:'🎒',l:'תיק'},{e:'💍',l:'תכשיטים'},{e:'🏠',l:'לבית'},{e:'🎵',l:'אוזניות'},
+  {e:'📺',l:'טלוויזיה'},{e:'✈️',l:'חוויה'},{e:'💆',l:'ספא'},{e:'🎟️',l:'כרטיסים'},
+  {e:'💰',l:'גיפט קארד'},{e:'🧴',l:'טיפוח'}
+];
+const AVATAR_COLORS = [
+  ['#1e1b4b','#a5b4fc'],['#042c53','#93c5fd'],['#052e16','#86efac'],
+  ['#451a03','#fed7aa'],['#2e1065','#c4b5fd'],['#0c1e3c','#93c5fd'],
+  ['#1a0a2e','#c084fc'],['#0c2615','#4ade80'],
+];
+const THEMES = [
+  {name:'סגול', key:'purple', from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241', light:'#a5b4fc'},
+  {name:'כחול', key:'blue', from:'#3b82f6', to:'#06b6d4', rgb:'59,130,246', light:'#93c5fd'},
+  {name:'ירוק', key:'green', from:'#10b981', to:'#34d399', rgb:'16,185,129', light:'#6ee7b7'},
+  {name:'כתום', key:'amber', from:'#f59e0b', to:'#fbbf24', rgb:'245,158,11', light:'#fcd34d'},
+  {name:'אדום', key:'red', from:'#ef4444', to:'#f97316', rgb:'239,68,68', light:'#fca5a5'},
+  {name:'ורוד', key:'pink', from:'#ec4899', to:'#a855f7', rgb:'236,72,153', light:'#f9a8d4'},
+  {name:'טורקיז', key:'teal', from:'#14b8a6', to:'#06b6d4', rgb:'20,184,166', light:'#5eead4'},
+  {name:'זהב', key:'gold', from:'#d97706', to:'#f59e0b', rgb:'217,119,6', light:'#fbbf24'},
+  {name:'לילך', key:'violet', from:'#7c3aed', to:'#9333ea', rgb:'124,58,237', light:'#c4b5fd'},
+  {name:'כחול כהה', key:'navy', from:'#1d4ed8', to:'#2563eb', rgb:'29,78,216', light:'#93c5fd'},
+  {name:'ניאון', key:'lime', from:'#65a30d', to:'#84cc16', rgb:'101,163,13', light:'#bef264'},
+  {name:'מותאם', key:'custom', from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241', light:'#a5b4fc', custom:true},
+];
 
-// ========== DEFAULT SETTINGS ==========
-const defaultSettings = {
-  showStats: true, showHero: true, showBudget: false,
-  showCalendar: true, showNotifPanel: false,
-  defaultFilter: '30', defaultSort: 'date',
-  sounds: true, confetti: true,
-  notifEnabled: true, notifSound: true, notifVibrate: false,
-  defaultDayBefore: true, defaultWeekBefore: false, giftReminder: true,
-  largeFont: false, animations: true,
-  theme: 'purple', mode: 'dark',
-};
-settings = Object.assign({}, defaultSettings, settings);
+// ========== UTILS ==========
+function getLabel(type, custom) { return EVENT_LABELS[type] || custom || '✨ אירוע'; }
+function avatarColor(name) {
+  const i = ((name || 'A').charCodeAt(0) - 65) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[Math.max(0, i)];
+}
+function avatarHTML(ev, size) {
+  const cls = 'avatar ' + (size || 'av-sm');
+  if (ev.photo && ev.photo.startsWith('data:')) {
+    return '<div class="' + cls + '"><img src="' + ev.photo + '"></div>';
+  }
+  if (ev.emoji) {
+    const [bg] = avatarColor(ev.name);
+    return '<div class="' + cls + '" style="background:' + bg + ';font-size:' + (size === 'av-lg' ? '24px' : size === 'av-md' ? '20px' : '16px') + ';">' + ev.emoji + '</div>';
+  }
+  const [bg, fg] = avatarColor(ev.name);
+  return '<div class="' + cls + '" style="background:' + bg + ';color:' + fg + ';">' + (ev.name || '?')[0].toUpperCase() + '</div>';
+}
 
-// ========== SAVE ==========
-function save() { localStorage.setItem('ls_v1_contacts', JSON.stringify(contacts)); }
-function saveSetting(key, val) { settings[key] = val; localStorage.setItem('ls_v1_settings', JSON.stringify(settings)); }
-function saveAllSettings() { localStorage.setItem('ls_v1_settings', JSON.stringify(settings)); }
+function getRecurrence(type) { return YEARLY.includes(type) ? 'yearly' : 'once'; }
+function calcDays(ev) {
+  if (!ev.date) return { daysLeft: null, isOver: false };
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(ev.date);
+  if (getRecurrence(ev.type) === 'yearly') {
+    let next = new Date(today.getFullYear(), d.getMonth(), d.getDate());
+    if (next < today) next.setFullYear(next.getFullYear() + 1);
+    return { daysLeft: Math.round((next - today) / 86400000), isOver: false, nextDate: next };
+  }
+  const diff = Math.round((d - today) / 86400000);
+  return { daysLeft: diff >= 0 ? diff : null, isOver: diff < 0 };
+}
 
-// ========== SCREEN NAVIGATION ==========
-let _history = ['screen-main'];
+function countdownHTML(daysLeft, isOver) {
+  if (isOver || daysLeft === null) return '<span class="cd-far">עבר</span>';
+  if (daysLeft === 0) return '<span class="cd-today">🎉 היום!</span>';
+  if (daysLeft === 1) return '<span class="cd-today">🔥 מחר!</span>';
+  if (daysLeft <= 7) return '<span class="cd-soon">⚡ עוד ' + daysLeft + ' ימים</span>';
+  if (daysLeft <= 30) return '<span class="cd-normal">📅 עוד ' + daysLeft + ' ימים</span>';
+  return '<span class="cd-far">📅 עוד ' + daysLeft + ' ימים</span>';
+}
+
+function urgencyBadge(daysLeft, isOver) {
+  if (isOver || daysLeft === null) return '<span class="badge badge-gray">עבר</span>';
+  if (daysLeft === 0) return '<span class="badge badge-red">היום!</span>';
+  if (daysLeft === 1) return '<span class="badge badge-red">מחר</span>';
+  if (daysLeft <= 7) return '<span class="badge badge-amber">' + daysLeft + ' ימים</span>';
+  if (daysLeft <= 30) return '<span class="badge badge-purple">' + daysLeft + ' ימים</span>';
+  return '<span class="badge badge-gray">' + daysLeft + ' ימים</span>';
+}
+
+function buildGreeting(ev) {
+  const type = ev.type || 'custom';
+  const variants = greetings[type] || greetings.custom;
+  const idx = greetVariants[ev.id] || 0;
+  let text = variants[idx] || variants[0];
+  return text.replace(/{name}/g, ev.name || '');
+}
+
+function nextVariant(id) {
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  const variants = greetings[ev.type] || greetings.custom;
+  greetVariants[id] = ((greetVariants[id] || 0) + 1) % variants.length;
+  const el = document.getElementById('greet-text-' + id);
+  if (el) el.textContent = buildGreeting(ev);
+  playSound('greet');
+}
+
+// ========== SCREEN NAV ==========
+function openScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+  const map = {
+    'screen-main': renderMain,
+    'screen-contacts': renderContacts,
+    'screen-search': initSearch,
+    'screen-greetings': renderGreetings,
+    'screen-my-greetings': renderMyGreetings,
+    'screen-stores': renderStores,
+    'screen-budget-settings': renderBudgetSettings,
+    'screen-print': initPrint,
+    'screen-guide': renderGuide,
+    'screen-appearance': renderAppearance,
+  };
+  if (map[id]) map[id]();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 // ========== SOUNDS ==========
 let _actx = null;
@@ -43,372 +174,434 @@ function playSound(type) {
   try {
     const ctx = getACtx();
     const g = ctx.createGain(); g.gain.value = 0.15; g.connect(ctx.destination);
-    const play = (freq, start, dur, wave = 'sine') => {
+    const play = (freq, start, dur) => {
       const o = ctx.createOscillator(), og = ctx.createGain();
-      o.type = wave; o.frequency.value = freq;
+      o.frequency.value = freq;
       og.gain.setValueAtTime(0.3, ctx.currentTime + start);
       og.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
       o.connect(og); og.connect(g);
       o.start(ctx.currentTime + start); o.stop(ctx.currentTime + start + dur + 0.05);
     };
-    if (type === 'save')   { play(520, 0, 0.12); play(660, 0.14, 0.18); }
+    if (type === 'save') { play(520, 0, 0.12); play(660, 0.14, 0.18); }
     if (type === 'delete') { play(380, 0, 0.1); play(220, 0.12, 0.18); }
-    if (type === 'greet')  { play(880, 0, 0.15); play(660, 0.17, 0.2); }
-    if (type === 'edit')   { play(600, 0, 0.08); }
-  } catch (e) {}
+    if (type === 'greet') { play(880, 0, 0.1); play(1100, 0.12, 0.15); }
+  } catch(e) {}
 }
 
 // ========== CONFETTI ==========
 function triggerConfetti() {
   if (!settings.confetti) return;
-  const canvas = document.createElement('canvas');
-  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;';
-  document.body.appendChild(canvas);
+  const canvas = document.getElementById('confettiCanvas');
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth; canvas.height = window.innerHeight;
   const pieces = Array.from({length:80}, () => ({
-    x: Math.random() * canvas.width, y: -10,
-    w: 7 + Math.random() * 7, h: 7 + Math.random() * 7,
-    color: 'hsl(' + Math.floor(Math.random()*360) + ',90%,60%)',
-    vx: (Math.random() - 0.5) * 4, vy: 2 + Math.random() * 3,
-    rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 8,
+    x: Math.random()*canvas.width, y: -10,
+    w: 7+Math.random()*7, h: 7+Math.random()*7,
+    color: 'hsl('+Math.floor(Math.random()*360)+',90%,60%)',
+    vx: (Math.random()-0.5)*4, vy: 2+Math.random()*3,
+    rot: Math.random()*360, rotV: (Math.random()-0.5)*8,
   }));
   let frame = 0;
   const draw = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
     pieces.forEach(p => {
-      p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
-      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
       ctx.restore();
     });
-    if (++frame < 100) requestAnimationFrame(draw); else canvas.remove();
+    if (++frame < 120) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
   };
   draw();
 }
 
-// ========== EVENT CALCULATIONS ==========
-const YEARLY_TYPES = ['birthday', 'anniversary', 'memorial', 'holiday'];
-function getRecurrence(type) { return YEARLY_TYPES.includes(type) ? 'yearly' : 'once'; }
-
-function calcDays(dateStr, recurrence) {
-  if (!dateStr) return { daysLeft: null, isOver: false, pastDays: null };
-  const today = new Date(); today.setHours(0,0,0,0);
-  const ev = new Date(dateStr);
-  if (recurrence === 'once') {
-    const diff = Math.round((ev - today) / 86400000);
-    return { daysLeft: diff >= 0 ? diff : null, isOver: diff < 0, pastDays: diff < 0 ? -diff : null };
-  }
-  // yearly
-  let next = new Date(today.getFullYear(), ev.getMonth(), ev.getDate());
-  if (next < today) next.setFullYear(next.getFullYear() + 1);
-  const daysLeft = Math.round((next - today) / 86400000);
-  return { daysLeft, isOver: false, pastDays: null, nextDate: next };
-}
-
-// ========== LABELS ==========
-const EVENT_LABELS = {
-  birthday: '🎉 יום הולדת', wedding: '💒 חתונה', anniversary: '💍 יום נישואין',
-  memorial: '🕯️ אזכרה', barmitzvah: '✡️ בר/בת מצווה', friends: '👥 מפגש חברים',
-  trip: '✈️ טיול', car: '🚗 טסט לרכב', medical: '🏥 תור רפואי',
-  holiday: '🎊 חג', graduation: '🎓 סיום לימודים', custom: '✨ אירוע',
-};
-function getLabel(type, custom) { return EVENT_LABELS[type] || custom || '✨ אירוע'; }
-
-const AVATAR_COLORS = [
-  ['#1e1b4b','#a5b4fc'], ['#042c53','#93c5fd'], ['#052e16','#86efac'],
-  ['#451a03','#fed7aa'], ['#2e1065','#c4b5fd'], ['#0c1e3c','#93c5fd'],
-];
-function avatarColor(name) {
-  const i = (name || 'A').charCodeAt(0) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[i];
-}
-function avatarEl(name, size = 'sm', photo = '') {
-  const cls = 'avatar avatar-' + size;
-  if (photo) return '<img src="' + photo + '" class="' + cls + '" style="object-fit:cover;">';
-  const [bg, fg] = avatarColor(name);
-  const letter = (name || '?')[0].toUpperCase();
-  return '<div class="' + cls + '" style="background:' + bg + ';color:' + fg + ';">' + letter + '</div>';
-}
-
-function countdownBadge(daysLeft, isOver) {
-  if (isOver || daysLeft === null) return '<span class="countdown-far">עבר</span>';
-  if (daysLeft === 0) return '<span class="countdown-today">🎉 היום!</span>';
-  if (daysLeft === 1) return '<span class="countdown-today">🔥 מחר!</span>';
-  if (daysLeft <= 7)  return '<span class="countdown-soon">⚡ עוד ' + daysLeft + ' ימים</span>';
-  if (daysLeft <= 30) return '<span class="countdown-normal">📅 עוד ' + daysLeft + ' ימים</span>';
-  return '<span class="countdown-far">📅 עוד ' + daysLeft + ' ימים</span>';
-}
-
-function urgencyBadge(daysLeft, isOver) {
-  if (isOver || daysLeft === null) return '<span class="badge badge-gray">עבר</span>';
-  if (daysLeft === 0) return '<span class="badge badge-red">היום!</span>';
-  if (daysLeft === 1) return '<span class="badge badge-red">מחר</span>';
-  if (daysLeft <= 7)  return '<span class="badge badge-amber">' + daysLeft + ' ימים</span>';
-  if (daysLeft <= 30) return '<span class="badge badge-purple">' + daysLeft + ' ימים</span>';
-  return '<span class="badge badge-gray">' + daysLeft + ' ימים</span>';
-}
-
 // ========== MAIN RENDER ==========
-let calYear, calMonth;
+let calYear, calMonth, activeGroupFilter = '';
 
 function renderMain() {
   const today = new Date();
   if (calYear === undefined) { calYear = today.getFullYear(); calMonth = today.getMonth(); }
-
-  // calc days for all
-  const enriched = contacts.map(c => ({ ...c, ...calcDays(c.date, getRecurrence(c.type)) }));
-  const filter = settings.defaultFilter || '30';
-  const sort = settings.defaultSort || 'date';
+  const enriched = events.map(ev => ({ ...ev, ...calcDays(ev) }));
 
   // stats
+  const statsEl = document.getElementById('main-stats');
   if (settings.showStats) {
-    const upcoming30 = enriched.filter(c => c.daysLeft !== null && c.daysLeft <= 30).length;
-    const totalBudget = contacts.reduce((s, c) => s + (parseInt(c.budget) || 0), 0);
-    const statsHtml = '<div class="stat-card"><div class="stat-num">' + upcoming30 + '</div><div class="stat-label">אירועים ב-30 יום</div></div>' +
-      '<div class="stat-card"><div class="stat-num green">' + totalBudget + '₪</div><div class="stat-label">תקציב מתנות</div></div>';
-    document.getElementById('statsGrid').innerHTML = statsHtml;
-    document.getElementById('statsGrid').style.display = '';
-  } else {
-    document.getElementById('statsGrid').style.display = 'none';
-  }
+    const u30 = enriched.filter(e => e.daysLeft !== null && e.daysLeft <= 30).length;
+    const budgetTotal = events.reduce((s,e) => s+(parseInt(e.budget)||0), 0);
+    statsEl.style.display = '';
+    statsEl.innerHTML =
+      '<div class="stat-card"><div class="stat-num">' + u30 + '</div><div class="stat-label">אירועים ב-30 יום</div></div>' +
+      (settings.showBudget ? '<div class="stat-card"><div class="stat-num green">' + budgetTotal + '₪</div><div class="stat-label">תקציב מתנות</div></div>' :
+       '<div class="stat-card"><div class="stat-num">' + events.length + '</div><div class="stat-label">סה"כ אירועים</div></div>');
+  } else { statsEl.style.display = 'none'; }
 
   // calendar
-  document.getElementById('calendarSection').style.display = settings.showCalendar ? '' : 'none';
-  if (settings.showCalendar) renderCalendar(enriched);
+  const calEl = document.getElementById('main-calendar');
+  if (settings.showCalendar) { calEl.style.display = ''; renderCalendar(enriched); }
+  else calEl.style.display = 'none';
 
   // hero
-  document.getElementById('heroWidget').style.display = settings.showHero ? '' : 'none';
-  if (settings.showHero) renderHero(enriched);
+  const heroEl = document.getElementById('main-hero');
+  if (settings.showHero) { heroEl.style.display = ''; renderHero(enriched); }
+  else heroEl.style.display = 'none';
 
   // group filters
   renderGroupFilters(enriched);
 
   // events list
-  renderEventsList(enriched, filter, sort);
+  renderEventsList(enriched);
+
+  // today events popup
+  const todayEvents = enriched.filter(e => e.daysLeft === 0);
+  if (todayEvents.length) {
+    setTimeout(() => {
+      triggerConfetti();
+      showTodayModal(todayEvents);
+    }, 1000);
+  }
 }
 
-// ========== CALENDAR ==========
 function renderCalendar(enriched) {
+  const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
   const today = new Date();
-  const monthNames = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-  document.getElementById('calMonthLabel').textContent = monthNames[calMonth] + ' ' + calYear;
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const days = new Date(calYear, calMonth+1, 0).getDate();
 
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-
-  // build event day map
-  const eventDays = {};
-  enriched.forEach(c => {
-    if (!c.date) return;
-    const ev = new Date(c.date);
-    const rec = getRecurrence(c.type);
-    let evYear = ev.getFullYear(), evMonth = ev.getMonth(), evDay = ev.getDate();
-    if (rec === 'yearly') evYear = calYear;
-    if (evYear === calYear && evMonth === calMonth) {
-      if (!eventDays[evDay]) eventDays[evDay] = [];
-      eventDays[evDay].push(c);
+  // build event days map
+  const evDays = {};
+  enriched.forEach(ev => {
+    if (!ev.date) return;
+    const d = new Date(ev.date);
+    let y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
+    if (getRecurrence(ev.type) === 'yearly') y = calYear;
+    if (y === calYear && m === calMonth) {
+      if (!evDays[day]) evDays[day] = [];
+      evDays[day].push(ev);
     }
   });
+  // welcome day
+  const isWelcome = settings.isFirstTime && events.length === 0;
+  const todayDay = today.getFullYear() === calYear && today.getMonth() === calMonth ? today.getDate() : -1;
 
-  let html = '';
-  // empty cells
-  for (let i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
-  for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === d;
-    const hasEvents = eventDays[d];
-    const isUrgent = hasEvents && hasEvents.some(c => { const calc = calcDays(c.date, getRecurrence(c.type)); return calc.daysLeft !== null && calc.daysLeft <= 7; });
+  let grid = '';
+  for (let i = 0; i < first; i++) grid += '<div class="cal-day"></div>';
+  for (let d = 1; d <= days; d++) {
+    const isToday = d === todayDay;
+    const hasEv = evDays[d];
+    const isUrgent = hasEv && hasEv.some(e => e.daysLeft !== null && e.daysLeft <= 7);
     let cls = 'cal-day';
-    if (isToday) cls += ' today';
-    if (hasEvents) cls += ' has-event';
+    if (isToday && isWelcome) cls += ' welcome-day';
+    else if (isToday) cls += ' today';
+    if (hasEv) cls += ' has-event';
     if (isUrgent) cls += ' urgent';
-    html += '<div class="' + cls + '" onclick="onCalDayClick(' + d + ',' + calMonth + ',' + calYear + ')">' + d + '</div>';
+    grid += '<div class="' + cls + '" onclick="onCalDay(' + d + ',' + calMonth + ',' + calYear + ')">' + d + '</div>';
   }
-  document.getElementById('calGrid').innerHTML = html;
+
+  document.getElementById('main-calendar').innerHTML =
+    '<div class="cal-wrap">' +
+    '<div class="cal-header">' +
+    '<span class="cal-nav" onclick="changeMonth(-1)">›</span>' +
+    '<span>' + months[calMonth] + ' ' + calYear + '</span>' +
+    '<span class="cal-nav" onclick="changeMonth(1)">‹</span>' +
+    '</div>' +
+    '<div class="cal-days-header"><div class="cal-day-name">א</div><div class="cal-day-name">ב</div><div class="cal-day-name">ג</div><div class="cal-day-name">ד</div><div class="cal-day-name">ה</div><div class="cal-day-name">ו</div><div class="cal-day-name">ש</div></div>' +
+    '<div class="cal-grid">' + grid + '</div>' +
+    '</div>';
 }
 
 function changeMonth(delta) {
   calMonth += delta;
   if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0)  { calMonth = 11; calYear--; }
-  const enriched = contacts.map(c => ({ ...c, ...calcDays(c.date, getRecurrence(c.type)) }));
-  renderCalendar(enriched);
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar(events.map(ev => ({ ...ev, ...calcDays(ev) })));
 }
 
-function onCalDayClick(d, m, y) {
-  // find events for that day
-  const events = contacts.filter(c => {
-    if (!c.date) return false;
-    const ev = new Date(c.date);
-    const rec = getRecurrence(c.type);
-    const evM = ev.getMonth(), evD = ev.getDate();
-    const evY = rec === 'yearly' ? y : ev.getFullYear();
-    return evY === y && evM === m && evD === d;
+function onCalDay(d, m, y) {
+  const today = new Date();
+  const isWelcome = settings.isFirstTime && events.length === 0;
+  if (isWelcome && d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) {
+    openModal('modal-welcome-guide'); return;
+  }
+  const dayEvents = events.filter(ev => {
+    if (!ev.date) return false;
+    const ed = new Date(ev.date);
+    const ey = getRecurrence(ev.type) === 'yearly' ? y : ed.getFullYear();
+    return ey === y && ed.getMonth() === m && ed.getDate() === d;
   });
-  if (!events.length) return;
-
-  const monthNames = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-  document.getElementById('calPopupTitle').textContent = '📅 ' + d + ' ' + monthNames[m];
-
-  const html = events.map(c => {
-    const [bg, fg] = avatarColor(c.name);
-    return '<div class="cal-popup-event"><div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';">' + (c.name||'?')[0].toUpperCase() + '</div><div><div style="font-size:13px;font-weight:500;">' + (c.name||'') + '</div><div style="font-size:11px;color:var(--muted);">' + getLabel(c.type, c.customType) + '</div></div></div>';
+  if (!dayEvents.length) return;
+  const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  document.getElementById('cal-popup-title').textContent = '📅 ' + d + ' ' + months[m];
+  document.getElementById('cal-popup-list').innerHTML = dayEvents.map(ev => {
+    const calc = calcDays(ev);
+    return '<div class="cal-popup-header" style="margin-bottom:8px;">' +
+      '<div style="display:flex;align-items:center;gap:8px;">' + avatarHTML(ev, 'av-sm') +
+      '<div><div style="font-size:13px;font-weight:500;">' + ev.name + '</div>' +
+      '<div style="font-size:11px;color:var(--acc-light);">' + getLabel(ev.type, ev.customType) + '</div></div></div>' +
+      countdownHTML(calc.daysLeft, calc.isOver) + '</div>';
   }).join('');
-  document.getElementById('calPopupList').innerHTML = html;
-
-  const popup = document.getElementById('calPopup');
-  popup.classList.add('open');
+  document.getElementById('cal-popup').classList.add('open');
 }
 
-function closeCalPopup() { document.getElementById('calPopup').classList.remove('open'); }
+function closeCalPopup() { document.getElementById('cal-popup').classList.remove('open'); }
 
-// ========== HERO WIDGET ==========
-
-// ========== GROUP FILTERS ==========
-let activeGroupFilter = '';
-function renderGroupFilters(enriched) {
-  const groups = ['', ...new Set(enriched.map(c => c.group).filter(Boolean))];
-  const html = groups.map(g =>
-    '<div class="chip' + (activeGroupFilter === g ? ' active' : '') + '" onclick="setGroupFilter(\'' + g.replace(/'/g,'\\\'') + '\')">' +
-    (g === '' ? 'הכל' : g) + '</div>'
+function showTodayModal(todayEvents) {
+  document.getElementById('today-modal-title').textContent = todayEvents.length === 1 ? '🎉 היום יש אירוע!' : '🎉 היום יש ' + todayEvents.length + ' אירועים!';
+  document.getElementById('today-modal-events').innerHTML = todayEvents.map(ev =>
+    '<div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:10px;">' +
+    avatarHTML(ev, 'av-sm') +
+    '<div><div style="font-size:14px;font-weight:600;">' + ev.name + '</div>' +
+    '<div style="font-size:12px;color:var(--acc-light);">' + getLabel(ev.type, ev.customType) + '</div></div>' +
+    '</div>'
   ).join('');
-  document.getElementById('groupFilterRow').innerHTML = html;
+  openModal('modal-today');
+}
+
+function renderHero(enriched) {
+  const upcoming = enriched.filter(e => e.daysLeft !== null).sort((a,b) => a.daysLeft - b.daysLeft);
+  const heroEl = document.getElementById('main-hero');
+  if (!upcoming.length && events.length === 0 && settings.isFirstTime) {
+    heroEl.innerHTML = '<div class="hero-welcome" onclick="openModal(\'modal-welcome-guide\')">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+      '<div style="font-size:28px;">🎉</div>' +
+      '<div><div style="font-size:14px;font-weight:600;">ברוך הבא ל"לא שכחתי"!</div>' +
+      '<div style="font-size:11px;color:var(--acc-light);">לחץ לקבלת מדריך קצר</div></div>' +
+      '</div>' +
+      '<span style="background:rgba(var(--acc-rgb),0.3);color:var(--acc-light);font-size:10px;padding:3px 10px;border-radius:var(--rf);display:inline-block;">📖 איך מתחילים?</span>' +
+      '</div>';
+    return;
+  }
+  if (!upcoming.length) { heroEl.innerHTML = ''; return; }
+  const ev = upcoming[0];
+  heroEl.innerHTML = '<div class="hero-card" onclick="openDetail(' + ev.id + ')">' +
+    '<div class="hero-label">האירוע הקרוב</div>' +
+    '<div style="display:flex;align-items:center;gap:12px;margin-top:5px;">' +
+    avatarHTML(ev, 'av-sm') +
+    '<div><div class="hero-name">' + ev.name + '</div>' +
+    '<div style="font-size:11px;color:#818cf8;margin-top:2px;">' + getLabel(ev.type, ev.customType) + '</div></div>' +
+    '</div>' +
+    '<span class="hero-badge">' + (ev.daysLeft === 0 ? '🎉 היום!' : ev.daysLeft === 1 ? '🔥 מחר!' : '📅 עוד ' + ev.daysLeft + ' ימים') + '</span>' +
+    '</div>';
+}
+
+function renderGroupFilters(enriched) {
+  const userGroups = [...new Set(enriched.map(e => e.group).filter(g => g && !FIXED_GROUPS.includes(g)))];
+  const allGroups = ['', ...FIXED_GROUPS, ...userGroups];
+  document.getElementById('main-group-filters').innerHTML = allGroups.map(g =>
+    '<div class="chip' + (activeGroupFilter === g ? ' active' : '') + '" onclick="setGroupFilter(\'' + g.replace(/'/g,"\\'") + '\')">' + (g || 'הכל') + '</div>'
+  ).join('');
 }
 
 function setGroupFilter(g) {
   activeGroupFilter = g;
-  const enriched = contacts.map(c => ({ ...c, ...calcDays(c.date, getRecurrence(c.type)) }));
+  const enriched = events.map(ev => ({ ...ev, ...calcDays(ev) }));
   renderGroupFilters(enriched);
-  renderEventsList(enriched, settings.defaultFilter || '30', settings.defaultSort || 'date');
+  renderEventsList(enriched);
 }
 
-// ========== EVENTS LIST ==========
-function renderEventsList(enriched, filter, sort) {
+function renderEventsList(enriched) {
   let list = [...enriched];
-
-  // group filter
-  if (activeGroupFilter) list = list.filter(c => c.group === activeGroupFilter);
-
-  // time filter
-  if (filter === '30') list = list.filter(c => c.daysLeft !== null && c.daysLeft <= 30);
-  else if (filter === 'future') list = list.filter(c => c.daysLeft !== null && !c.isOver);
-  else if (filter === 'past') list = list.filter(c => c.isOver);
-
-  // sort
-  if (sort === 'name') list.sort((a,b) => (a.name||'').localeCompare(b.name||'','he'));
-  else if (sort === 'group') list.sort((a,b) => (a.group||'').localeCompare(b.group||'','he'));
-  else list.sort((a,b) => {
+  if (activeGroupFilter) list = list.filter(e => e.group === activeGroupFilter);
+  const filter = settings.defaultFilter;
+  if (filter === '30') list = list.filter(e => e.daysLeft !== null && e.daysLeft <= 30);
+  else if (filter === 'future') list = list.filter(e => e.daysLeft !== null);
+  list.sort((a,b) => {
     if (a.daysLeft === null && b.daysLeft === null) return 0;
     if (a.daysLeft === null) return 1;
     if (b.daysLeft === null) return -1;
     return a.daysLeft - b.daysLeft;
   });
 
-  const cont = document.getElementById('eventsList');
+  const el = document.getElementById('main-events-list');
   if (!list.length) {
-    if (!contacts.length) {
-      cont.innerHTML = '<div class="empty-state">' +
-        '<div class="empty-icon">🔔</div>' +
-        '<div class="empty-title">ברוך הבא ל"לא שכחתי"!</div>' +
-        '<div class="empty-sub">האפליקציה שתזכיר לך כל אירוע חשוב</div>' +
-        '<div class="features-list">' +
-        '<div class="feature-row"><div class="feature-icon" style="background:rgba(99,102,241,0.2);">🎉</div>ימי הולדת ואירועים</div>' +
-        '<div class="feature-row"><div class="feature-icon" style="background:rgba(52,211,153,0.15);">🎁</div>ניהול מתנות ותקציב</div>' +
-        '<div class="feature-row"><div class="feature-icon" style="background:rgba(251,191,36,0.15);">🔔</div>תזכורות חכמות</div>' +
-        '<div class="feature-row"><div class="feature-icon" style="background:rgba(99,102,241,0.15);">💬</div>ברכות בוואטסאפ</div>' +
-        '</div>' +
-        '<button class="btn-primary" onclick="openScreen(\'screen-add-event\')">➕ הוסף אירוע ראשון</button>' +
-        '<button class="btn-ghost" onclick="openScreen(\'screen-import\')">📥 ייבוא מלוח השנה</button>' +
-        '</div>';
+    if (!events.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">עדיין אין אירועים</div><div class="empty-sub">לחץ "הוסף אירוע" כדי להתחיל</div></div>';
     } else {
-      cont.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">לא נמצאו אירועים</div>';
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">לא נמצאו אירועים בטווח זה</div>';
     }
     return;
   }
-
-  cont.innerHTML = list.map(c => buildEventCard(c)).join('');
+  el.innerHTML = list.map(ev => buildCard(ev)).join('');
 }
 
+function buildCard(ev) {
+  const storeLinks = ev.giftIdea ? (settings.activeStores||['Amazon','KSP','זאפ']).map(s =>
+    '<a href="https://www.google.com/search?q=' + encodeURIComponent(ev.giftIdea + ' ' + s) + '" target="_blank" class="store-link">🔍 ' + s + '</a>'
+  ).join('') : '';
+
+  const giftHtml = (ev.giftIdea || ev.budget) ? (
+    '<div class="gift-box"><div style="display:flex;justify-content:space-between;align-items:center;">' +
+    '<span style="font-size:11px;color:var(--green);">🎁 ' + (ev.giftIdea||'') + (ev.budget ? ' | ' + ev.budget + '₪' : '') + '</span>' +
+    '<button onclick="event.stopPropagation();toggleGift(' + ev.id + ')" style="background:' + (ev.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:3px 9px;border-radius:var(--rf);font-size:11px;cursor:pointer;">' + (ev.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע') + '</button>' +
+    '</div><div class="store-links">' + storeLinks + '</div></div>'
+  ) : '';
+
+  return '<div class="event-card new-card" id="card-' + ev.id + '">' +
+    '<div class="event-card-main">' +
+    '<div onclick="openDetail(' + ev.id + ')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;">' +
+    avatarHTML(ev, 'av-sm') +
+    '<div style="flex:1;"><div style="font-weight:600;font-size:16px;">' + ev.name + '</div>' +
+    '<div style="font-size:12px;color:var(--accent);">' + getLabel(ev.type, ev.customType) + '</div>' +
+    '<div style="margin-top:4px;">' + countdownHTML(ev.daysLeft, ev.isOver) + '</div></div>' +
+    '</div>' + urgencyBadge(ev.daysLeft, ev.isOver) +
+    '</div>' +
+    '<div class="event-actions">' +
+    '<button class="card-btn share" onclick="shareEvent(' + ev.id + ')">📱 שתף</button>' +
+    '<button class="card-btn" onclick="editEvent(' + ev.id + ')">✏️ ערוך</button>' +
+    '<button class="card-btn" onclick="toggleDetails(' + ev.id + ',this)">⚙️ עוד ▼</button>' +
+    '</div>' +
+    '<div class="details-panel" id="dp-' + ev.id + '">' +
+    (ev.group ? '<div class="detail-row"><span class="detail-label">🏷️ קבוצה</span><span>' + ev.group + '</span></div>' : '') +
+    (ev.phone ? '<div class="detail-row"><span class="detail-label">📱 טלפון</span><a href="tel:' + ev.phone + '" style="color:var(--acc-light);">' + ev.phone + '</a></div>' : '') +
+    (ev.phone2 ? '<div class="detail-row"><span class="detail-label">📱 טלפון 2</span><a href="tel:' + ev.phone2 + '" style="color:var(--acc-light);">' + ev.phone2 + '</a></div>' : '') +
+    (ev.email ? '<div class="detail-row"><span class="detail-label">✉️ מייל</span><a href="mailto:' + ev.email + '" style="color:var(--acc-light);">' + ev.email + '</a></div>' : '') +
+    (ev.notes ? '<div style="font-size:12px;color:var(--muted);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">💡 ' + ev.notes + '</div>' : '') +
+    giftHtml +
+    '<div class="greet-box">' +
+    '<div class="greet-label"><span>💬 ברכה</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ')">הבא ›</button></div>' +
+    '<div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div>' +
+    '<div class="greet-actions">' +
+    '<button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button>' +
+    '<button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button>' +
+    '</div></div>' +
+    '</div></div>';
+}
 
 function toggleDetails(id, btn) {
-  const panel = document.getElementById('details-' + id);
-  const isOpen = panel.classList.contains('open');
-  panel.classList.toggle('open');
-  btn.textContent = isOpen ? '⚙️ עוד ▼' : '▲ הסתר';
+  const p = document.getElementById('dp-' + id);
+  p.classList.toggle('open');
+  btn.textContent = p.classList.contains('open') ? '▲ הסתר' : '⚙️ עוד ▼';
 }
 
-// ========== GREETING ==========
+// ========== DETAIL ==========
+let _detailId = null;
+function openDetail(id) {
+  _detailId = id;
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  const calc = calcDays(ev);
+  const storeLinks = ev.giftIdea ? (settings.activeStores||['Amazon','KSP','זאפ']).map(s =>
+    '<a href="https://www.google.com/search?q=' + encodeURIComponent(ev.giftIdea + ' ' + s) + '" target="_blank" class="store-link">🔍 ' + s + '</a>'
+  ).join('') : '';
 
-function sendWhatsApp(id) {
-  const c = contacts.find(x => x.id === id); if (!c) return;
-  playSound('greet');
-  const text = buildGreeting(c);
-  const phone = (c.phone || '').replace(/\D/g,'');
-  const url = phone ? 'https://wa.me/972' + phone.replace(/^0/,'') + '?text=' + encodeURIComponent(text) : 'https://wa.me/?text=' + encodeURIComponent(text);
-  window.open(url, '_blank');
+  document.getElementById('detail-content').innerHTML =
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">' +
+    avatarHTML(ev, 'av-lg') +
+    '<div><div style="font-size:20px;font-weight:600;">' + ev.name + '</div>' +
+    '<div style="font-size:13px;color:var(--accent);margin-top:2px;">' + getLabel(ev.type, ev.customType) + '</div>' +
+    '<div style="margin-top:5px;">' + countdownHTML(calc.daysLeft, calc.isOver) + '</div></div>' +
+    '</div>' +
+    '<div class="card" style="margin-bottom:12px;">' +
+    '<div class="detail-row"><span class="detail-label">📅 תאריך</span><span>' + (ev.date||'') + '</span></div>' +
+    (ev.group ? '<div class="detail-row"><span class="detail-label">🏷️ קבוצה</span><span>' + ev.group + '</span></div>' : '') +
+    (ev.phone ? '<div class="detail-row"><span class="detail-label">📱 טלפון</span><a href="tel:' + ev.phone + '" style="color:var(--acc-light);">' + ev.phone + '</a></div>' : '') +
+    (ev.phone2 ? '<div class="detail-row"><span class="detail-label">📱 טלפון 2</span><a href="tel:' + ev.phone2 + '" style="color:var(--acc-light);">' + ev.phone2 + '</a></div>' : '') +
+    (ev.email ? '<div class="detail-row"><span class="detail-label">✉️ מייל</span><a href="mailto:' + ev.email + '" style="color:var(--acc-light);">' + ev.email + '</a></div>' : '') +
+    (ev.notes ? '<div class="detail-row"><span class="detail-label">💡 הערות</span><span style="color:var(--muted);">' + ev.notes + '</span></div>' : '') +
+    '</div>' +
+    ((ev.giftIdea||ev.budget) ? '<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 ' + (ev.giftIdea||'') + (ev.budget?' | '+ev.budget+'₪':'') + '</span><button onclick="toggleGift(' + ev.id + ');renderMain();" style="background:' + (ev.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">' + (ev.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע') + '</button></div><div class="store-links">' + storeLinks + '</div></div>' : '') +
+    '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>💬 ברכה</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ');updateDetailGreet(' + ev.id + ')">הבא ›</button></div><div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button><button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button></div></div>' +
+    '<div style="display:flex;gap:8px;">' +
+    (ev.phone ? '<button class="card-btn" style="flex:1;" onclick="window.location.href=\'tel:' + ev.phone + '\'">📱 התקשר</button>' : '') +
+    '<button class="card-btn" style="flex:1;" onclick="shareEvent(' + ev.id + ')">📤 שתף</button>' +
+    '<button class="card-btn" style="flex:1;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);" onclick="deleteEventDirect(' + ev.id + ')">🗑️ מחק</button>' +
+    '</div>';
+
+  openScreen('screen-detail');
 }
 
-function copyGreeting(id) {
-  const c = contacts.find(x => x.id === id); if (!c) return;
-  playSound('greet');
-  navigator.clipboard.writeText(buildGreeting(c)).then(() => alert('הברכה הועתקה! 📋'));
+function updateDetailGreet(id) {
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  const el = document.getElementById('greet-text-' + id);
+  if (el) el.textContent = buildGreeting(ev);
 }
 
-// ========== GIFT STATUS ==========
-function toggleGiftStatus(id) {
-  const c = contacts.find(x => x.id === id); if (!c) return;
-  c.giftStatus = c.giftStatus === 'paid' ? 'pending' : 'paid';
-  save(); renderMain();
-}
+function editCurrentDetail() { if (_detailId) editEvent(_detailId); }
 
-// ========== SHARE ==========
-function shareEvent(id) {
-  const c = contacts.find(x => x.id === id); if (!c) return;
-  const calc = calcDays(c.date, getRecurrence(c.type));
-  const text = '🔔 ' + c.name + ' — ' + getLabel(c.type, c.customType) + (calc.daysLeft !== null ? ' (בעוד ' + calc.daysLeft + ' ימים)' : '') + '\n\nהאפליקציה "לא שכחתי": https://barakaflalo.github.io/lo-shachachti';
-  if (navigator.share) navigator.share({ title: 'לא שכחתי', text }).catch(() => {});
-  else navigator.clipboard.writeText(text).then(() => alert('הועתק! 📋'));
-}
-
-function shareApp() {
-  const text = '🔔 "לא שכחתי" — האפליקציה שתזכיר לך כל יום הולדת, אזכרה ואירוע חשוב!\nhttps://barakaflalo.github.io/lo-shachachti';
-  if (navigator.share) navigator.share({ title: 'לא שכחתי', text }).catch(() => {});
-  else navigator.clipboard.writeText(text).then(() => alert('הקישור הועתק! 📋'));
+function deleteEventDirect(id) {
+  if (!confirm('מחק את האירוע לצמיתות?')) return;
+  events = events.filter(e => e.id !== id);
+  saveEvents(); playSound('delete'); openScreen('screen-main');
 }
 
 // ========== FORM ==========
-const GIFT_OPTIONS = [
-  {e:'⌚',l:'שעון'},{e:'👕',l:'בגדים'},{e:'👟',l:'נעליים'},{e:'🖼️',l:'תמונה'},
-  {e:'📱',l:'סלולר'},{e:'🎮',l:'גיימינג'},{e:'📚',l:'ספרים'},{e:'💄',l:'קוסמטיקה'},
-  {e:'🌸',l:'פרחים'},{e:'🍫',l:'שוקולד'},{e:'🍷',l:'יין'},{e:'☕',l:'קפה'},
-  {e:'🎒',l:'תיק'},{e:'💍',l:'תכשיטים'},{e:'🏠',l:'לבית'},{e:'🧹',l:'שואב אבק'},
-  {e:'📺',l:'טלוויזיה'},{e:'🎵',l:'אוזניות'},{e:'✈️',l:'חוויה'},{e:'💆',l:'ספא'},
-  {e:'🎟️',l:'כרטיסים'},{e:'💰',l:'גיפט קארד'},
-];
-
 let selectedGiftTags = [];
+let _formPhoto = null, _formEmoji = null;
+
+function openAddForm(group) {
+  document.getElementById('form-title').textContent = 'אירוע חדש';
+  document.getElementById('editing-id').value = '';
+  document.getElementById('btn-delete-form').style.display = 'none';
+  clearForm();
+  if (group) {
+    const sel = document.getElementById('inp-group-select');
+    if ([...sel.options].find(o => o.value === group)) sel.value = group;
+  }
+  openScreen('screen-add');
+}
+
+function clearForm() {
+  ['inp-name','inp-date','inp-phone','inp-phone2','inp-email','inp-notes','inp-budget','inp-gift-idea','inp-custom-type','inp-group-custom'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('inp-type').value = 'birthday';
+  document.getElementById('inp-gender').value = 'male';
+  document.getElementById('inp-group-select').value = '';
+  document.getElementById('inp-gift-status').value = 'pending';
+  document.getElementById('inp-custom-type').style.display = 'none';
+  document.getElementById('inp-group-custom').style.display = 'none';
+  document.getElementById('sound-label').textContent = 'ברירת מחדל';
+  selectedGiftTags = []; _formPhoto = null; _formEmoji = null;
+  document.querySelectorAll('.gift-tag').forEach(t => t.classList.remove('selected'));
+  document.getElementById('gift-selected-display').style.display = 'none';
+  document.getElementById('form-avatar').innerHTML = '?';
+  document.getElementById('form-avatar').style.cssText = 'background:#1e1b4b;color:var(--acc-light);border:2px dashed rgba(var(--acc-rgb),0.4);';
+  ['extra','gift'].forEach(id => {
+    document.getElementById('collapse-' + id).classList.remove('open');
+    document.getElementById('btn-' + id).classList.remove('open');
+  });
+}
+
+function cancelForm() { clearForm(); openScreen('screen-main'); }
+
+function onTypeChange() {
+  const t = document.getElementById('inp-type').value;
+  document.getElementById('inp-custom-type').style.display = t === 'custom' ? 'block' : 'none';
+}
+
+function onGroupChange() {
+  const v = document.getElementById('inp-group-select').value;
+  document.getElementById('inp-group-custom').style.display = v === 'custom' ? 'block' : 'none';
+}
+
+function toggleCollapse(id) {
+  const btn = document.getElementById('btn-' + id);
+  const content = document.getElementById('collapse-' + id);
+  content.classList.toggle('open');
+  btn.classList.toggle('open');
+  const arrow = btn.querySelector('span:last-child');
+  if (arrow) arrow.textContent = content.classList.contains('open') ? '▲' : '▼';
+}
 
 function initGiftTags() {
-  const cont = document.getElementById('giftTagsContainer');
-  if (!cont) return;
-  cont.innerHTML = GIFT_OPTIONS.map(o =>
+  const c = document.getElementById('gift-tags-container'); if (!c) return;
+  c.innerHTML = GIFT_OPTIONS.map(o =>
     '<div class="gift-tag" data-label="' + o.l + '" onclick="toggleGiftTag(this,\'' + o.l + '\')">' + o.e + ' ' + o.l + '</div>'
   ).join('');
 }
 
 function toggleGiftTag(el, label) {
-  const idx = selectedGiftTags.indexOf(label);
-  if (idx === -1) { selectedGiftTags.push(label); el.classList.add('selected'); }
-  else { selectedGiftTags.splice(idx, 1); el.classList.remove('selected'); }
+  const i = selectedGiftTags.indexOf(label);
+  if (i === -1) { selectedGiftTags.push(label); el.classList.add('selected'); }
+  else { selectedGiftTags.splice(i,1); el.classList.remove('selected'); }
   updateGiftDisplay();
 }
 
 function updateGiftDisplay() {
   const custom = document.getElementById('inp-gift-idea').value;
   const all = [...selectedGiftTags, ...(custom ? [custom] : [])];
-  const disp = document.getElementById('giftSelectedDisplay');
-  if (all.length) { disp.style.display='block'; disp.textContent='🎁 נבחר: ' + all.join(' · '); }
-  else disp.style.display='none';
+  const d = document.getElementById('gift-selected-display');
+  if (all.length) { d.style.display = 'block'; d.textContent = '🎁 נבחר: ' + all.join(' · '); }
+  else d.style.display = 'none';
 }
 
 function getGiftIdea() {
@@ -416,1282 +609,885 @@ function getGiftIdea() {
   return [...selectedGiftTags, ...(custom ? [custom] : [])].join(', ');
 }
 
-function setGiftIdea(val) {
-  selectedGiftTags = [];
-  document.querySelectorAll('.gift-tag').forEach(t => t.classList.remove('selected'));
-  if (!val) { updateGiftDisplay(); return; }
-  val.split(',').map(s => s.trim()).forEach(p => {
-    const tag = document.querySelector('.gift-tag[data-label="' + p + '"]');
-    if (tag) { selectedGiftTags.push(p); tag.classList.add('selected'); }
-    else document.getElementById('inp-gift-idea').value = p;
-  });
-  updateGiftDisplay();
-}
-
-function onTypeChange() {
-  const type = document.getElementById('inp-type').value;
-  document.getElementById('inp-custom-type').style.display = type === 'custom' ? 'block' : 'none';
-  document.getElementById('inp-recurrence').value = getRecurrence(type);
-}
-
-function onGroupSelectChange() {
-  const val = document.getElementById('inp-group-select').value;
-  document.getElementById('inp-group-custom').style.display = val === 'custom' ? 'block' : 'none';
-}
-
-function toggleCollapse(id) {
-  const btn = document.getElementById('btn-' + id);
-  const content = document.getElementById('collapse-' + id);
-  const isOpen = content.classList.contains('open');
-  content.classList.toggle('open');
-  btn.classList.toggle('open');
-  const arrow = btn.querySelector('span:last-child');
-  if (arrow) arrow.textContent = isOpen ? '▼' : '▲';
-}
-
-function openAddForm() {
-  document.getElementById('formTitle').textContent = 'אירוע חדש';
-  document.getElementById('editingId').value = '';
-  document.getElementById('btn-delete-form').style.display = 'none';
-  clearForm();
-  openScreen('screen-add-event');
-}
-
-function clearForm() {
-  ['inp-name','inp-date','inp-phone','inp-notes','inp-budget','inp-gift-idea','inp-custom-type','inp-group-custom'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('inp-type').value = 'birthday';
-  document.getElementById('inp-gender').value = '';
-  document.getElementById('inp-group-select').value = '';
-  document.getElementById('inp-gift-status').value = 'pending';
-  document.getElementById('inp-custom-type').style.display = 'none';
-  document.getElementById('inp-group-custom').style.display = 'none';
-  selectedGiftTags = [];
-  document.querySelectorAll('.gift-tag').forEach(t => t.classList.remove('selected'));
-  document.getElementById('giftSelectedDisplay').style.display = 'none';
-  // close collapses
-  ['extra','gift'].forEach(id => {
-    document.getElementById('collapse-' + id).classList.remove('open');
-    document.getElementById('btn-' + id).classList.remove('open');
-    const arrow = document.getElementById('btn-' + id).querySelector('span:last-child');
-    if (arrow) arrow.textContent = '▼';
-  });
-}
-
-function cancelForm() { clearForm(); openScreen('screen-main'); }
-
 function saveEvent() {
   const name = document.getElementById('inp-name').value.trim();
   const date = document.getElementById('inp-date').value;
   if (!name || !date) { alert('שם ותאריך הם שדות חובה'); return; }
-
-  const groupSelect = document.getElementById('inp-group-select').value;
-  const group = groupSelect === 'custom' ? document.getElementById('inp-group-custom').value.trim() : groupSelect;
-
-  const eventData = {
+  const gSel = document.getElementById('inp-group-select').value;
+  const group = gSel === 'custom' ? document.getElementById('inp-group-custom').value.trim() : gSel;
+  const data = {
     name, date,
     type: document.getElementById('inp-type').value,
     customType: document.getElementById('inp-custom-type').value,
-    phone: document.getElementById('inp-phone').value.trim(),
     gender: document.getElementById('inp-gender').value,
+    phone: document.getElementById('inp-phone').value.trim(),
+    phone2: document.getElementById('inp-phone2').value.trim(),
+    email: document.getElementById('inp-email').value.trim(),
     group,
     notes: document.getElementById('inp-notes').value.trim(),
     budget: document.getElementById('inp-budget').value,
     giftIdea: getGiftIdea(),
     giftStatus: document.getElementById('inp-gift-status').value,
+    photo: _formPhoto || null,
+    emoji: _formEmoji || null,
   };
-
-  const editId = document.getElementById('editingId').value;
+  const editId = document.getElementById('editing-id').value;
   if (editId) {
-    const idx = contacts.findIndex(c => c.id === parseInt(editId));
-    if (idx !== -1) contacts[idx] = { ...contacts[idx], ...eventData };
+    const i = events.findIndex(e => e.id === parseInt(editId));
+    if (i !== -1) events[i] = { ...events[i], ...data };
   } else {
-    eventData.id = Date.now();
-    eventData.notifications = [];
-    contacts.unshift(eventData);
-    scheduleNotifs(eventData);
+    data.id = Date.now();
+    data.notifications = [];
+    events.unshift(data);
+    if (settings.isFirstTime) { settings.isFirstTime = false; saveSettings(); }
+    scheduleNotif(data);
   }
-  save(); playSound('save'); clearForm(); openScreen('screen-main');
+  saveEvents(); playSound('save'); clearForm(); openScreen('screen-main');
 }
 
 function saveAndEdit() {
   saveEvent();
-  // open last saved for editing
-  if (contacts.length) editEvent(contacts[0].id);
-}
-
-function editEvent(id) {
-  const c = contacts.find(x => x.id === id); if (!c) return;
-  playSound('edit');
-  document.getElementById('formTitle').textContent = '✏️ עריכת אירוע';
-  document.getElementById('editingId').value = id;
-  document.getElementById('btn-delete-form').style.display = 'block';
-  document.getElementById('inp-name').value = c.name || '';
-  document.getElementById('inp-date').value = c.date || '';
-  document.getElementById('inp-type').value = c.type || 'birthday';
-  document.getElementById('inp-custom-type').value = c.customType || '';
-  document.getElementById('inp-custom-type').style.display = c.type === 'custom' ? 'block' : 'none';
-  document.getElementById('inp-phone').value = c.phone || '';
-  document.getElementById('inp-gender').value = c.gender || '';
-  document.getElementById('inp-notes').value = c.notes || '';
-  document.getElementById('inp-budget').value = c.budget || '';
-  document.getElementById('inp-gift-status').value = c.giftStatus || 'pending';
-
-  // group
-  const knownGroups = ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];
-  if (knownGroups.includes(c.group)) {
-    document.getElementById('inp-group-select').value = c.group;
-    document.getElementById('inp-group-custom').style.display = 'none';
-  } else if (c.group) {
-    document.getElementById('inp-group-select').value = 'custom';
-    document.getElementById('inp-group-custom').value = c.group;
-    document.getElementById('inp-group-custom').style.display = 'block';
-  }
-
-  // open sections if data exists
-  if (c.phone || c.group || c.notes || c.gender) {
+  if (events.length) {
+    editEvent(events[0].id);
     document.getElementById('collapse-extra').classList.add('open');
     document.getElementById('btn-extra').classList.add('open');
   }
-  if (c.giftIdea || c.budget) {
-    document.getElementById('collapse-gift').classList.add('open');
-    document.getElementById('btn-gift').classList.add('open');
-  }
+}
 
-  setGiftIdea(c.giftIdea || '');
-  openScreen('screen-add-event');
+function editEvent(id) {
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  document.getElementById('form-title').textContent = '✏️ עריכת אירוע';
+  document.getElementById('editing-id').value = id;
+  document.getElementById('btn-delete-form').style.display = 'block';
+  document.getElementById('inp-name').value = ev.name || '';
+  document.getElementById('inp-date').value = ev.date || '';
+  document.getElementById('inp-type').value = ev.type || 'birthday';
+  document.getElementById('inp-custom-type').value = ev.customType || '';
+  document.getElementById('inp-custom-type').style.display = ev.type === 'custom' ? 'block' : 'none';
+  document.getElementById('inp-gender').value = ev.gender || 'male';
+  document.getElementById('inp-phone').value = ev.phone || '';
+  document.getElementById('inp-phone2').value = ev.phone2 || '';
+  document.getElementById('inp-email').value = ev.email || '';
+  document.getElementById('inp-notes').value = ev.notes || '';
+  document.getElementById('inp-budget').value = ev.budget || '';
+  document.getElementById('inp-gift-status').value = ev.giftStatus || 'pending';
+  const known = ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];
+  if (known.includes(ev.group)) { document.getElementById('inp-group-select').value = ev.group; }
+  else if (ev.group) {
+    document.getElementById('inp-group-select').value = 'custom';
+    document.getElementById('inp-group-custom').value = ev.group;
+    document.getElementById('inp-group-custom').style.display = 'block';
+  }
+  _formPhoto = ev.photo || null; _formEmoji = ev.emoji || null;
+  updateFormAvatar();
+  if (ev.giftIdea || ev.budget) { document.getElementById('collapse-gift').classList.add('open'); document.getElementById('btn-gift').classList.add('open'); }
+  if (ev.phone || ev.notes || ev.email) { document.getElementById('collapse-extra').classList.add('open'); document.getElementById('btn-extra').classList.add('open'); }
+  openScreen('screen-add');
 }
 
 function deleteCurrentEvent() {
-  const id = parseInt(document.getElementById('editingId').value);
-  if (!id) return;
-  if (!confirm('למחוק את האירוע לצמיתות?')) return;
-  contacts = contacts.filter(c => c.id !== id);
-  save(); playSound('delete'); clearForm(); openScreen('screen-main');
+  const id = parseInt(document.getElementById('editing-id').value);
+  if (!id || !confirm('מחק?')) return;
+  events = events.filter(e => e.id !== id);
+  saveEvents(); playSound('delete'); clearForm(); openScreen('screen-main');
 }
 
-// ========== EVENT DETAIL SCREEN ==========
-let _detailId = null;
-function openEventDetail(id) {
-  _detailId = id;
-  const c = contacts.find(x => x.id === id); if (!c) return;
-  const calc = calcDays(c.date, getRecurrence(c.type));
-  const [bg, fg] = avatarColor(c.name);
-
-  const storeLinks = c.giftIdea ? activeStores.map(s =>
-    '<a href="https://www.google.com/search?q=' + encodeURIComponent(c.giftIdea + ' ' + s) + '" target="_blank" class="store-link">🔍 ' + s + '</a>'
-  ).join('') : '';
-
-  const html =
-    '<div style="padding:8px 0;">' +
-    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">' +
-    '<div class="avatar avatar-md" style="background:' + bg + ';color:' + fg + ';">' + (c.name||'?')[0].toUpperCase() + '</div>' +
-    '<div><div style="font-size:18px;font-weight:600;">' + (c.name||'') + '</div>' +
-    '<div style="font-size:13px;color:var(--accent);margin-top:2px;">' + getLabel(c.type, c.customType) + '</div>' +
-    '<div style="margin-top:5px;">' + countdownBadge(calc.daysLeft, calc.isOver) + '</div>' +
-    '</div></div>' +
-    '<div class="card" style="margin-bottom:12px;">' +
-    (c.phone ? '<div class="detail-row"><span class="detail-label">📱 טלפון</span><a href="tel:' + c.phone + '" style="color:var(--accent);">' + c.phone + '</a></div>' : '') +
-    (c.group ? '<div class="detail-row"><span class="detail-label">🏷️ קבוצה</span><span>' + c.group + '</span></div>' : '') +
-    '<div class="detail-row"><span class="detail-label">📅 תאריך</span><span>' + (c.date||'') + '</span></div>' +
-    ((c.notifications||[]).length ? '<div class="detail-row"><span class="detail-label">🔔 תזכורות</span><span style="color:var(--accent);">' + c.notifications.length + '</span></div>' : '') +
-    (c.notes ? '<div style="padding:8px 0;font-size:12px;color:var(--muted);font-style:italic;">💡 ' + c.notes + '</div>' : '') +
-    '</div>' +
-    ((c.giftIdea || c.budget) ?
-      '<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;">' +
-      '<span class="gift-title">🎁 ' + (c.giftIdea||'') + (c.budget?' | '+c.budget+' ₪':'') + '</span>' +
-      '<button onclick="toggleGiftStatus(' + c.id + ');renderMain();" style="background:' + (c.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:4px 10px;border-radius:var(--radius-full);font-size:12px;cursor:pointer;">' + (c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע') + '</button>' +
-      '</div><div class="store-links">' + storeLinks + '</div></div>'
-      : '') +
-    '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label">💬 ברכה מוכנה</div>' +
-    '<div class="greet-text">' + buildGreeting(c) + '</div>' +
-    '<div class="greet-actions">' +
-    '<button class="greet-btn" onclick="sendWhatsApp(' + c.id + ')">📱 וואטסאפ</button>' +
-    '<button class="greet-btn secondary" onclick="copyGreeting(' + c.id + ')">📋 העתק</button>' +
-    '</div></div>' +
-    '<div style="display:flex;gap:8px;">' +
-    (c.phone ? '<button class="card-btn" style="flex:1;" onclick="window.open(\'tel:' + c.phone + '\')">📱 התקשר</button>' : '') +
-    '<button class="card-btn" style="flex:1;" onclick="openScreen(\'screen-notifications\')">🔔 תזכורות</button>' +
-    '<button class="card-btn" style="flex:1;color:var(--red);border-color:rgba(239,68,68,0.3);" onclick="if(confirm(\'מחק?\'))deleteEventDirect(' + c.id + ')">🗑️ מחק</button>' +
-    '</div></div>';
-
-  document.getElementById('eventDetailContent').innerHTML = html;
-  openScreen('screen-event-detail');
+// ========== PHOTO ==========
+function updateFormAvatar() {
+  const el = document.getElementById('form-avatar');
+  if (_formPhoto) {
+    el.innerHTML = '<img src="' + _formPhoto + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+    el.style.cssText = 'border:2px solid var(--acc-border);';
+  } else if (_formEmoji) {
+    el.innerHTML = _formEmoji;
+    el.style.cssText = 'background:#1e1b4b;font-size:24px;border:2px solid var(--acc-border);';
+  } else {
+    const name = document.getElementById('inp-name').value || '?';
+    const [bg, fg] = avatarColor(name);
+    el.innerHTML = name[0].toUpperCase();
+    el.style.cssText = 'background:' + bg + ';color:' + fg + ';border:2px dashed rgba(var(--acc-rgb),0.4);';
+  }
 }
 
-function editCurrentEvent() { if (_detailId) editEvent(_detailId); }
+function triggerCamera() {
+  closeModal('modal-photo');
+  const i = document.getElementById('photo-input');
+  i.setAttribute('capture', 'environment');
+  i.click();
+}
 
-function deleteEventDirect(id) {
-  contacts = contacts.filter(c => c.id !== id);
-  save(); playSound('delete'); openScreen('screen-main');
+function triggerGallery() {
+  closeModal('modal-photo');
+  const i = document.getElementById('photo-input');
+  i.removeAttribute('capture');
+  i.click();
+}
+
+function openEmojiPicker() {
+  closeModal('modal-photo');
+  const emoji = prompt('הכנס אמוג\'י:', '😊');
+  if (emoji) { _formEmoji = emoji; _formPhoto = null; updateFormAvatar(); }
+}
+
+function removePhoto() {
+  closeModal('modal-photo');
+  _formPhoto = null; _formEmoji = null; updateFormAvatar();
+}
+
+function onPhotoSelected(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { _formPhoto = e.target.result; _formEmoji = null; updateFormAvatar(); };
+  reader.readAsDataURL(file);
+}
+
+function playCurrentSound() { playSound('greet'); }
+function onSoundSelected(input) {
+  const file = input.files[0]; if (!file) return;
+  document.getElementById('sound-label').textContent = file.name;
+}
+
+// ========== GIFT ==========
+function toggleGift(id) {
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  ev.giftStatus = ev.giftStatus === 'paid' ? 'pending' : 'paid';
+  saveEvents(); renderMain();
+}
+
+// ========== SHARE ==========
+function sendWhatsApp(id) {
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  playSound('greet');
+  const text = buildGreeting(ev);
+  const phone = (ev.phone || '').replace(/\D/g,'');
+  const url = phone ? 'https://wa.me/972' + phone.replace(/^0/,'') + '?text=' + encodeURIComponent(text) : 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+}
+
+function copyGreet(id) {
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  playSound('greet');
+  navigator.clipboard.writeText(buildGreeting(ev)).then(() => alert('הברכה הועתקה! 📋'));
+}
+
+function shareEvent(id) {
+  const ev = events.find(e => e.id === id); if (!ev) return;
+  const calc = calcDays(ev);
+  const text = '🔔 ' + ev.name + ' — ' + getLabel(ev.type, ev.customType) +
+    (calc.daysLeft !== null ? ' (בעוד ' + calc.daysLeft + ' ימים)' : '') +
+    '\n\nלא שכחתי: https://barakaflalo.github.io/lo-shachachti';
+  if (navigator.share) navigator.share({ text }).catch(()=>{});
+  else navigator.clipboard.writeText(text).then(() => alert('הועתק! 📋'));
+}
+
+function shareApp() {
+  const text = '🔔 "לא שכחתי" — האפליקציה שתזכיר לך כל יום הולדת ואירוע!\nhttps://barakaflalo.github.io/lo-shachachti';
+  if (navigator.share) navigator.share({ text }).catch(()=>{});
+  else navigator.clipboard.writeText(text).then(() => alert('הקישור הועתק! 📋'));
 }
 
 // ========== SEARCH ==========
 let searchGroupFilter = '';
 
-function onSearch() {
-  const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-  const cont = document.getElementById('searchResults');
-
-  let list = contacts.map(c => ({ ...c, ...calcDays(c.date, getRecurrence(c.type)) }));
-  if (searchGroupFilter) list = list.filter(c => c.group === searchGroupFilter);
-  if (q) list = list.filter(c => (c.name||'').toLowerCase().includes(q) || getLabel(c.type, c.customType).includes(q) || (c.group||'').toLowerCase().includes(q));
-
-  list.sort((a,b) => { if (a.daysLeft===null) return 1; if (b.daysLeft===null) return -1; return a.daysLeft-b.daysLeft; });
-
-  if (!list.length && !q && !searchGroupFilter) {
-    cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);"><div style="font-size:36px;margin-bottom:12px;">🔍</div><div>הקלד שם, סוג אירוע<br>או שם קבוצה</div></div>';
-    return;
-  }
-
-  let html = list.length ? '<div style="font-size:11px;color:var(--muted2);margin-bottom:10px;">' + list.length + ' תוצאות</div>' : '';
-  html += list.map(c => {
-    const [bg, fg] = avatarColor(c.name);
-    return '<div class="event-card" onclick="openEventDetail(' + c.id + ')" style="cursor:pointer;">' +
-      '<div class="event-card-main">' +
-      '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';">' + (c.name||'?')[0].toUpperCase() + '</div>' +
-      '<div style="flex:1;"><div style="font-weight:600;">' + highlight(c.name||'',q) + '</div>' +
-      '<div style="font-size:12px;color:var(--accent);">' + getLabel(c.type, c.customType) + '</div></div>' +
-      urgencyBadge(c.daysLeft, c.isOver) +
-      '</div></div>';
-  }).join('');
-
-  if (q && !list.find(c => (c.name||'').toLowerCase() === q)) {
-    html += '<div class="add-suggestion"><div class="add-suggestion-title">לא מצאת את מי שחיפשת?</div>' +
-      '<button class="btn-primary" onclick="addFromSearch(\'' + q.replace(/'/g,'\\\'') + '\')">➕ הוסף "' + q + '" כאיש קשר חדש</button></div>';
-  }
-
-  cont.innerHTML = html || '<div style="text-align:center;padding:30px;color:var(--muted);">לא נמצאו תוצאות</div>';
+function initSearch() {
+  renderSearchFilters();
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;">🔍</div><div>הקלד שם או בחר קבוצה</div></div>';
+  setTimeout(() => document.getElementById('search-input').focus(), 100);
 }
 
-function highlight(text, q) {
-  if (!q) return text;
-  const idx = text.toLowerCase().indexOf(q);
-  if (idx === -1) return text;
-  return text.slice(0,idx) + '<span style="color:#a5b4fc;font-weight:600;">' + text.slice(idx,idx+q.length) + '</span>' + text.slice(idx+q.length);
+function renderSearchFilters() {
+  const userGroups = [...new Set(events.map(e => e.group).filter(g => g && !FIXED_GROUPS.includes(g)))];
+  const all = ['', ...FIXED_GROUPS, ...userGroups];
+  document.getElementById('search-filters').innerHTML = all.map(g =>
+    '<div class="chip' + (searchGroupFilter === g ? ' active' : '') + '" onclick="setSearchGroup(\'' + g.replace(/'/g,"\\'") + '\')">' + (g||'הכל') + '</div>'
+  ).join('');
+}
+
+function setSearchGroup(g) {
+  searchGroupFilter = g;
+  renderSearchFilters();
+  if (g) {
+    const list = events.filter(e => e.group === g).map(e => ({...e,...calcDays(e)}));
+    const cont = document.getElementById('search-results');
+    if (!list.length) {
+      cont.innerHTML = '<div class="empty-state"><div style="font-size:28px;margin-bottom:8px;">👥</div><div style="margin-bottom:14px;">אין אנשים בקבוצה "' + g + '"</div><button class="btn-primary" onclick="openAddForm(\'' + g + '\')" style="max-width:200px;margin:0 auto;">➕ הוסף ל' + g + '</button></div>';
+      return;
+    }
+    cont.innerHTML = '<div class="section-lbl">' + g + ' — ' + list.length + ' אנשים</div>' +
+      list.map(e => searchRow(e)).join('');
+  } else {
+    onSearch();
+  }
+}
+
+function onSearch() {
+  const q = (document.getElementById('search-input').value || '').trim().toLowerCase();
+  if (!q && !searchGroupFilter) {
+    document.getElementById('search-results').innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;">🔍</div><div>הקלד שם או בחר קבוצה</div></div>';
+    return;
+  }
+  let list = events.map(e => ({...e,...calcDays(e)}));
+  if (searchGroupFilter) list = list.filter(e => e.group === searchGroupFilter);
+  if (q) list = list.filter(e => (e.name||'').toLowerCase().includes(q) || getLabel(e.type,e.customType).includes(q));
+  list.sort((a,b) => { if (a.daysLeft===null) return 1; if (b.daysLeft===null) return -1; return a.daysLeft-b.daysLeft; });
+  const cont = document.getElementById('search-results');
+  if (!list.length) {
+    cont.innerHTML = '<div class="empty-state"><div style="font-size:28px;margin-bottom:8px;">🤷</div><div style="margin-bottom:14px;">לא נמצא "' + q + '"</div>' +
+      (q ? '<div style="background:var(--acc-dim);border:1px dashed var(--acc-border);border-radius:var(--r);padding:12px;text-align:center;"><div style="font-size:12px;color:#818cf8;margin-bottom:8px;">רוצה להוסיף אותו?</div><button class="btn-primary" onclick="addFromSearch(\'' + q + '\')">➕ הוסף "' + q + '"</button></div>' : '') +
+      '</div>';
+    return;
+  }
+  cont.innerHTML = '<div class="section-lbl">' + list.length + ' תוצאות</div>' + list.map(e => searchRow(e, q)).join('');
+  if (q && !list.find(e => (e.name||'').toLowerCase() === q)) {
+    cont.innerHTML += '<div style="background:var(--acc-dim);border:1px dashed var(--acc-border);border-radius:var(--r);padding:12px;text-align:center;margin-top:8px;"><div style="font-size:12px;color:#818cf8;margin-bottom:8px;">לא מצאת את מי שחיפשת?</div><button class="btn-primary" onclick="addFromSearch(\'' + q + '\')">➕ הוסף "' + q + '"</button></div>';
+  }
+}
+
+function searchRow(e, q) {
+  const name = q ? (e.name||'').replace(new RegExp(q,'gi'), m => '<span style="color:var(--acc-light);font-weight:600;">' + m + '</span>') : (e.name||'');
+  return '<div class="event-card" onclick="openDetail(' + e.id + ')" style="cursor:pointer;">' +
+    '<div class="event-card-main">' + avatarHTML(e,'av-sm') +
+    '<div style="flex:1;margin-right:10px;"><div style="font-weight:600;">' + name + '</div>' +
+    '<div style="font-size:12px;color:var(--accent);">' + getLabel(e.type,e.customType) + '</div></div>' +
+    urgencyBadge(e.daysLeft,e.isOver) + '</div></div>';
 }
 
 function addFromSearch(name) {
-  document.getElementById('inp-name').value = name;
-  document.getElementById('formTitle').textContent = 'אירוע חדש';
-  document.getElementById('editingId').value = '';
-  document.getElementById('btn-delete-form').style.display = 'none';
-  openScreen('screen-add-event');
+  openAddForm();
+  setTimeout(() => { document.getElementById('inp-name').value = name; }, 50);
 }
 
-// ========== CONTACTS SCREEN ==========
+// ========== CONTACTS ==========
+let contactsGroupFilter = '';
+
+function renderContacts() {
+  const q = (document.getElementById('contacts-search').value || '').toLowerCase();
+  const userGroups = [...new Set(events.map(e => e.group).filter(g => g && !FIXED_GROUPS.includes(g)))];
+  const allGroups = ['', ...FIXED_GROUPS, ...userGroups];
+  document.getElementById('contacts-filter').innerHTML = allGroups.map(g =>
+    '<div class="chip' + (contactsGroupFilter === g ? ' active' : '') + '" onclick="setContactGroup(\'' + g.replace(/'/g,"\\'") + '\')">' + (g||'הכל') + '</div>'
+  ).join('');
+
+  let list = events.filter(e => !q || (e.name||'').toLowerCase().includes(q));
+  if (contactsGroupFilter) list = list.filter(e => e.group === contactsGroupFilter);
+
+  const cont = document.getElementById('contacts-list');
+  if (contactsGroupFilter && !list.length) {
+    cont.innerHTML = '<div class="empty-state"><div style="font-size:28px;margin-bottom:8px;">👥</div><div style="margin-bottom:14px;">אין אנשים בקבוצה "' + contactsGroupFilter + '"</div><button class="btn-primary" onclick="openAddForm(\'' + contactsGroupFilter + '\')" style="max-width:220px;margin:0 auto;">➕ הוסף ל' + contactsGroupFilter + '</button></div>';
+    return;
+  }
+  if (!list.length) { cont.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">לא נמצאו אנשי קשר</div>'; return; }
+
+  const byGroup = {};
+  list.forEach(e => { const g = e.group||'ללא קבוצה'; if (!byGroup[g]) byGroup[g]=[]; byGroup[g].push(e); });
+  cont.innerHTML = Object.entries(byGroup).map(([g, items]) =>
+    '<div class="section-lbl">' + g + ' — ' + items.length + '</div>' +
+    items.map(e => {
+      const calc = calcDays(e);
+      return '<div class="contact-row" onclick="openDetail(' + e.id + ')">' +
+        avatarHTML(e,'av-sm') +
+        '<div style="flex:1;margin-right:10px;"><div style="font-size:13px;font-weight:500;">' + (e.name||'') + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);">' + getLabel(e.type,e.customType) + (e.date?' — '+e.date:'') + '</div></div>' +
+        (calc.daysLeft !== null ? urgencyBadge(calc.daysLeft,calc.isOver) : '') +
+        '<span style="color:var(--acc-light);margin-right:auto;">›</span></div>';
+    }).join('')
+  ).join('');
+}
+
+function setContactGroup(g) { contactsGroupFilter = g; renderContacts(); }
+
+function importFromPhone() {
+  if (!('contacts' in navigator && 'ContactsManager' in window)) {
+    alert('ייבוא מהטלפון עובד רק בכרום על אנדרואיד 📱\n\nאם אתה על אייפון — יש להשתמש בייבוא ICS בהגדרות מערכת.');
+    return;
+  }
+  navigator.contacts.select(['name','tel','birthday'],{multiple:true}).then(results => {
+    if (!results.length) return;
+    let added = 0, skipped = 0;
+    results.forEach(c => {
+      const name = (c.name&&c.name[0]) || '';
+      if (!name) return;
+      if (events.find(e => e.name === name)) { skipped++; return; }
+      const bday = c.birthday ? new Date(c.birthday).toISOString().slice(0,10) : '';
+      events.push({ id:Date.now()+added, name, phone:(c.tel&&c.tel[0])||'', date:bday, type:bday?'birthday':'custom', group:'', notes:'', notifications:[] });
+      added++;
+    });
+    saveEvents(); renderContacts(); renderMain();
+    alert('✅ יובאו ' + added + ' אנשי קשר' + (skipped?' ('+skipped+' כבר קיימים)':''));
+  }).catch(() => alert('לא ניתן לגשת לאנשי הקשר. וודא שנתת הרשאה.'));
+}
+
+// ========== SETTINGS ==========
+function togSetting(key, el) {
+  settings[key] = !settings[key];
+  el.classList.toggle('on', settings[key]);
+  saveSettings();
+  renderMain();
+}
+
+function applyFont() {
+  if (settings.largeFont) { document.documentElement.style.fontSize='18px'; document.body.classList.add('large-font'); }
+  else { document.documentElement.style.fontSize=''; document.body.classList.remove('large-font'); }
+}
+
+function saveUserSettings() {
+  settings.defaultFilter = document.getElementById('default-filter').value;
+  settings.defaultSort = document.getElementById('default-sort').value;
+  saveSettings(); renderMain(); openScreen('screen-main');
+}
+
+function togCustomNotif(el) {
+  el.classList.toggle('on');
+  document.getElementById('custom-notif-area').style.display = el.classList.contains('on') ? 'block' : 'none';
+}
+
+function editGiftReminder() {
+  const n = prompt('כמה ימים לפני האירוע?', settings.giftReminderDays || 14);
+  if (!n) return;
+  settings.giftReminderDays = parseInt(n) || 14;
+  saveSettings();
+  const l = document.getElementById('gift-reminder-sub');
+  if (l) l.textContent = settings.giftReminderDays + ' ימים לפני';
+}
+
+function editQuietHours() {
+  const s = prompt('שעת התחלה (HH:MM):', settings.quietStart || '23:00');
+  if (!s) return;
+  const e = prompt('שעת סיום (HH:MM):', settings.quietEnd || '08:00');
+  if (!e) return;
+  settings.quietStart = s; settings.quietEnd = e; saveSettings();
+  const l = document.getElementById('quiet-hours-label');
+  if (l) l.textContent = s + ' — ' + e;
+}
+
+function addCustomNotif() {
+  const days = prompt('כמה ימים לפני?', '');
+  if (!days) return;
+  const time = prompt('באיזו שעה? (HH:MM)', '09:00');
+  if (!time) return;
+  if (!settings.customNotifs) settings.customNotifs = [];
+  settings.customNotifs.push({ days: parseInt(days), time });
+  saveSettings();
+  renderCustomNotifs();
+}
+
+function renderCustomNotifs() {
+  const c = document.getElementById('custom-notif-tags'); if (!c) return;
+  c.innerHTML = (settings.customNotifs || []).map((n,i) =>
+    '<div class="gift-tag selected">' + n.days + ' ימים — ' + n.time + ' <span onclick="removeCustomNotif(' + i + ')" style="cursor:pointer;">✕</span></div>'
+  ).join('');
+}
+
+function removeCustomNotif(i) {
+  settings.customNotifs.splice(i, 1);
+  saveSettings(); renderCustomNotifs();
+}
 
 // ========== GREETINGS ==========
+function renderGreetings() {
+  const types = [
+    {key:'birthday',label:'🎉 יום הולדת'},{key:'memorial',label:'🕯️ אזכרה'},
+    {key:'anniversary',label:'💍 יום נישואין'},{key:'wedding',label:'💒 חתונה'},
+    {key:'barmitzvah',label:'✡️ בר/בת מצווה'},{key:'friends',label:'👥 מפגש'},
+    {key:'trip',label:'✈️ טיול'},{key:'car',label:'🚗 טסט רכב'},
+    {key:'medical',label:'🏥 תור רפואי'},{key:'holiday',label:'🎊 חג'},
+    {key:'graduation',label:'🎓 סיום לימודים'},{key:'custom',label:'✨ אחר'},
+  ];
+  document.getElementById('greetings-list').innerHTML = types.map(t =>
+    '<div class="card" style="margin-bottom:10px;">' +
+    '<div style="font-size:13px;font-weight:500;margin-bottom:10px;">' + t.label + '</div>' +
+    (greetings[t.key]||[]).map((v,i) =>
+      '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,0.04);">' +
+      '<span style="font-size:10px;color:var(--muted);width:16px;flex-shrink:0;margin-top:3px;">' + (i+1) + '</span>' +
+      '<div style="flex:1;font-size:12px;color:var(--muted);line-height:1.6;">' + v + '</div>' +
+      '<button onclick="editVariant(\'' + t.key + '\',' + i + ')" style="font-size:10px;color:var(--acc-light);background:transparent;border:none;cursor:pointer;flex-shrink:0;">✏️</button>' +
+      '</div>'
+    ).join('') +
+    '</div>'
+  ).join('');
+}
 
-function editGreeting(key) {
-  const current = greetings[key] || '';
-  const newVal = prompt('ערוך ברכה:', current);
-  if (newVal !== null) {
-    greetings[key] = newVal;
-    localStorage.setItem('ls_v1_greetings', JSON.stringify(greetings));
-    renderGreetings();
-  }
+function editVariant(type, idx) {
+  const cur = greetings[type][idx];
+  const nv = prompt('ערוך ברכה ' + (idx+1) + ':', cur);
+  if (nv !== null) { greetings[type][idx] = nv; saveGreetings(); renderGreetings(); }
+}
+
+function renderMyGreetings() {
+  document.getElementById('my-greetings-list').innerHTML = myGreetings.map((g,i) =>
+    '<div class="form-group"><label class="form-label">ברכה ' + (i+1) + '</label>' +
+    '<textarea class="form-textarea" id="my-greet-' + i + '" placeholder="כתוב ברכה אישית...">' + (g||'') + '</textarea></div>'
+  ).join('');
+}
+
+function saveMyGreetings() {
+  myGreetings = [0,1,2,3,4].map(i => document.getElementById('my-greet-'+i).value);
+  localStorage.setItem('ls2_my_greetings', JSON.stringify(myGreetings));
+  alert('ברכות נשמרו ✅');
 }
 
 // ========== STORES ==========
-const ALL_STORES = ['Amazon','KSP','זאפ','IVORY','BUG','Etsy','ASOS','iDigital','Walmart'];
-
 function renderStores() {
-  document.getElementById('storeTagsContainer').innerHTML = ALL_STORES.map(s =>
-    '<div class="gift-tag' + (activeStores.includes(s) ? ' selected' : '') + '" onclick="toggleStore(this,\'' + s + '\')">' + s + '</div>'
+  document.getElementById('stores-container').innerHTML = ALL_STORES.map(s =>
+    '<div class="gift-tag' + ((settings.activeStores||[]).includes(s) ? ' selected' : '') + '" onclick="toggleStore(this,\'' + s + '\')">' + s + '</div>'
   ).join('');
 }
 
 function toggleStore(el, name) {
-  const idx = activeStores.indexOf(name);
-  if (idx === -1) { activeStores.push(name); el.classList.add('selected'); }
-  else { activeStores.splice(idx,1); el.classList.remove('selected'); }
+  if (!settings.activeStores) settings.activeStores = [];
+  const i = settings.activeStores.indexOf(name);
+  if (i === -1) { settings.activeStores.push(name); el.classList.add('selected'); }
+  else { settings.activeStores.splice(i,1); el.classList.remove('selected'); }
 }
 
 function addCustomStore() {
-  const name = document.getElementById('inp-custom-store').value.trim();
-  if (!name) return;
-  if (!activeStores.includes(name)) activeStores.push(name);
+  const name = document.getElementById('inp-custom-store').value.trim(); if (!name) return;
+  if (!settings.activeStores) settings.activeStores = [];
+  if (!settings.activeStores.includes(name)) settings.activeStores.push(name);
   document.getElementById('inp-custom-store').value = '';
   renderStores();
 }
 
-function saveStores() {
-  localStorage.setItem('ls_v1_stores', JSON.stringify(activeStores));
-  alert('החנויות נשמרו ✅');
+function saveStores() { saveSettings(); alert('חנויות נשמרו ✅'); }
+
+// ========== BUDGET ==========
+function renderBudgetSettings() {
+  const from = (document.getElementById('budget-from')||{}).value || '';
+  const to = (document.getElementById('budget-to')||{}).value || '';
+  let list = events.filter(e => e.budget);
+  if (from) list = list.filter(e => (e.date||'') >= from);
+  if (to) list = list.filter(e => (e.date||'') <= to);
+  const paid = list.filter(e => e.giftStatus === 'paid');
+  const pending = list.filter(e => e.giftStatus !== 'paid');
+  const paidT = paid.reduce((s,e) => s+(parseInt(e.budget)||0), 0);
+  const pendT = pending.reduce((s,e) => s+(parseInt(e.budget)||0), 0);
+  const statsEl = document.getElementById('budget-stats');
+  if (statsEl) statsEl.innerHTML =
+    '<div class="stat-card"><div class="stat-num green">' + paidT + '₪</div><div class="stat-label">✅ שולם (' + paid.length + ')</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--amber);">' + pendT + '₪</div><div class="stat-label">⏳ פתוח (' + pending.length + ')</div></div>';
+  const listEl = document.getElementById('budget-list');
+  if (listEl) listEl.innerHTML = [...paid,...pending].map(e =>
+    '<div class="detail-row"><span>' + (e.name||'') + '</span><span style="display:flex;gap:8px;align-items:center;">' +
+    '<span style="color:' + (e.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';">' + (parseInt(e.budget)||0) + '₪</span>' +
+    '<button onclick="toggleGift(' + e.id + ');renderBudgetSettings();" style="font-size:10px;background:' + (e.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:2px 8px;border-radius:var(--rf);cursor:pointer;">' + (e.giftStatus==='paid'?'✅':'⏳') + '</button>' +
+    '</span></div>'
+  ).join('');
 }
 
-// ========== SETTINGS ==========
-
-function saveUserSettings() {
-  settings.defaultFilter = document.getElementById('defaultFilter').value;
-  settings.defaultSort = document.getElementById('defaultSort').value;
-  saveAllSettings(); renderMain();
-  alert('הגדרות נשמרו ✅');
-  openScreen('screen-main');
+function printBudgetReport() {
+  const list = events.filter(e => e.budget);
+  const win = window.open('');
+  win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;"><h2>לא שכחתי — דוח תקציב</h2>');
+  win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>תקציב</th><th>סטטוס</th></tr>');
+  list.forEach(e => win.document.write('<tr><td>'+(e.name||'')+'</td><td>'+(e.date||'')+'</td><td>'+(e.budget||'')+'₪</td><td>'+(e.giftStatus==='paid'?'✅':'⏳')+'</td></tr>'));
+  win.document.write('</table></body></html>'); win.print();
 }
 
-function toggleCustomNotif(el) {
-  el.classList.toggle('on');
-  const show = el.classList.contains('on');
-  document.getElementById('customNotifTags').style.display = show ? 'block' : 'none';
+function exportBudgetCSV() {
+  const list = events.filter(e => e.budget);
+  const rows = [['שם','תאריך','תקציב','סטטוס']];
+  list.forEach(e => rows.push([e.name||'',e.date||'',(e.budget||'')+'₪',e.giftStatus==='paid'?'נקנה':'לביצוע']));
+  const csv = rows.map(r => r.map(f => '"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv'}));
+  a.download = 'budget.csv'; a.click();
 }
 
-// ========== APPEARANCE ==========
-const THEMES = [
-  { name:'סגול',    key:'purple',  from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241',  light:'#a5b4fc' },
-  { name:'כחול',    key:'blue',    from:'#3b82f6', to:'#06b6d4', rgb:'59,130,246',  light:'#93c5fd' },
-  { name:'ירוק',    key:'green',   from:'#10b981', to:'#34d399', rgb:'16,185,129',  light:'#6ee7b7' },
-  { name:'כתום',    key:'amber',   from:'#f59e0b', to:'#fbbf24', rgb:'245,158,11',  light:'#fcd34d' },
-  { name:'אדום',    key:'red',     from:'#ef4444', to:'#f97316', rgb:'239,68,68',   light:'#fca5a5' },
-  { name:'ורוד',    key:'pink',    from:'#ec4899', to:'#a855f7', rgb:'236,72,153',  light:'#f9a8d4' },
-  { name:'טורקיז',  key:'teal',    from:'#14b8a6', to:'#06b6d4', rgb:'20,184,166',  light:'#5eead4' },
-  { name:'זהב',     key:'gold',    from:'#d97706', to:'#f59e0b', rgb:'217,119,6',   light:'#fbbf24' },
-  { name:'לילך',    key:'violet',  from:'#7c3aed', to:'#9333ea', rgb:'124,58,237',  light:'#c4b5fd' },
-  { name:'כחול כהה',key:'navy',    from:'#1d4ed8', to:'#2563eb', rgb:'29,78,216',   light:'#93c5fd' },
-  { name:'ניאון',   key:'lime',    from:'#65a30d', to:'#84cc16', rgb:'101,163,13',  light:'#bef264' },
-  { name:'מותאם',   key:'custom',  from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241',  light:'#a5b4fc', custom:true },
-];
+// ========== PRINT ==========
+let reportType = 'all';
 
-function initAppearanceScreen() {
-  const grid = document.getElementById('themeGrid');
-  if (!grid) return;
-  grid.innerHTML = THEMES.map(t => {
-    const isActive = settings.theme === t.key;
-    if (t.custom) {
-      return '<div onclick="openCustomColor()" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--radius-sm);padding:10px 6px;text-align:center;cursor:pointer;position:relative;">' +
-        '<div style="width:28px;height:28px;border-radius:50%;background:' + (isActive&&settings.customColor?settings.customColor:'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)') + ';margin:0 auto 5px;"></div>' +
-        '<div style="font-size:10px;color:' + (isActive?'var(--accent-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
-        '<input type="color" id="customColorPicker" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;" onchange="applyCustomColor(this.value)">' +
-        '</div>';
-    }
-    return '<div onclick="selectTheme(\'' + t.key + '\')" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--radius-sm);padding:10px 6px;text-align:center;cursor:pointer;">' +
-      '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,' + t.from + ',' + t.to + ');margin:0 auto 5px;"></div>' +
-      '<div style="font-size:10px;color:' + (isActive?'var(--accent-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
-      '</div>';
-  }).join('');
+function initPrint() {
+  reportType = 'all';
+  document.querySelectorAll('#report-type-row .chip').forEach((c,i) => c.classList.toggle('active', i===0));
+  updateReportPreview();
 }
 
-function openCustomColor() {
-  const picker = document.getElementById('customColorPicker');
-  if (picker) picker.click();
+function setReportType(el, type) {
+  reportType = type;
+  document.querySelectorAll('#report-type-row .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  updateReportPreview();
 }
 
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
-  return r+','+g+','+b;
+function updateReportPreview() {
+  const from = (document.getElementById('print-from')||{}).value || '';
+  const to = (document.getElementById('print-to')||{}).value || '';
+  let list = getReportList(from, to);
+  const el = document.getElementById('report-preview');
+  if (!el) return;
+  el.innerHTML = '<div class="info-box"><div style="font-size:11px;color:var(--acc-light);font-weight:500;margin-bottom:8px;">תצוגה מקדימה — ' + list.length + ' אירועים</div>' +
+    list.slice(0,4).map(e => '<div class="detail-row"><span>' + (e.name||'') + '</span><span style="font-size:11px;color:var(--muted);">' + (e.date||'') + '</span></div>').join('') +
+    (list.length > 4 ? '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;">ועוד ' + (list.length-4) + '...</div>' : '') +
+    '</div>';
 }
 
-function lightenHex(hex) {
-  const r = Math.min(255, parseInt(hex.slice(1,3),16)+80);
-  const g = Math.min(255, parseInt(hex.slice(3,5),16)+80);
-  const b = Math.min(255, parseInt(hex.slice(5,7),16)+80);
-  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+function getReportList(from, to) {
+  let list = [...events];
+  if (from) list = list.filter(e => (e.date||'') >= from);
+  if (to) list = list.filter(e => (e.date||'') <= to);
+  if (reportType === 'upcoming') list = list.map(e => ({...e,...calcDays(e)})).filter(e => e.daysLeft !== null && e.daysLeft <= 30).sort((a,b) => a.daysLeft-b.daysLeft);
+  else if (reportType === 'group') list.sort((a,b) => (a.group||'').localeCompare(b.group||'','he'));
+  else if (reportType === 'budget') list = list.filter(e => e.budget);
+  return list;
 }
 
-function applyCustomColor(hex) {
-  settings.theme = 'custom';
-  settings.customColor = hex;
-  saveAllSettings();
-  const rgb = hexToRgb(hex);
-  const light = lightenHex(hex);
-  const root = document.documentElement;
-  root.style.setProperty('--accent', hex);
-  root.style.setProperty('--accent-dim', 'rgba('+rgb+',0.2)');
-  root.style.setProperty('--accent-border', 'rgba('+rgb+',0.4)');
-  root.style.setProperty('--accent-rgb', rgb);
-  root.style.setProperty('--accent-light', light);
-  initAppearanceScreen();
+function printReport() {
+  const from = (document.getElementById('print-from')||{}).value || '';
+  const to = (document.getElementById('print-to')||{}).value || '';
+  const list = getReportList(from, to);
+  const labels = {all:'הכל',upcoming:'קרובים',group:'לפי קבוצה',budget:'תקציב'};
+  const win = window.open('');
+  win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;"><h2>לא שכחתי — דוח ' + labels[reportType] + '</h2>');
+  if (from||to) win.document.write('<p style="color:#888;">תקופה: ' + (from||'') + ' — ' + (to||'') + '</p>');
+  win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>סוג</th><th>קבוצה</th><th>תקציב</th></tr>');
+  list.forEach(e => win.document.write('<tr><td>'+(e.name||'')+'</td><td>'+(e.date||'')+'</td><td>'+getLabel(e.type,e.customType)+'</td><td>'+(e.group||'')+'</td><td>'+(e.budget?e.budget+'₪':'')+'</td></tr>'));
+  win.document.write('</table></body></html>'); win.print();
 }
 
-function selectTheme(key) {
-  settings.theme = key;
-  saveSetting('theme', key);
-  applyTheme(key);
-  initAppearanceScreen();
-}
-
-function applyTheme(key) {
-  if (key === 'custom' && settings.customColor) {
-    applyCustomColor(settings.customColor);
-    return;
-  }
-  const t = THEMES.find(x => x.key === key);
-  if (!t) return;
-  const root = document.documentElement;
-  root.style.setProperty('--accent', t.from);
-  root.style.setProperty('--accent-dim', 'rgba(' + t.rgb + ',0.2)');
-  root.style.setProperty('--accent-border', 'rgba(' + t.rgb + ',0.4)');
-  root.style.setProperty('--accent-rgb', t.rgb);
-  root.style.setProperty('--accent-light', t.light);
-}
-
-
-
-// ========== IMPORT ==========
-
-function importICS(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const text = e.target.result;
-    const events = parseICS(text);
-    let added = 0, skipped = 0;
-    events.forEach(ev => {
-      const exists = contacts.find(c => c.name === ev.name && c.date === ev.date);
-      if (exists) { skipped++; return; }
-      contacts.push({ id: Date.now() + added, ...ev, notifications: [] });
-      added++;
-    });
-    save(); renderMain();
-    alert('יובאו ' + added + ' אירועים! (' + skipped + ' דולגו)');
-    openScreen('screen-main');
-  };
-  reader.readAsText(file);
-}
-
-function parseICS(text) {
-  const events = [];
-  const blocks = text.split('BEGIN:VEVENT');
-  blocks.slice(1).forEach(block => {
-    const getSafe = key => { const m = block.match(new RegExp(key + '[^:]*:([^\r\n]+)')); return m ? m[1].trim() : ''; };
-    let summary = getSafe('SUMMARY');
-    let dtstart = getSafe('DTSTART');
-    if (!summary || !dtstart) return;
-    // clean date
-    dtstart = dtstart.replace(/T.*/, '');
-    if (dtstart.length === 8) dtstart = dtstart.slice(0,4)+'-'+dtstart.slice(4,6)+'-'+dtstart.slice(6,8);
-    // detect type
-    let type = 'birthday';
-    if (/אזכרה|יאר/.test(summary)) type = 'memorial';
-    else if (/נישואין|חתונה/.test(summary)) type = 'anniversary';
-    // clean name
-    summary = summary.replace(/יום הולדת של?|'s birthday/gi,'').replace(/Birthday/gi,'').trim();
-    events.push({ name: summary, date: dtstart, type, group: '', notes: '' });
-  });
-  return events;
-}
-
-function importFacebook(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      let added = 0;
-      // try various facebook export formats
-      const birthdays = data.birthday_posts || data.friends || [];
-      birthdays.forEach(item => {
-        const name = item.name || item.title || '';
-        const bday = item.birthday || item.date || '';
-        if (!name || !bday) return;
-        const exists = contacts.find(c => c.name === name);
-        if (exists) return;
-        contacts.push({ id: Date.now() + added, name, date: bday, type: 'birthday', group: 'חברים', notes: '', notifications: [] });
-        added++;
-      });
-      save(); renderMain();
-      alert('יובאו ' + added + ' חברים מפייסבוק!');
-      openScreen('screen-main');
-    } catch (err) {
-      alert('שגיאה בקריאת הקובץ. וודא שזה קובץ JSON תקין מפייסבוק');
-    }
-  };
-  reader.readAsText(file);
-}
-
-function connectGoogleCalendar() {
-  alert('חיבור לגוגל קלנדר ידרוש שרת backend. בגרסה הנוכחית — השתמש בייבוא ICS מגוגל.');
-}
-
-// ========== EXPORT / BACKUP ==========
+// ========== BACKUP ==========
 function exportJSON() {
-  const data = { version: 1, contacts, settings, greetings, exported: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = 'lo-shachachti-backup-' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
+  const data = { version:2, events, settings, greetings, exported:new Date().toISOString() };
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download = 'lo-shachachti-' + new Date().toISOString().slice(0,10) + '.json'; a.click();
 }
 
 function restoreBackup(input) {
   const file = input.files[0]; if (!file) return;
   if (!confirm('שחזור יחליף את כל הנתונים הנוכחיים. להמשיך?')) return;
-  const reader = new FileReader();
-  reader.onload = e => {
+  const r = new FileReader();
+  r.onload = e => {
     try {
-      const data = JSON.parse(e.target.result);
-      contacts = data.contacts || [];
-      if (data.settings) { settings = Object.assign({}, defaultSettings, data.settings); saveAllSettings(); }
-      if (data.greetings) { greetings = data.greetings; localStorage.setItem('ls_v1_greetings', JSON.stringify(greetings)); }
-      save(); renderMain();
+      const d = JSON.parse(e.target.result);
+      events = d.events || [];
+      if (d.settings) { settings = Object.assign(settings, d.settings); saveSettings(); }
+      if (d.greetings) { Object.assign(greetings, d.greetings); saveGreetings(); }
+      saveEvents(); renderMain(); openScreen('screen-main');
       alert('שוחזר בהצלחה ✅');
-      openScreen('screen-main');
-    } catch (err) { alert('שגיאה בקריאת קובץ הגיבוי'); }
+    } catch { alert('שגיאה בקריאת קובץ הגיבוי'); }
   };
-  reader.readAsText(file);
+  r.readAsText(file);
 }
 
-function exportCSV() {
-  const rows = [['שם','תאריך','סוג','קבוצה','טלפון','תקציב','סטטוס מתנה','הערות']];
-  contacts.forEach(c => rows.push([c.name||'',c.date||'',getLabel(c.type,c.customType),c.group||'',c.phone||'',c.budget||'',c.giftStatus||'',c.notes||'']));
-  const csv = rows.map(r => r.map(f => '"' + String(f).replace(/"/g,'""') + '"').join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = 'lo-shachachti-' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
+function exportCSVAll() {
+  const rows = [['שם','תאריך','סוג','קבוצה','טלפון','תקציב','סטטוס','הערות']];
+  events.forEach(e => rows.push([e.name||'',e.date||'',getLabel(e.type,e.customType),e.group||'',e.phone||'',e.budget||'',e.giftStatus||'',e.notes||'']));
+  const csv = rows.map(r => r.map(f => '"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv'}));
+  a.download = 'events.csv'; a.click();
+}
+
+function importCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const lines = e.target.result.split('\n').slice(1);
+    let added = 0;
+    lines.forEach(line => {
+      const cols = line.match(/("([^"]*)"|[^,]+|(?<=,)(?=,)|^(?=,)|(?<=,)$)/g);
+      if (!cols || cols.length < 2) return;
+      const name = (cols[0]||'').replace(/^"|"$/g,'').trim();
+      const date = (cols[1]||'').replace(/^"|"$/g,'').trim();
+      if (!name || !date) return;
+      if (events.find(ev => ev.name === name && ev.date === date)) return;
+      events.push({ id:Date.now()+added, name, date, type:'custom', group:'', notes:'', notifications:[] });
+      added++;
+    });
+    saveEvents(); renderMain(); alert('יובאו ' + added + ' שורות');
+  };
+  r.readAsText(file, 'UTF-8');
+}
+
+function importICS(input) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const blocks = e.target.result.split('BEGIN:VEVENT');
+    let added = 0, skipped = 0;
+    blocks.slice(1).forEach(block => {
+      const get = key => { const m = block.match(new RegExp(key+'[^:]*:([^\r\n]+)')); return m ? m[1].trim() : ''; };
+      let summary = get('SUMMARY');
+      let dtstart = get('DTSTART').replace(/T.*/,'');
+      if (!summary || !dtstart) return;
+      if (dtstart.length === 8) dtstart = dtstart.slice(0,4)+'-'+dtstart.slice(4,6)+'-'+dtstart.slice(6,8);
+      summary = summary.replace(/יום הולדת של?|'s birthday/gi,'').replace(/Birthday/gi,'').trim();
+      let type = 'birthday';
+      if (/אזכרה|יאר/.test(summary)) type = 'memorial';
+      else if (/נישואין|חתונה/.test(summary)) type = 'anniversary';
+      if (events.find(ev => ev.name === summary && ev.date === dtstart)) { skipped++; return; }
+      events.push({ id:Date.now()+added, name:summary, date:dtstart, type, group:'', notes:'', notifications:[] });
+      added++;
+    });
+    saveEvents(); renderMain(); openScreen('screen-main');
+    alert('יובאו ' + added + ' אירועים!' + (skipped?' ('+skipped+' דולגו)':''));
+  };
+  r.readAsText(file);
+}
+
+function importFacebook(input) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const items = data.birthday_posts || data.friends || [];
+      let added = 0;
+      items.forEach(item => {
+        const name = item.name || item.title || '';
+        const bday = item.birthday || item.date || '';
+        if (!name || events.find(ev => ev.name === name)) return;
+        events.push({ id:Date.now()+added, name, date:bday, type:'birthday', group:'חברים', notes:'', notifications:[] });
+        added++;
+      });
+      saveEvents(); renderMain(); openScreen('screen-main');
+      alert('יובאו ' + added + ' חברים מפייסבוק!');
+    } catch { alert('שגיאה בקריאת קובץ ה-JSON'); }
+  };
+  r.readAsText(file);
 }
 
 function confirmDeleteAll() {
-  if (!confirm('מחיקת כל הנתונים לצמיתות?!\nלא ניתן לשחזר ללא גיבוי.')) return;
-  contacts = []; save(); renderMain(); openScreen('screen-main');
+  if (!confirm('מחק את כל הנתונים לצמיתות?!')) return;
+  events = []; saveEvents(); renderMain(); openScreen('screen-main');
   alert('כל הנתונים נמחקו');
 }
 
-// ========== BUDGET SUMMARY ==========
-function renderBudgetSummary() {
-  const el = document.getElementById('screen-budget-summary');
-  if (!el) return;
-  const paid = contacts.filter(c => c.giftStatus === 'paid');
-  const pending = contacts.filter(c => c.giftStatus !== 'paid' && c.budget);
-  const paidTotal = paid.reduce((s,c) => s + (parseInt(c.budget)||0), 0);
-  const pendingTotal = pending.reduce((s,c) => s + (parseInt(c.budget)||0), 0);
-  const existing = document.getElementById('budgetSummaryContent');
-  if (!existing) return;
-  existing.innerHTML =
-    '<div class="stat-grid"><div class="stat-card"><div class="stat-num green">' + paidTotal + '₪</div><div class="stat-label">✅ שולם (' + paid.length + ')</div></div>' +
-    '<div class="stat-card"><div class="stat-num" style="color:var(--amber);">' + pendingTotal + '₪</div><div class="stat-label">⏳ פתוח (' + pending.length + ')</div></div></div>' +
-    paid.map(c => '<div class="detail-row"><span>' + (c.name||'') + '</span><span style="color:var(--green);">' + (parseInt(c.budget)||0) + '₪</span></div>').join('') +
-    pending.map(c => '<div class="detail-row"><span>' + (c.name||'') + '</span><span style="color:var(--amber);">' + (parseInt(c.budget)||0) + '₪</span></div>').join('');
+// ========== APPEARANCE ==========
+function renderAppearance() {
+  const grid = document.getElementById('theme-grid'); if (!grid) return;
+  grid.innerHTML = THEMES.map(t => {
+    const isActive = settings.theme === t.key;
+    if (t.custom) {
+      return '<div onclick="openCustomColor()" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;position:relative;">' +
+        '<div style="width:28px;height:28px;border-radius:50%;background:' + (isActive&&settings.customColor?settings.customColor:'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)') + ';margin:0 auto 5px;"></div>' +
+        '<div style="font-size:10px;color:' + (isActive?'var(--acc-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
+        '<input type="color" id="custom-color-picker" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;" onchange="applyCustomColor(this.value)">' +
+        '</div>';
+    }
+    return '<div onclick="selectTheme(\'' + t.key + '\')" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;">' +
+      '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,' + t.from + ',' + t.to + ');margin:0 auto 5px;"></div>' +
+      '<div style="font-size:10px;color:' + (isActive?'var(--acc-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
+      '</div>';
+  }).join('');
+  ['dark','light','auto'].forEach(m => {
+    const el = document.getElementById('mode-' + m);
+    if (el) el.classList.toggle('active', settings.mode === m);
+  });
+}
+
+function selectTheme(key) {
+  settings.theme = key; saveSettings(); applyTheme(key); renderAppearance();
+}
+
+function applyTheme(key) {
+  if (key === 'custom' && settings.customColor) { applyCustomColor(settings.customColor); return; }
+  const t = THEMES.find(x => x.key === key); if (!t) return;
+  const r = document.documentElement;
+  r.style.setProperty('--accent', t.from);
+  r.style.setProperty('--acc-rgb', t.rgb);
+  r.style.setProperty('--acc-light', t.light);
+  r.style.setProperty('--acc-dim', 'rgba(' + t.rgb + ',0.2)');
+  r.style.setProperty('--acc-border', 'rgba(' + t.rgb + ',0.4)');
+}
+
+function openCustomColor() { document.getElementById('custom-color-picker').click(); }
+
+function applyCustomColor(hex) {
+  settings.theme = 'custom'; settings.customColor = hex; saveSettings();
+  const rgb = [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)].join(',');
+  const light = '#' + [parseInt(hex.slice(1,3),16)+80,parseInt(hex.slice(3,5),16)+80,parseInt(hex.slice(5,7),16)+80].map(x => Math.min(255,x).toString(16).padStart(2,'0')).join('');
+  const r = document.documentElement;
+  r.style.setProperty('--accent', hex);
+  r.style.setProperty('--acc-rgb', rgb);
+  r.style.setProperty('--acc-light', light);
+  r.style.setProperty('--acc-dim', 'rgba(' + rgb + ',0.2)');
+  r.style.setProperty('--acc-border', 'rgba(' + rgb + ',0.4)');
+  renderAppearance();
+}
+
+function setMode(mode) {
+  settings.mode = mode; saveSettings();
+  if (mode === 'light') document.body.classList.add('light-mode');
+  else if (mode === 'dark') document.body.classList.remove('light-mode');
+  else {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.classList.toggle('light-mode', !dark);
+  }
+  renderAppearance();
+}
+
+function saveAppearance() { saveSettings(); openScreen('screen-settings'); }
+
+// ========== GUIDE ==========
+const DAILY_TIPS = [
+  'לחץ על יום בלוח השנה כדי לראות את האירועים של אותו יום!',
+  'לחץ "הבא ›" בברכה כדי לראות 5 וריאנטים שונים!',
+  'הוסף תמונה או אמוג\'י לאיש קשר לחוויה יותר אישית 📸',
+  'ייצא גיבוי מדי פעם — הגדרות ← גיבוי והדפסה',
+  'שנה את צבע האפליקציה — הגדרות ← מראה ← ערכת צבעים 🎨',
+  'הוסף קבוצות לאנשי קשר לסינון מהיר במסך הראשי',
+  'ייבא ימי הולדת מפייסבוק — הגדרות ← מערכת ← ייבוא 📘',
+];
+
+function renderGuide() {
+  const tip = DAILY_TIPS[Math.floor(Math.random() * DAILY_TIPS.length)];
+  const el = document.getElementById('daily-tip');
+  if (el) el.innerHTML = '<div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;">💡 טיפ יומי</div><div style="font-size:11px;color:var(--muted);">' + tip + '</div>';
+}
+
+const CHAPTERS = {
+  start: {
+    title: '🚀 התחלה מהירה',
+    content: () => {
+      const steps = [
+        ['➕ לחץ "הוסף אירוע"','הכפתור הכחול במסך הראשי'],
+        ['📝 הכנס שם ותאריך','שם האדם + תאריך האירוע'],
+        ['🎉 בחר סוג אירוע','יום הולדת, אזכרה, חתונה ועוד 11 סוגים'],
+        ['👥 בחר קבוצה','משפחה / חברים / עבודה...'],
+        ['💾 שמור ותקבל תזכורות!','האפליקציה תזכיר לך לפני כל אירוע'],
+      ];
+      return '<div style="background:rgba(var(--acc-rgb),0.1);border:1px solid var(--acc-border);border-radius:var(--rs);padding:10px 12px;margin-bottom:14px;text-align:center;font-size:12px;color:var(--acc-light);">תוך 30 שניות תוסיף את האירוע הראשון שלך!</div>' +
+        steps.map((s,i) => '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;"><div class="step-num">' + (i+1) + '</div><div><div style="font-size:13px;font-weight:500;">' + s[0] + '</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">' + s[1] + '</div></div></div>').join('') +
+        '<div class="tip-card"><div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;">⭐ טיפ חכם</div><div style="font-size:11px;color:var(--muted);">לחץ "שמור וערוך פרטים" להוסיף מיד טלפון, מתנה ותזכורות!</div></div>' +
+        '<button class="btn-primary" onclick="openAddForm()">➕ נסה עכשיו!</button>';
+    }
+  },
+  events: {
+    title: '🎉 ניהול אירועים',
+    content: () => {
+      const items = [
+        ['🎉 11 סוגי אירועים','יום הולדת, חתונה, אזכרה, טסט, תור רפואי ועוד'],
+        ['👥 קבוצות','משפחה / חברים / עבודה — לסינון מהיר'],
+        ['📅 לוח שנה','לחץ על יום לראות אירועים. נקודה סגולה = אירוע'],
+        ['🔥 האירוע הקרוב','הכרטיס בראש המסך מציג תמיד מה הבא'],
+        ['✏️ עריכה','לחץ "עוד ▼" על כרטיס ← "ערוך"'],
+        ['🔔 תזכורות','כל אירוע מקבל תזכורת אוטומטית יום לפני'],
+      ];
+      return items.map(i => '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">' + i[0] + '</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">' + i[1] + '</div></div></div>').join('');
+    }
+  },
+  gifts: {
+    title: '🎁 מתנות ותקציב',
+    content: () => {
+      const items = [
+        ['💰 הגדרת תקציב','הכנס תקציב בטופס האירוע'],
+        ['🛒 רעיונות למתנה','בחר מ-22 קטגוריות מוכנות'],
+        ['✅ מעקב קנייה','לחץ "⏳ לביצוע" כדי לסמן כנקנה'],
+        ['🔍 חיפוש מתנות','כפתורי חנויות מפנים ישר לחיפוש'],
+        ['📊 דוח תקציב','הגדרות ← הגדרות תקציב'],
+      ];
+      return items.map(i => '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">' + i[0] + '</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">' + i[1] + '</div></div></div>').join('');
+    }
+  },
+  greetings: {
+    title: '💬 ברכות',
+    content: () =>
+      '<div style="font-size:13px;font-weight:500;margin-bottom:10px;">5 ברכות לכל סוג אירוע</div>' +
+      '<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px;">לכל סוג אירוע יש 5 וריאנטים שונים. לחץ "הבא ›" על הכרטיס כדי לעבור ביניהם.</div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">📱 שליחה בוואטסאפ</div><div style="font-size:11px;color:var(--muted);">לחיצה אחת שולחת ישר לוואטסאפ</div></div></div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">✏️ עריכת ברכות</div><div style="font-size:11px;color:var(--muted);">הגדרות ← מערכת ← ברכות קבועות</div></div></div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">📝 ברכות אישיות</div><div style="font-size:11px;color:var(--muted);">כתוב ברכות משלך — עד 5 ברכות</div></div></div>',
+  },
+  notif: {
+    title: '🔔 התראות',
+    content: () =>
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">📅 יום לפני</div><div style="font-size:11px;color:var(--muted);">התראה אוטומטית יום לפני כל אירוע</div></div></div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">✏️ מותאם אישית</div><div style="font-size:11px;color:var(--muted);">הגדר כמה ימים לפני ובאיזו שעה</div></div></div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">🎁 תזכורת מתנה</div><div style="font-size:11px;color:var(--muted);">תזכורת שבועיים לפני — לקנות מתנה</div></div></div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">🔕 שעות שקט</div><div style="font-size:11px;color:var(--muted);">הגדר שעות ללא הפרעה</div></div></div>',
+  },
+  backup: {
+    title: '💾 גיבוי וייבוא',
+    content: () =>
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">📥 ייבוא ICS</div><div style="font-size:11px;color:var(--muted);">ייבא מגוגל קלנדר, אפל, אאוטלוק</div></div></div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">📘 ייבוא פייסבוק</div><div style="font-size:11px;color:var(--muted);">ייבא ימי הולדת של חברים</div></div></div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">📤 ייצוא גיבוי</div><div style="font-size:11px;color:var(--muted);">שמור קובץ JSON לשחזור מלא</div></div></div>' +
+      '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">🔄 שחזור</div><div style="font-size:11px;color:var(--muted);">החלף טלפון? שחזר את כל הנתונים</div></div></div>',
+  },
+  secrets: {
+    title: '⭐ פיצ`רים נסתרים',
+    content: () => {
+      const items = [
+        ['📅 לוח שנה אינטראקטיבי','לחץ על כל יום לראות אירועים'],
+        ['💬 5 ברכות לכל אירוע','לחץ "הבא ›" לעבור ביניהן'],
+        ['🎨 11 ערכות צבע','כולל color picker חופשי!'],
+        ['📸 תמונה לאיש קשר','הוסף תמונה, גלריה, או אמוג\'י'],
+        ['🔍 חיפוש לפי קבוצה','לחץ קבוצה בחיפוש לראות את כולם'],
+        ['🌓 מצב בהיר/כהה','הגדרות ← מראה'],
+        ['🔤 גופן גדול','הגדרות ← משתמש ← גופן גדול'],
+      ];
+      return '<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:var(--rs);padding:10px;margin-bottom:12px;font-size:12px;color:var(--muted);text-align:center;">דברים שרוב המשתמשים לא מגלים!</div>' +
+        items.map(i => '<div class="detail-row"><div><div style="font-size:13px;font-weight:500;">' + i[0] + '</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">' + i[1] + '</div></div></div>').join('');
+    }
+  },
+};
+
+function openGuideChapter(key) {
+  const ch = CHAPTERS[key]; if (!ch) return;
+  document.getElementById('chapter-title').textContent = ch.title;
+  document.getElementById('chapter-content').innerHTML = ch.content();
+  openScreen('screen-guide-chapter');
 }
 
 // ========== NOTIFICATIONS ==========
-function scheduleNotifs(c) {
-  if (!settings.notifEnabled) return;
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  if (!('serviceWorker' in navigator)) return;
+function scheduleNotif(ev) {
+  if (!settings.notifEnabled || !('serviceWorker' in navigator)) return;
+  if (Notification.permission !== 'granted') return;
+  const days = settings.notifDayBefore ? [1] : [];
+  if (settings.notifWeekBefore) days.push(7);
   navigator.serviceWorker.ready.then(reg => {
     const today = new Date(); today.setHours(0,0,0,0);
-    const ev = new Date(c.date);
-    const notifs = [];
-    if (settings.defaultDayBefore) notifs.push({ days: 1, time: '09:00', label: 'מחר — ' + (c.name||'') });
-    if (settings.defaultWeekBefore) notifs.push({ days: 7, time: '09:00', label: 'בעוד שבוע — ' + (c.name||'') });
-    notifs.forEach(n => {
-      let eventDate = new Date(today.getFullYear(), ev.getMonth(), ev.getDate());
-      if (eventDate < today) eventDate.setFullYear(today.getFullYear() + 1);
-      const notifDate = new Date(eventDate);
-      notifDate.setDate(notifDate.getDate() - n.days);
-      const [h, m] = (n.time||'09:00').split(':').map(Number);
-      notifDate.setHours(h, m, 0, 0);
-      const ms = notifDate - new Date();
+    const d = new Date(ev.date);
+    days.forEach(n => {
+      let next = new Date(today.getFullYear(), d.getMonth(), d.getDate());
+      if (next < today) next.setFullYear(next.getFullYear()+1);
+      next.setDate(next.getDate() - n);
+      next.setHours(9,0,0,0);
+      const ms = next - new Date();
       if (ms < 0) return;
       setTimeout(() => {
         reg.showNotification('לא שכחתי 🔔', {
-          body: n.label + ' — ' + getLabel(c.type, c.customType),
-          icon: 'icon-192.png', tag: 'notif-' + c.id, dir: 'rtl',
+          body: ev.name + ' — ' + getLabel(ev.type, ev.customType) + (n===1?' מחר!':' בעוד '+n+' ימים'),
+          icon: 'icon-192.png', tag: 'ev-' + ev.id, dir: 'rtl',
         });
       }, ms);
     });
   });
 }
 
-function requestNotifPermission() {
-  if ('Notification' in window) {
-    Notification.requestPermission().then(perm => {
-      if (perm === 'granted') contacts.forEach(c => scheduleNotifs(c));
-    });
-  }
-}
-
-// ========== MODAL ==========
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// ========== SCROLL TO TOP ==========
-window.addEventListener('scroll', () => {
-  const btn = document.getElementById('scrollTopBtn');
-  if (btn) btn.style.display = window.scrollY > 300 ? 'block' : 'none';
-});
-
 // ========== INIT ==========
-window.addEventListener('DOMContentLoaded', () => {
-  // Service Worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(() => requestNotifPermission()).catch(() => {});
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  // splash
+  setTimeout(() => {
+    const s = document.getElementById('splash');
+    s.classList.add('hide');
+    setTimeout(() => s.style.display = 'none', 500);
+  }, 1500);
 
-  // Init form
+  // apply theme & mode
+  applyTheme(settings.theme || 'purple');
+  if (settings.mode === 'light') document.body.classList.add('light-mode');
+  if (settings.largeFont) { document.documentElement.style.fontSize='18px'; document.body.classList.add('large-font'); }
+
+  // init gift tags
   initGiftTags();
   document.getElementById('inp-gift-idea').addEventListener('input', updateGiftDisplay);
+  document.getElementById('inp-name').addEventListener('input', updateFormAvatar);
 
-  // Init appearance
-  initAppearanceScreen();
-  applyTheme(settings.theme || 'purple');
+  // service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(() => {
+      if ('Notification' in window && Notification.permission !== 'granted') {
+        Notification.requestPermission().then(p => { if (p === 'granted') events.forEach(scheduleNotif); });
+      }
+    });
+  }
 
-  // Appearance mode cards style
-  ['dark','light','auto'].forEach(m => {
-    const el = document.getElementById('mode-' + m);
-    if (el) el.style.cssText += ';flex:1;border:' + (settings.mode===m?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--radius-sm);padding:8px 5px;cursor:pointer;';
+  // scroll to top button
+  window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollTopBtn');
+    if (btn) btn.style.display = window.scrollY > 300 ? 'block' : 'none';
   });
 
-  // Budget summary screen placeholder
-  const backupScreen = document.getElementById('screen-backup');
-  if (backupScreen && !document.getElementById('screen-budget-summary')) {
-    const budgetScreen = document.createElement('div');
-    budgetScreen.className = 'screen';
-    budgetScreen.id = 'screen-budget-summary';
-    budgetScreen.innerHTML =
-      '<div class="topbar"><button class="back-btn" onclick="openScreen(\'screen-backup\')">← חזרה</button><span style="font-size:15px;font-weight:600;">💰 סיכום תקציב</span></div>' +
-      '<div style="padding:12px 0;" id="budgetSummaryContent"></div>';
-    document.body.insertBefore(budgetScreen, document.getElementById('scrollTopBtn'));
-  }
-
-  // Print report screen
-  if (!document.getElementById('screen-print-report')) {
-    const printScreen = document.createElement('div');
-    printScreen.className = 'screen';
-    printScreen.id = 'screen-print-report';
-    printScreen.innerHTML =
-      '<div class="topbar"><button class="back-btn" onclick="openScreen(\'screen-backup\')">← חזרה</button><span style="font-size:15px;font-weight:600;">🖨️ הדפס דוח</span></div>' +
-      '<div style="padding:12px 0;">' +
-      '<div class="section-lbl">סוג דוח</div>' +
-      '<div class="filter-row" id="reportTypeRow">' +
-      '<div class="chip on" onclick="setReportType(this,\'all\')">📋 הכל</div>' +
-      '<div class="chip" onclick="setReportType(this,\'upcoming\')">⏳ קרובים</div>' +
-      '<div class="chip" onclick="setReportType(this,\'group\')">🏷️ לפי קבוצה</div>' +
-      '<div class="chip" onclick="setReportType(this,\'budget\')">💰 תקציב</div>' +
-      '</div>' +
-      '<div class="section-lbl">טווח תאריכים</div>' +
-      '<div class="form-grid-2">' +
-      '<div><label class="form-label">מתאריך</label><input type="date" class="form-input" id="printFrom" oninput="updateReportPreview()"></div>' +
-      '<div><label class="form-label">עד תאריך</label><input type="date" class="form-input" id="printTo" oninput="updateReportPreview()"></div>' +
-      '</div>' +
-      '<div id="reportPreview" style="margin-bottom:12px;"></div>' +
-      '<button class="btn-primary" onclick="printReport()">🖨️ הדפס</button>' +
-      '</div>';
-    document.body.insertBefore(printScreen, document.getElementById('scrollTopBtn'));
-  }
-
-  // My greetings screen
-  if (!document.getElementById('screen-my-greetings')) {
-    const mgScreen = document.createElement('div');
-    mgScreen.className = 'screen';
-    mgScreen.id = 'screen-my-greetings';
-    mgScreen.innerHTML =
-      '<div class="topbar"><button class="back-btn" onclick="openScreen(\'screen-system-settings\')">← חזרה</button><span style="font-size:15px;font-weight:600;">📝 ברכות אישיות</span></div>' +
-      '<div style="padding:12px 0;">' +
-      ['ברכה 1','ברכה 2','ברכה 3','ברכה 4','ברכה 5'].map((label,i) =>
-        '<label class="form-label">' + label + '</label>' +
-        '<textarea class="form-textarea" id="my-greet-' + i + '" placeholder="כתוב ברכה אישית...">' + (myGreetings[i]||'') + '</textarea>'
-      ).join('') +
-      '<button class="btn-primary" onclick="saveMyGreetings()">💾 שמור</button>' +
-      '</div>';
-    document.body.insertBefore(mgScreen, document.getElementById('scrollTopBtn'));
-  }
-
-  // Render main
+  // render main
   renderMain();
 });
-
-function saveMyGreetings() {
-  myGreetings = [0,1,2,3,4].map(i => document.getElementById('my-greet-'+i).value);
-  localStorage.setItem('ls_v1_my_greetings', JSON.stringify(myGreetings));
-  alert('הברכות האישיות נשמרו ✅');
-}
-
-
-// ========== APPEARANCE FIX ==========
-function setMode(mode) {
-  settings.mode = mode;
-  document.querySelectorAll('.appearance-mode-card').forEach(el => el.classList.remove('active'));
-  const el = document.getElementById('mode-' + mode);
-  if (el) el.classList.add('active');
-  if (mode === 'light') document.body.classList.add('light-mode');
-  else document.body.classList.remove('light-mode');
-  saveSetting('mode', mode);
-}
-
-function saveAppearance() {
-  saveAllSettings();
-  if (settings.largeFont) document.body.classList.add('large-font');
-  else document.body.classList.remove('large-font');
-  if (settings.mode === 'light') document.body.classList.add('light-mode');
-  else document.body.classList.remove('light-mode');
-  alert('המראה נשמר ✅');
-  openScreen('screen-settings');
-}
-
-// fix toggleSetting for largeFont
-const _origToggle = toggleSetting;
-// override toggleSetting to handle appearance
-function toggleSetting(key, el) {
-  settings[key] = !settings[key];
-  if (settings[key]) el.classList.add('on'); else el.classList.remove('on');
-  saveAllSettings();
-  if (key === 'largeFont') {
-    if (settings.largeFont) document.body.classList.add('large-font');
-    else document.body.classList.remove('large-font');
-  }
-  if (key !== 'largeFont' && key !== 'animations' && key !== 'sounds' && key !== 'confetti') renderMain();
-}
-
-// ========== SEARCH FIX — show all groups + contacts in group ==========
-function renderSearchFilters() {
-  const allGroups = [...new Set(contacts.map(c => c.group).filter(Boolean))];
-  document.getElementById('searchFilterRow').innerHTML =
-    ['', ...allGroups].map(g =>
-      '<div class="chip' + (searchGroupFilter === g ? ' active' : '') + '" onclick="setSearchGroup(\'' + g.replace(/'/g,"\\'") + '\')">' + (g || 'הכל') + '</div>'
-    ).join('');
-}
-
-// ========== HERO LABEL FIX ==========
-function renderHero(enriched) {
-  const upcoming = enriched.filter(c => c.daysLeft !== null).sort((a,b) => a.daysLeft - b.daysLeft);
-  if (!upcoming.length) { document.getElementById('heroWidget').innerHTML = ''; return; }
-  const c = upcoming[0];
-  const [bg, fg] = avatarColor(c.name);
-  document.getElementById('heroWidget').innerHTML =
-    '<div class="hero-card" onclick="openEventDetail(' + c.id + ')" style="cursor:pointer;">' +
-    '<div class="hero-label">האירוע הקרוב</div>' +
-    '<div style="display:flex;align-items:center;gap:12px;margin-top:4px;">' +
-    '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';">' + (c.name||'?')[0].toUpperCase() + '</div>' +
-    '<div><div class="hero-name">' + (c.name||'') + '</div>' +
-    '<div style="font-size:11px;color:#818cf8;margin-top:2px;">' + getLabel(c.type, c.customType) + '</div></div>' +
-    '</div>' +
-    '<span class="hero-badge">' + (c.daysLeft === 0 ? '🎉 היום!' : c.daysLeft === 1 ? '🔥 מחר!' : '📅 עוד ' + c.daysLeft + ' ימים') + '</span>' +
-    '</div>';
-  if (enriched.some(x => x.daysLeft === 0)) setTimeout(triggerConfetti, 500);
-}
-
-// ========== GREETINGS — ALL EVENT TYPES + 5 VARIANTS ==========
-const GREETING_VARIANTS = {
-  birthday: [
-    'יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר והצלחה 🎂',
-    'מזל טוב {name}! עוד שנה של הצלחות ושמחות 🎉',
-    '{name} היקר/ה, יום הולדת שמח! שכל חלומותיך יתגשמו ✨',
-    'שנה שמחה ובריאה {name}! 🥳',
-    'יום הולדת שמח! שתחגוג עוד הרבה שנים {name} 🎈',
-  ],
-  memorial: [
-    'חושב עליכם היום ביום האזכרה. מחבק מרחוק 🕯️',
-    'זכרו יהיה ברוך לעד 🕯️',
-    'זיכרון לברכה. מחשבותינו אתכם 🕯️',
-    'בעצב ובכבוד, מציין/ת את יום האזכרה 🕯️',
-    'לנצח בלבנו 🕯️',
-  ],
-  anniversary: [
-    'יום נישואין שמח {name}! שתמשיכו לאהוב ולצמוח יחד 💍',
-    'מזל טוב על {n} שנות נישואין! 💍',
-    'שנה נוספת של אהבה ושמחה {name}! 💑',
-    'יום נישואין שמח! שתמשיכו יחד לנצח 💍',
-    'ברכות חמות ליום הנישואין! 💞',
-  ],
-  wedding: [
-    'מזל טוב {name}! שתתחילו את דרכם המשותפת באהבה ובאושר 💒',
-    'ברכות לחתונה! יום מרגש ומיוחד 💒',
-    'מזל טוב לחתן ולכלה! 🥂',
-    'שתהיה חתונה שמחה ויפה! 🎊',
-    'ברכות מכל הלב ליום המיוחד! 💒',
-  ],
-  barmitzvah: [
-    'מזל טוב על בר/בת המצווה! ✡️',
-    'ברכות לאבן הדרך המיוחדת! ✡️',
-    'מזל טוב! יום גדול ומשמעותי ✨',
-    'ברכות חמות לאירוע המיוחד! ✡️',
-    'מזל טוב! שתמשיך בדרך טובה ✡️',
-  ],
-  friends: [
-    'מחכה לפגישה! 😊',
-    'יהיה כיף לראות אותך! 🤗',
-    'מצפה למפגש! 👋',
-    'יאללה נתראה! 😄',
-    'מחכה בקוצר רוח! 🎉',
-  ],
-  trip: [
-    'טיסה טובה! ✈️ שתהיה חופשה נהדרת',
-    'נסיעה טובה! 🌍 תהנה/י',
-    'חופשה מענגת! ✈️',
-    'שתחזור/י בריא/ה ושלם/ה! 🧳',
-    'טיול נעים! 🏖️',
-  ],
-  car: [
-    'בהצלחה בטסט! 🚗',
-    'יעבור חלק! 🔧',
-    'בהצלחה! 🚙',
-    'הכל יהיה בסדר גמור! 🔑',
-    'יצא מהטסט עם פס ירוק! ✅',
-  ],
-  medical: [
-    'בהצלחה בתור! 🏥 הבריאות קודמת',
-    'שיהיה בסדר! 💊',
-    'בריאות מעל הכל! 🏥',
-    'שתרגיש/י טוב! 💙',
-    'בהצלחה! שיהיה בשורות טובות 🌿',
-  ],
-  holiday: [
-    'חג שמח! 🎊',
-    'מועדים לשמחה! 🕎',
-    'חג שמח וכשר! ✨',
-    'ברכות לחג! 🎉',
-    'שיהיה חג מאושר! 🌟',
-  ],
-  graduation: [
-    'מזל טוב על הסיום! 🎓 עתיד מזהיר לפניך',
-    'ברכות על הגמר! 🎓',
-    'מזל טוב! כל הכבוד על ההשגה 🎓',
-    'ברכות חמות על סיום הלימודים! 📚',
-    'מזל טוב! הצלחה בדרך הבאה 🌟',
-  ],
-  custom: [
-    'מזל טוב! 🎉',
-    'ברכות! ✨',
-    'כל הכבוד! 👏',
-    'שיהיה בהצלחה! 🌟',
-    'ברכות חמות! 💙',
-  ],
-};
-
-// track which variant index to use per contact
-const greetVariantIndex = {};
-
-function buildGreeting(c) {
-  const type = c.type || 'custom';
-  const name = c.name || '';
-  const variants = GREETING_VARIANTS[type] || GREETING_VARIANTS.custom;
-  const idx = greetVariantIndex[c.id] || 0;
-  return variants[idx].replace(/{name}/g, name).replace(/{n}/g, '');
-}
-
-function nextGreetVariant(id, btnEl) {
-  const c = contacts.find(x => x.id === id); if (!c) return;
-  const type = c.type || 'custom';
-  const variants = GREETING_VARIANTS[type] || GREETING_VARIANTS.custom;
-  const cur = greetVariantIndex[id] || 0;
-  greetVariantIndex[id] = (cur + 1) % variants.length;
-  // update text in DOM
-  const textEl = document.getElementById('greet-text-' + id);
-  if (textEl) textEl.textContent = buildGreeting(c);
-  playSound('greet');
-}
-
-// override buildEventCard to use new greeting system with variant button
-function buildEventCard(c) {
-  const [bg, fg] = avatarColor(c.name);
-  const letter = (c.name||'?')[0].toUpperCase();
-  const hasGift = c.giftIdea || c.budget;
-  const notifCount = (c.notifications || []).length;
-  const storeLinksHtml = c.giftIdea ? activeStores.map(s =>
-    '<a href="https://www.google.com/search?q=' + encodeURIComponent(c.giftIdea + ' ' + s) + '" target="_blank" class="store-link">🔍 ' + s + '</a>'
-  ).join('') : '';
-  const giftHtml = hasGift ? (
-    '<div class="gift-box">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-    '<span class="gift-title">🎁 ' + (c.giftIdea||'') + (c.budget?' | '+c.budget+' ₪':'') + '</span>' +
-    '<button onclick="event.stopPropagation();toggleGiftStatus(' + c.id + ')" style="background:' + (c.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:3px 9px;border-radius:var(--radius-full);font-size:11px;cursor:pointer;">' +
-    (c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע') + '</button>' +
-    '</div>' +
-    '<div class="store-links">' + storeLinksHtml + '</div>' +
-    '</div>'
-  ) : '';
-  return '<div class="event-card" id="card-' + c.id + '">' +
-    '<div class="event-card-main">' +
-    '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';">' + letter + '</div>' +
-    '<div style="flex:1;min-width:0;">' +
-    '<div style="font-weight:600;font-size:16px;">' + (c.name||'') + '</div>' +
-    '<div style="font-size:12px;color:var(--accent);margin-top:1px;">' + getLabel(c.type, c.customType) + '</div>' +
-    '<div style="margin-top:4px;">' + countdownBadge(c.daysLeft, c.isOver) + '</div>' +
-    '</div>' +
-    urgencyBadge(c.daysLeft, c.isOver) +
-    '</div>' +
-    '<div class="event-card-actions">' +
-    '<button class="card-btn share" onclick="event.stopPropagation();shareEvent(' + c.id + ')">📱 שתף</button>' +
-    '<button class="card-btn edit" onclick="event.stopPropagation();editEvent(' + c.id + ')">✏️ ערוך</button>' +
-    '<button class="card-btn" onclick="event.stopPropagation();toggleDetails(' + c.id + ',this)">⚙️ עוד ▼</button>' +
-    '</div>' +
-    '<div class="details-panel" id="details-' + c.id + '">' +
-    (c.group ? '<div class="detail-row"><span class="detail-label">🏷️ קבוצה</span><span>' + c.group + '</span></div>' : '') +
-    (c.phone ? '<div class="detail-row"><span class="detail-label">📱 טלפון</span><a href="tel:' + c.phone + '" style="color:var(--accent);">' + c.phone + '</a></div>' : '') +
-    (c.notes ? '<div style="font-size:12px;font-style:italic;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);">💡 ' + c.notes + '</div>' : '') +
-    (notifCount ? '<div class="detail-row"><span class="detail-label">🔔 תזכורות</span><span style="color:var(--accent);">' + notifCount + '</span></div>' : '') +
-    giftHtml +
-    '<div class="greet-box">' +
-    '<div class="greet-label" style="display:flex;justify-content:space-between;align-items:center;"><span>💬 ברכה מוכנה</span><button onclick="nextGreetVariant(' + c.id + ',this)" style="font-size:10px;color:#a5b4fc;background:rgba(99,102,241,0.15);border:1px solid var(--accent-border);border-radius:var(--radius-full);padding:2px 9px;cursor:pointer;">הבא ›</button></div>' +
-    '<div class="greet-text" id="greet-text-' + c.id + '">' + buildGreeting(c) + '</div>' +
-    '<div class="greet-actions">' +
-    '<button class="greet-btn" onclick="sendWhatsApp(' + c.id + ')">📱 וואטסאפ</button>' +
-    '<button class="greet-btn secondary" onclick="copyGreeting(' + c.id + ')">📋 העתק</button>' +
-    '</div></div>' +
-    '</div>' +
-    '<button class="details-toggle" onclick="toggleDetails(' + c.id + ',this)">▼ פרטים נוספים</button>' +
-    '</div>';
-}
-
-// override renderGreetings to show all event types
-function renderGreetings() {
-  const types = [
-    {key:'birthday', label:'🎉 יום הולדת'},
-    {key:'memorial', label:'🕯️ אזכרה'},
-    {key:'anniversary', label:'💍 יום נישואין'},
-    {key:'wedding', label:'💒 חתונה'},
-    {key:'barmitzvah', label:'✡️ בר/בת מצווה'},
-    {key:'friends', label:'👥 מפגש חברים'},
-    {key:'trip', label:'✈️ טיול'},
-    {key:'car', label:'🚗 טסט לרכב'},
-    {key:'medical', label:'🏥 תור רפואי'},
-    {key:'holiday', label:'🎊 חג'},
-    {key:'graduation', label:'🎓 סיום לימודים'},
-    {key:'custom', label:'✨ אחר'},
-  ];
-  const el = document.getElementById('greetingsList');
-  if (!el) return;
-  el.innerHTML = types.map(t => {
-    const variants = GREETING_VARIANTS[t.key] || [];
-    return '<div class="card" style="margin-bottom:10px;">' +
-      '<div style="font-size:13px;font-weight:500;margin-bottom:8px;">' + t.label + '</div>' +
-      variants.map((v,i) =>
-        '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid var(--border);">' +
-        '<span style="font-size:10px;color:var(--muted);width:16px;flex-shrink:0;margin-top:3px;">' + (i+1) + '</span>' +
-        '<div style="flex:1;font-size:12px;color:var(--muted);line-height:1.6;">' + v + '</div>' +
-        '<button onclick="editVariant(\'' + t.key + '\',' + i + ')" style="font-size:10px;color:var(--accent);background:transparent;border:none;cursor:pointer;flex-shrink:0;">✏️</button>' +
-        '</div>'
-      ).join('') +
-      '</div>';
-  }).join('');
-}
-
-function editVariant(type, idx) {
-  const current = GREETING_VARIANTS[type][idx];
-  const newVal = prompt('ערוך ברכה ' + (idx+1) + ':', current);
-  if (newVal !== null) {
-    GREETING_VARIANTS[type][idx] = newVal;
-    renderGreetings();
-  }
-}
-
-// ========== BUDGET SETTINGS ==========
-function renderBudgetSettings() {
-  const from = (document.getElementById('budgetFrom') || {}).value || '';
-  const to = (document.getElementById('budgetTo') || {}).value || '';
-  let list = contacts.filter(c => c.budget);
-  if (from) list = list.filter(c => (c.date||'') >= from);
-  if (to)   list = list.filter(c => (c.date||'') <= to);
-
-  const paid = list.filter(c => c.giftStatus === 'paid');
-  const pending = list.filter(c => c.giftStatus !== 'paid');
-  const paidTotal = paid.reduce((s,c) => s+(parseInt(c.budget)||0), 0);
-  const pendingTotal = pending.reduce((s,c) => s+(parseInt(c.budget)||0), 0);
-
-  const statsEl = document.getElementById('budgetStatsGrid');
-  if (statsEl) {
-    statsEl.innerHTML =
-      '<div class="stat-card"><div class="stat-num green">' + paidTotal + '₪</div><div class="stat-label">✅ שולם (' + paid.length + ')</div></div>' +
-      '<div class="stat-card"><div class="stat-num" style="color:var(--amber);">' + pendingTotal + '₪</div><div class="stat-label">⏳ פתוח (' + pending.length + ')</div></div>';
-  }
-
-  const listEl = document.getElementById('budgetDetailList');
-  if (listEl) {
-    listEl.innerHTML = '<div style="font-size:11px;color:var(--muted2);margin-bottom:8px;">סה"כ: ' + (paidTotal+pendingTotal) + '₪</div>' +
-      [...paid, ...pending].map(c =>
-        '<div class="detail-row"><span>' + (c.name||'') + '</span>' +
-        '<span style="display:flex;gap:8px;align-items:center;">' +
-        '<span style="color:' + (c.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';">' + (parseInt(c.budget)||0) + '₪</span>' +
-        '<button onclick="toggleGiftStatus(' + c.id + ');renderBudgetSettings();" style="font-size:10px;background:' + (c.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:2px 8px;border-radius:var(--radius-full);cursor:pointer;">' + (c.giftStatus==='paid'?'✅':'⏳') + '</button>' +
-        '</span></div>'
-      ).join('');
-  }
-}
-
-function printBudgetReport() {
-  const list = contacts.filter(c => c.budget);
-  const paidTotal = list.filter(c=>c.giftStatus==='paid').reduce((s,c)=>s+(parseInt(c.budget)||0),0);
-  const total = list.reduce((s,c)=>s+(parseInt(c.budget)||0),0);
-  const win = window.open('');
-  win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;"><h2>לא שכחתי — דוח תקציב</h2>');
-  win.document.write('<p>שולם: <b>' + paidTotal + '₪</b> | סה"כ: <b>' + total + '₪</b></p>');
-  win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>תקציב</th><th>סטטוס</th></tr>');
-  list.forEach(c => win.document.write('<tr><td>'+(c.name||'')+'</td><td>'+(c.date||'')+'</td><td>'+(c.budget||'')+'₪</td><td>'+(c.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע')+'</td></tr>'));
-  win.document.write('</table></body></html>'); win.print();
-}
-
-function exportBudgetCSV() {
-  const list = contacts.filter(c => c.budget);
-  const rows = [['שם','תאריך','תקציב','סטטוס']];
-  list.forEach(c => rows.push([c.name||'',c.date||'',(c.budget||'')+'₪',c.giftStatus==='paid'?'נקנה':'לביצוע']));
-  const csv = rows.map(r => r.map(f => '"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='budget-'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
-}
-
-function recalcBudget() {
-  renderBudgetSettings();
-  alert('חישוב תקציב עודכן ✅');
-}
-
-// ========== INIT OVERRIDES ==========
-// Apply saved appearance on load
-document.addEventListener('DOMContentLoaded', () => {
-  if (settings.mode === 'light') document.body.classList.add('light-mode');
-  if (settings.largeFont) document.body.classList.add('large-font');
-  // update appearance screen mode cards
-  ['dark','light','auto'].forEach(m => {
-    const el = document.getElementById('mode-' + m);
-    if (el && settings.mode === m) el.classList.add('active');
-  });
-  // init budget screen
-  const budgetScreen = document.getElementById('screen-budget-settings');
-  if (budgetScreen) budgetScreen.addEventListener('click', () => {});
-});
-
-// override openScreen to init budget settings
-const _origOpenScreen = openScreen;
-function openScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-  window.scrollTo(0, 0);
-  if (id === 'screen-main') renderMain();
-  if (id === 'screen-contacts') renderContactsList();
-  if (id === 'screen-greetings') renderGreetings();
-  if (id === 'screen-stores') renderStores();
-  if (id === 'screen-budget-settings') setTimeout(renderBudgetSettings, 50);
-  if (id === 'screen-search') { setTimeout(() => document.getElementById('searchInput').focus(), 100); renderSearchFilters(); }
-  if (id === 'screen-appearance') initAppearanceScreen();
-}
-
-// ========== REPORT TYPE ==========
-let currentReportType = 'all';
-function setReportType(el, type) {
-  currentReportType = type;
-  document.querySelectorAll('#reportTypeRow .chip').forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
-  updateReportPreview();
-}
-
-function updateReportPreview() {
-  const from = (document.getElementById('printFrom')||{}).value || '';
-  const to = (document.getElementById('printTo')||{}).value || '';
-  let list = [...contacts];
-  if (from) list = list.filter(c => (c.date||'') >= from);
-  if (to)   list = list.filter(c => (c.date||'') <= to);
-  if (currentReportType === 'upcoming') {
-    list = list.map(c => ({...c,...calcDays(c.date,getRecurrence(c.type))}))
-               .filter(c => c.daysLeft !== null && c.daysLeft <= 30)
-               .sort((a,b) => a.daysLeft - b.daysLeft);
-  } else if (currentReportType === 'group') {
-    list.sort((a,b) => (a.group||'').localeCompare(b.group||'','he'));
-  } else if (currentReportType === 'budget') {
-    list = list.filter(c => c.budget);
-  }
-  const preview = document.getElementById('reportPreview');
-  if (!preview) return;
-  preview.innerHTML = '<div class="info-box"><div class="info-box-title">תצוגה מקדימה — ' + list.length + ' אירועים</div>' +
-    list.slice(0,4).map(c => '<div class="detail-row"><span>' + (c.name||'') + '</span><span style="color:var(--muted);font-size:11px;">' + (c.date||'') + '</span></div>').join('') +
-    (list.length > 4 ? '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;">ועוד ' + (list.length-4) + ' נוספים...</div>' : '') +
-    '</div>';
-}
-
-// ========== PRINT REPORT OVERRIDE ==========
-function printReport() {
-  const from = (document.getElementById('printFrom')||{}).value || '';
-  const to = (document.getElementById('printTo')||{}).value || '';
-  let list = [...contacts];
-  if (from) list = list.filter(c => (c.date||'') >= from);
-  if (to)   list = list.filter(c => (c.date||'') <= to);
-  if (currentReportType === 'upcoming') {
-    list = list.map(c => ({...c,...calcDays(c.date,getRecurrence(c.type))}))
-               .filter(c => c.daysLeft !== null && c.daysLeft <= 30)
-               .sort((a,b) => a.daysLeft - b.daysLeft);
-  } else if (currentReportType === 'group') {
-    list.sort((a,b) => (a.group||'').localeCompare(b.group||'','he'));
-  } else if (currentReportType === 'budget') {
-    list = list.filter(c => c.budget);
-  }
-  const typeLabels = {all:'הכל', upcoming:'קרובים', group:'לפי קבוצה', budget:'תקציב'};
-  const win = window.open('');
-  win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;">');
-  win.document.write('<h2>לא שכחתי — דוח ' + (typeLabels[currentReportType]||'') + '</h2>');
-  if (from || to) win.document.write('<p style="color:#888;">תקופה: ' + (from||'') + ' עד ' + (to||'') + '</p>');
-  win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>סוג</th><th>קבוצה</th><th>תקציב</th><th>סטטוס</th></tr>');
-  list.forEach(c => win.document.write(
-    '<tr><td>' + (c.name||'') + '</td><td>' + (c.date||'') + '</td><td>' + getLabel(c.type,c.customType) +
-    '</td><td>' + (c.group||'') + '</td><td>' + (c.budget?c.budget+'₪':'') +
-    '</td><td>' + (c.giftStatus==='paid'?'✅':'') + '</td></tr>'
-  ));
-  win.document.write('</table></body></html>');
-  win.print();
-}
-
-// ========== GIFT REMINDER CUSTOM ==========
-function editGiftReminder() {
-  const current = settings.giftReminderDays || 14;
-  const days = prompt('כמה ימים לפני האירוע לשלוח תזכורת מתנה?', current);
-  if (days === null) return;
-  const n = parseInt(days);
-  if (isNaN(n) || n < 1) { alert('הכנס מספר ימים תקין'); return; }
-  settings.giftReminderDays = n;
-  saveAllSettings();
-  const lbl = document.getElementById('giftReminderSub');
-  if (lbl) lbl.textContent = n + ' ימים לפני';
-}
-
-// ========== LARGE FONT FIX ==========
-function applyLargeFont() {
-  if (settings.largeFont) {
-    document.documentElement.style.fontSize = '18px';
-    document.body.classList.add('large-font');
-  } else {
-    document.documentElement.style.fontSize = '';
-    document.body.classList.remove('large-font');
-  }
-}
-
-// ========== SEARCH FIX — group click shows contacts ==========
-function setSearchGroup(g) {
-  searchGroupFilter = g;
-  renderSearchFilters();
-  if (g) {
-    // show contacts in this group directly
-    const list = contacts.filter(c => c.group === g).map(c => ({...c,...calcDays(c.date,getRecurrence(c.type))}));
-    const cont = document.getElementById('searchResults');
-    const header = '<div style="font-size:11px;color:var(--muted2);margin-bottom:8px;">' + g + ' — ' + list.length + ' אנשים</div>';
-    cont.innerHTML = header + list.map(c => {
-      const [bg,fg] = avatarColor(c.name);
-      return '<div class="event-card" onclick="openEventDetail(' + c.id + ')" style="cursor:pointer;">' +
-        '<div class="event-card-main">' +
-        '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';">' + (c.name||'?')[0].toUpperCase() + '</div>' +
-        '<div style="flex:1;"><div style="font-weight:600;">' + (c.name||'') + '</div>' +
-        '<div style="font-size:12px;color:var(--accent);">' + getLabel(c.type,c.customType) + '</div></div>' +
-        urgencyBadge(c.daysLeft,c.isOver) + '</div></div>';
-    }).join('');
-  } else {
-    onSearch();
-  }
-}
-
-// apply on init
-document.addEventListener('DOMContentLoaded', () => {
-  applyLargeFont();
-  if (settings.giftReminderDays && settings.giftReminderDays !== 14) {
-    const lbl = document.getElementById('giftReminderSub');
-    if (lbl) lbl.textContent = settings.giftReminderDays + ' ימים לפני';
-  }
-});
-
-// fix print report screen creation
-const _origInit = window.onload;
-
-// ========== CONTACTS — IMPORT FROM PHONE ==========
-function importFromPhone() {
-  if (!('contacts' in navigator && 'ContactsManager' in window)) {
-    alert('הדפדפן שלך לא תומך בגישה ישירה לאנשי קשר.\n\nנסה בכרום על אנדרואיד, או השתמש בייבוא CSV.');
-    return;
-  }
-  const props = ['name','tel','birthday'];
-  const opts = { multiple: true };
-  navigator.contacts.select(props, opts).then(results => {
-    if (!results || !results.length) return;
-    let added = 0, skipped = 0;
-    results.forEach(contact => {
-      const name = (contact.name && contact.name[0]) || '';
-      const phone = (contact.tel && contact.tel[0]) || '';
-      if (!name) return;
-      const exists = contacts.find(c => c.name === name);
-      if (exists) { skipped++; return; }
-      const bday = contact.birthday ? new Date(contact.birthday).toISOString().slice(0,10) : '';
-      contacts.push({
-        id: Date.now() + added,
-        name, phone, date: bday,
-        type: bday ? 'birthday' : 'custom',
-        group: '', notes: '', notifications: [],
-      });
-      added++;
-    });
-    save(); renderContactsList(); renderMain();
-    alert('✅ יובאו ' + added + ' אנשי קשר' + (skipped ? ' (' + skipped + ' כבר קיימים)' : ''));
-  }).catch(err => {
-    alert('לא ניתן לגשת לאנשי הקשר. וודא שנתת הרשאה לאפליקציה.');
-  });
-}
-
-// ========== CONTACTS — ALL GROUPS ALWAYS SHOWN ==========
-const FIXED_GROUPS = ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];
-
-function renderContactsList() {
-  const q = (document.getElementById('contactsSearch').value || '').toLowerCase();
-  const activeGroup = window._contactGroupFilter || '';
-
-  // build filter row — always show all fixed groups + user groups
-  const userGroups = [...new Set(contacts.map(c => c.group).filter(g => g && !FIXED_GROUPS.includes(g)))];
-  const allGroups = ['', ...FIXED_GROUPS, ...userGroups];
-  document.getElementById('contactsFilterRow').innerHTML = allGroups.map(g =>
-    '<div class="chip' + (activeGroup === g ? ' active' : '') + '" onclick="setContactGroup(\'' + g.replace(/'/g,"\\'") + '\')">' + (g || 'הכל') + '</div>'
-  ).join('');
-
-  // filter contacts
-  let list = contacts.filter(c => !q || (c.name||'').toLowerCase().includes(q));
-  if (activeGroup) list = list.filter(c => c.group === activeGroup);
-
-  const cont = document.getElementById('contactsList');
-
-  if (activeGroup && !list.length) {
-    // empty group
-    cont.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">' +
-      '<div style="font-size:28px;margin-bottom:8px;">👥</div>' +
-      '<div style="font-size:13px;margin-bottom:4px;">אין אנשים בקבוצה "' + activeGroup + '"</div>' +
-      '<div style="font-size:11px;color:var(--muted2);margin-bottom:14px;">הוסף אנשי קשר לקבוצה זו</div>' +
-      '<button class="btn-primary" style="max-width:200px;margin:0 auto;" onclick="openAddWithGroup(\'' + activeGroup + '\')">➕ הוסף ל' + activeGroup + '</button>' +
-      '</div>';
-    return;
-  }
-
-  if (!list.length) {
-    cont.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">לא נמצאו אנשי קשר</div>';
-    return;
-  }
-
-  // group by group
-  const byGroup = {};
-  list.forEach(c => {
-    const g = c.group || 'ללא קבוצה';
-    if (!byGroup[g]) byGroup[g] = [];
-    byGroup[g].push(c);
-  });
-
-  let html = '';
-  Object.entries(byGroup).forEach(([group, items]) => {
-    html += '<div class="section-lbl">' + group + ' — ' + items.length + '</div>';
-    html += items.map(c => {
-      const calc = calcDays(c.date, getRecurrence(c.type));
-      const [bg, fg] = avatarColor(c.name);
-      return '<div class="contact-row" onclick="openEventDetail(' + c.id + ')">' +
-        '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';width:36px;height:36px;font-size:14px;">' + (c.name||'?')[0].toUpperCase() + '</div>' +
-        '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + (c.name||'') + '</div>' +
-        '<div style="font-size:11px;color:var(--muted);">' + getLabel(c.type,c.customType) + (c.date?' — '+c.date:'') + '</div></div>' +
-        (calc.daysLeft !== null ? urgencyBadge(calc.daysLeft,calc.isOver) : '') +
-        '<span class="contact-row-arrow">›</span></div>';
-    }).join('');
-  });
-  cont.innerHTML = html;
-}
-
-function setContactGroup(g) {
-  window._contactGroupFilter = g;
-  renderContactsList();
-}
-
-function openAddWithGroup(group) {
-  openScreen('screen-add-event');
-  // pre-select group
-  setTimeout(() => {
-    const sel = document.getElementById('inp-group-select');
-    if (sel && [...sel.options].find(o => o.value === group)) sel.value = group;
-    else if (sel) {
-      sel.value = 'custom';
-      document.getElementById('inp-group-custom').value = group;
-      document.getElementById('inp-group-custom').style.display = 'block';
-    }
-  }, 100);
-}
