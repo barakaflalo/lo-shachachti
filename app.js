@@ -591,7 +591,8 @@ function clearForm() {
   document.getElementById('sound-label').textContent = 'ברירת מחדל';
   const trimBox = document.getElementById('sound-trim-box');
   if (trimBox) trimBox.style.display = 'none';
-  selectedGiftTags = []; _formPhoto = null; _formEmoji = null; _soundBlob = null;
+  selectedGiftTags = []; _formPhoto = null; _formEmoji = null; _soundBlob = null; _soundFile = null;
+  if (_soundObjectURL) { URL.revokeObjectURL(_soundObjectURL); _soundObjectURL = null; }
   if (_soundAudio) { _soundAudio.pause(); _soundAudio = null; }
   document.querySelectorAll('.gift-tag').forEach(t => t.classList.remove('selected'));
   document.getElementById('gift-selected-display').style.display = 'none';
@@ -802,42 +803,41 @@ function onPhotoSelected(input) {
 }
 
 // ========== צליל מותאם אישית ==========
-let _soundBlob = null; // blob זמני לפני שמירה
-let _soundAudio = null; // אובייקט אודיו נוכחי
+let _soundBlob = null;   // base64 לשמירה
+let _soundObjectURL = null; // URL זמני לניגון
+let _soundFile = null;   // קובץ מקורי
+let _soundAudio = null;
 
 function onSoundSelected(input) {
   const file = input.files[0]; if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { alert('הקובץ גדול מדי. בחר קובץ עד 5MB'); return; }
+  if (file.size > 8 * 1024 * 1024) { alert('הקובץ גדול מדי. בחר קובץ עד 8MB'); return; }
+  _soundFile = file;
+  // צור URL זמני לניגון מיידי
+  if (_soundObjectURL) URL.revokeObjectURL(_soundObjectURL);
+  _soundObjectURL = URL.createObjectURL(file);
+  document.getElementById('sound-label').textContent = file.name;
+  // הצג כלי חיתוך
+  const trimBox = document.getElementById('sound-trim-box');
+  if (trimBox) trimBox.style.display = 'block';
+  // שמור גם כ-base64
   const reader = new FileReader();
-  reader.onload = e => {
-    _soundBlob = e.target.result; // base64
-    document.getElementById('sound-label').textContent = file.name + ' (טרם נחתך)';
-    // הצג כלי חיתוך
-    const trimBox = document.getElementById('sound-trim-box');
-    if (trimBox) trimBox.style.display = 'block';
-    // נגן לתצוגה מקדימה
-    if (_soundAudio) _soundAudio.pause();
-    _soundAudio = new Audio(_soundBlob);
-    _soundAudio.play().catch(()=>{});
-  };
+  reader.onload = e => { _soundBlob = e.target.result; };
   reader.readAsDataURL(file);
 }
 
 function playCurrentSound() {
-  const editId = document.getElementById('editing-id').value;
-  let src = _soundBlob;
-  if (!src && editId) {
-    const ev = events.find(e => e.id === parseInt(editId));
-    src = ev ? ev.customSound : null;
-  }
+  const src = _soundObjectURL || _soundBlob;
   if (!src) { playSound('greet'); return; }
-  if (_soundAudio) _soundAudio.pause();
+  if (_soundAudio) { _soundAudio.pause(); _soundAudio.currentTime = 0; }
   _soundAudio = new Audio(src);
-  _soundAudio.play().catch(()=>{ playSound('greet'); });
+  _soundAudio.volume = 0.8;
+  const promise = _soundAudio.play();
+  if (promise) promise.catch(() => { alert('לא ניתן לנגן. נסה לחץ על הכפתור שוב'); });
 }
 
 function trimAndSaveSound() {
-  if (!_soundBlob) { alert('בחר קובץ קודם'); return; }
+  if (!_soundBlob && !_soundObjectURL) { alert('בחר קובץ קודם'); return; }
+  if (!_soundBlob) { alert('ממתין לטעינת הקובץ... נסה שוב'); return; }
   const startEl = document.getElementById('sound-start');
   const endEl = document.getElementById('sound-end');
   const start = parseFloat(startEl ? startEl.value : 0) || 0;
@@ -912,7 +912,9 @@ function audioBufferToWav(buffer) {
 function playEventSound(ev) {
   if (ev && ev.customSound) {
     const audio = new Audio(ev.customSound);
-    audio.play().catch(()=>{ playSound('save'); });
+    audio.volume = 0.8;
+    const p = audio.play();
+    if (p) p.catch(()=>{ playSound('save'); });
   } else {
     playSound('save');
   }
