@@ -1711,6 +1711,41 @@ function requestOneSignalPermission() {
   });
 }
 
+function enablePushNotifications() {
+  if (typeof OneSignalDeferred !== 'undefined') {
+    OneSignalDeferred.push(async function(OneSignal) {
+      try {
+        const permission = await OneSignal.Notifications.requestPermission();
+        if (permission) {
+          alert('✅ התראות הופעלו! תקבל תזכורות על אירועים קרובים.');
+        } else {
+          alert('לא אושר. בדוק הגדרות הדפדפן ← התראות ← אפשר עבור האתר הזה.');
+        }
+      } catch(e) {
+        // fallback לבקשת הרשאה רגילה
+        Notification.requestPermission().then(p => {
+          if (p === 'granted') {
+            alert('✅ התראות הופעלו!');
+            events.forEach(scheduleNotif);
+          } else {
+            alert('לא אושר. בדוק הגדרות הדפדפן.');
+          }
+        });
+      }
+    });
+  } else {
+    // OneSignal לא נטען — fallback
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') {
+        alert('✅ התראות הופעלו!');
+        events.forEach(scheduleNotif);
+      } else {
+        alert('לא אושר. בדוק הגדרות הדפדפן ← התראות ← אפשר עבור האתר הזה.');
+      }
+    });
+  }
+}
+
 function sendOneSignalNotif(title, message, delayMs) {
   // OneSignal Web Push — נשלח דרך הדשבורד או API
   // לא ניתן לשלוח מ-client בלי שרת, אבל ניתן לתזמן דרך tags

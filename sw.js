@@ -1,4 +1,4 @@
-const CACHE = 'lo-shachachti-v19';
+const CACHE = 'lo-shachachti-v20';
 const FILES = ['./','./index.html','./style.css','./app.js','./manifest.json','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', e => {
