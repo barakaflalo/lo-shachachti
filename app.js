@@ -908,23 +908,71 @@ function toggleCustomNotif(el) {
 
 // ========== APPEARANCE ==========
 const THEMES = [
-  { name:'סגול',  key:'purple', from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241',  light:'#a5b4fc' },
-  { name:'כחול',  key:'blue',   from:'#3b82f6', to:'#06b6d4', rgb:'59,130,246',  light:'#93c5fd' },
-  { name:'ירוק',  key:'green',  from:'#10b981', to:'#34d399', rgb:'16,185,129',  light:'#6ee7b7' },
-  { name:'כתום',  key:'amber',  from:'#f59e0b', to:'#fbbf24', rgb:'245,158,11',  light:'#fcd34d' },
-  { name:'אדום',  key:'red',    from:'#ef4444', to:'#f97316', rgb:'239,68,68',   light:'#fca5a5' },
-  { name:'ורוד',  key:'pink',   from:'#ec4899', to:'#a855f7', rgb:'236,72,153',  light:'#f9a8d4' },
+  { name:'סגול',    key:'purple',  from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241',  light:'#a5b4fc' },
+  { name:'כחול',    key:'blue',    from:'#3b82f6', to:'#06b6d4', rgb:'59,130,246',  light:'#93c5fd' },
+  { name:'ירוק',    key:'green',   from:'#10b981', to:'#34d399', rgb:'16,185,129',  light:'#6ee7b7' },
+  { name:'כתום',    key:'amber',   from:'#f59e0b', to:'#fbbf24', rgb:'245,158,11',  light:'#fcd34d' },
+  { name:'אדום',    key:'red',     from:'#ef4444', to:'#f97316', rgb:'239,68,68',   light:'#fca5a5' },
+  { name:'ורוד',    key:'pink',    from:'#ec4899', to:'#a855f7', rgb:'236,72,153',  light:'#f9a8d4' },
+  { name:'טורקיז',  key:'teal',    from:'#14b8a6', to:'#06b6d4', rgb:'20,184,166',  light:'#5eead4' },
+  { name:'זהב',     key:'gold',    from:'#d97706', to:'#f59e0b', rgb:'217,119,6',   light:'#fbbf24' },
+  { name:'לילך',    key:'violet',  from:'#7c3aed', to:'#9333ea', rgb:'124,58,237',  light:'#c4b5fd' },
+  { name:'כחול כהה',key:'navy',    from:'#1d4ed8', to:'#2563eb', rgb:'29,78,216',   light:'#93c5fd' },
+  { name:'ניאון',   key:'lime',    from:'#65a30d', to:'#84cc16', rgb:'101,163,13',  light:'#bef264' },
+  { name:'מותאם',   key:'custom',  from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241',  light:'#a5b4fc', custom:true },
 ];
 
 function initAppearanceScreen() {
   const grid = document.getElementById('themeGrid');
   if (!grid) return;
-  grid.innerHTML = THEMES.map(t =>
-    '<div onclick="selectTheme(\'' + t.key + '\')" style="border:' + (settings.theme===t.key?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--radius-sm);padding:10px 6px;text-align:center;cursor:pointer;">' +
-    '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,' + t.from + ',' + t.to + ');margin:0 auto 5px;"></div>' +
-    '<div style="font-size:10px;color:' + (settings.theme===t.key?'#a5b4fc':'var(--muted)') + ';">' + t.name + (settings.theme===t.key?' ✓':'') + '</div>' +
-    '</div>'
-  ).join('');
+  grid.innerHTML = THEMES.map(t => {
+    const isActive = settings.theme === t.key;
+    if (t.custom) {
+      return '<div onclick="openCustomColor()" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--radius-sm);padding:10px 6px;text-align:center;cursor:pointer;position:relative;">' +
+        '<div style="width:28px;height:28px;border-radius:50%;background:' + (isActive&&settings.customColor?settings.customColor:'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)') + ';margin:0 auto 5px;"></div>' +
+        '<div style="font-size:10px;color:' + (isActive?'var(--accent-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
+        '<input type="color" id="customColorPicker" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;" onchange="applyCustomColor(this.value)">' +
+        '</div>';
+    }
+    return '<div onclick="selectTheme('' + t.key + '')" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--radius-sm);padding:10px 6px;text-align:center;cursor:pointer;">' +
+      '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,' + t.from + ',' + t.to + ');margin:0 auto 5px;"></div>' +
+      '<div style="font-size:10px;color:' + (isActive?'var(--accent-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function openCustomColor() {
+  const picker = document.getElementById('customColorPicker');
+  if (picker) picker.click();
+}
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return r+','+g+','+b;
+}
+
+function lightenHex(hex) {
+  const r = Math.min(255, parseInt(hex.slice(1,3),16)+80);
+  const g = Math.min(255, parseInt(hex.slice(3,5),16)+80);
+  const b = Math.min(255, parseInt(hex.slice(5,7),16)+80);
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+function applyCustomColor(hex) {
+  settings.theme = 'custom';
+  settings.customColor = hex;
+  saveAllSettings();
+  const rgb = hexToRgb(hex);
+  const light = lightenHex(hex);
+  const root = document.documentElement;
+  root.style.setProperty('--accent', hex);
+  root.style.setProperty('--accent-dim', 'rgba('+rgb+',0.2)');
+  root.style.setProperty('--accent-border', 'rgba('+rgb+',0.4)');
+  root.style.setProperty('--accent-rgb', rgb);
+  root.style.setProperty('--accent-light', light);
+  initAppearanceScreen();
 }
 
 function selectTheme(key) {
@@ -935,6 +983,10 @@ function selectTheme(key) {
 }
 
 function applyTheme(key) {
+  if (key === 'custom' && settings.customColor) {
+    applyCustomColor(settings.customColor);
+    return;
+  }
   const t = THEMES.find(x => x.key === key);
   if (!t) return;
   const root = document.documentElement;
@@ -1727,3 +1779,116 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // fix print report screen creation
 const _origInit = window.onload;
+
+// ========== CONTACTS — IMPORT FROM PHONE ==========
+function importFromPhone() {
+  if (!('contacts' in navigator && 'ContactsManager' in window)) {
+    alert('הדפדפן שלך לא תומך בגישה ישירה לאנשי קשר.\n\nנסה בכרום על אנדרואיד, או השתמש בייבוא CSV.');
+    return;
+  }
+  const props = ['name','tel','birthday'];
+  const opts = { multiple: true };
+  navigator.contacts.select(props, opts).then(results => {
+    if (!results || !results.length) return;
+    let added = 0, skipped = 0;
+    results.forEach(contact => {
+      const name = (contact.name && contact.name[0]) || '';
+      const phone = (contact.tel && contact.tel[0]) || '';
+      if (!name) return;
+      const exists = contacts.find(c => c.name === name);
+      if (exists) { skipped++; return; }
+      const bday = contact.birthday ? new Date(contact.birthday).toISOString().slice(0,10) : '';
+      contacts.push({
+        id: Date.now() + added,
+        name, phone, date: bday,
+        type: bday ? 'birthday' : 'custom',
+        group: '', notes: '', notifications: [],
+      });
+      added++;
+    });
+    save(); renderContactsList(); renderMain();
+    alert('✅ יובאו ' + added + ' אנשי קשר' + (skipped ? ' (' + skipped + ' כבר קיימים)' : ''));
+  }).catch(err => {
+    alert('לא ניתן לגשת לאנשי הקשר. וודא שנתת הרשאה לאפליקציה.');
+  });
+}
+
+// ========== CONTACTS — ALL GROUPS ALWAYS SHOWN ==========
+const FIXED_GROUPS = ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];
+
+function renderContactsList() {
+  const q = (document.getElementById('contactsSearch').value || '').toLowerCase();
+  const activeGroup = window._contactGroupFilter || '';
+
+  // build filter row — always show all fixed groups + user groups
+  const userGroups = [...new Set(contacts.map(c => c.group).filter(g => g && !FIXED_GROUPS.includes(g)))];
+  const allGroups = ['', ...FIXED_GROUPS, ...userGroups];
+  document.getElementById('contactsFilterRow').innerHTML = allGroups.map(g =>
+    '<div class="chip' + (activeGroup === g ? ' active' : '') + '" onclick="setContactGroup(\'' + g.replace(/'/g,"\\'") + '\')">' + (g || 'הכל') + '</div>'
+  ).join('');
+
+  // filter contacts
+  let list = contacts.filter(c => !q || (c.name||'').toLowerCase().includes(q));
+  if (activeGroup) list = list.filter(c => c.group === activeGroup);
+
+  const cont = document.getElementById('contactsList');
+
+  if (activeGroup && !list.length) {
+    // empty group
+    cont.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">' +
+      '<div style="font-size:28px;margin-bottom:8px;">👥</div>' +
+      '<div style="font-size:13px;margin-bottom:4px;">אין אנשים בקבוצה "' + activeGroup + '"</div>' +
+      '<div style="font-size:11px;color:var(--muted2);margin-bottom:14px;">הוסף אנשי קשר לקבוצה זו</div>' +
+      '<button class="btn-primary" style="max-width:200px;margin:0 auto;" onclick="openAddWithGroup(\'' + activeGroup + '\')">➕ הוסף ל' + activeGroup + '</button>' +
+      '</div>';
+    return;
+  }
+
+  if (!list.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">לא נמצאו אנשי קשר</div>';
+    return;
+  }
+
+  // group by group
+  const byGroup = {};
+  list.forEach(c => {
+    const g = c.group || 'ללא קבוצה';
+    if (!byGroup[g]) byGroup[g] = [];
+    byGroup[g].push(c);
+  });
+
+  let html = '';
+  Object.entries(byGroup).forEach(([group, items]) => {
+    html += '<div class="section-lbl">' + group + ' — ' + items.length + '</div>';
+    html += items.map(c => {
+      const calc = calcDays(c.date, getRecurrence(c.type));
+      const [bg, fg] = avatarColor(c.name);
+      return '<div class="contact-row" onclick="openEventDetail(' + c.id + ')">' +
+        '<div class="avatar avatar-sm" style="background:' + bg + ';color:' + fg + ';width:36px;height:36px;font-size:14px;">' + (c.name||'?')[0].toUpperCase() + '</div>' +
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + (c.name||'') + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);">' + getLabel(c.type,c.customType) + (c.date?' — '+c.date:'') + '</div></div>' +
+        (calc.daysLeft !== null ? urgencyBadge(calc.daysLeft,calc.isOver) : '') +
+        '<span class="contact-row-arrow">›</span></div>';
+    }).join('');
+  });
+  cont.innerHTML = html;
+}
+
+function setContactGroup(g) {
+  window._contactGroupFilter = g;
+  renderContactsList();
+}
+
+function openAddWithGroup(group) {
+  openScreen('screen-add-event');
+  // pre-select group
+  setTimeout(() => {
+    const sel = document.getElementById('inp-group-select');
+    if (sel && [...sel.options].find(o => o.value === group)) sel.value = group;
+    else if (sel) {
+      sel.value = 'custom';
+      document.getElementById('inp-group-custom').value = group;
+      document.getElementById('inp-group-custom').style.display = 'block';
+    }
+  }, 100);
+}

@@ -356,10 +356,11 @@
     <span style="font-size:15px;font-weight:600;">אנשי קשר</span>
   </div>
   <div style="padding:12px 0;">
-    <input type="text" class="form-input" id="contactsSearch" placeholder="🔍 חיפוש..." oninput="renderContactsList()">
+    <button class="btn-primary" style="margin-bottom:10px;" onclick="importFromPhone()">📱 ייבא מספר הטלפונים</button>
+    <input type="text" class="form-input" id="contactsSearch" placeholder="🔍 חיפוש..." oninput="renderContactsList()" style="margin-bottom:10px;">
     <div class="filter-row" id="contactsFilterRow"></div>
     <div id="contactsList"></div>
-    <button class="btn-primary" onclick="openScreen('screen-add-event')">➕ הוסף איש קשר</button>
+    <button class="btn-secondary" onclick="openScreen('screen-add-event')">➕ הוסף ידנית</button>
   </div>
 </div>
 
