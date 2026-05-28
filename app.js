@@ -390,20 +390,20 @@ function renderHero(enriched) {
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
       '<div style="font-size:28px;">🎉</div>' +
       '<div><div style="font-size:14px;font-weight:600;">ברוך הבא ל"לא שכחתי"!</div>' +
-      '<div style="font-size:11px;color:var(--acc-light);">לחץ לקבלת מדריך קצר</div></div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.8);">לחץ לקבלת מדריך קצר</div></div>' +
       '</div>' +
-      '<span style="background:rgba(var(--acc-rgb),0.3);color:var(--acc-light);font-size:10px;padding:3px 10px;border-radius:var(--rf);display:inline-block;">📖 איך מתחילים?</span>' +
+      '<span style="background:rgba(255,255,255,0.2);color:white;font-size:10px;padding:3px 10px;border-radius:var(--rf);display:inline-block;">📖 איך מתחילים?</span>' +
       '</div>';
     return;
   }
   if (!upcoming.length) { heroEl.innerHTML = ''; return; }
   const ev = upcoming[0];
-  heroEl.innerHTML = '<div class="hero-card" onclick="openDetail(' + ev.id + ')">' +
+  heroEl.innerHTML = '<div class="hero-card" onclick="openDetail(' + ev.id + ')" style="cursor:pointer;">' +
     '<div class="hero-label">האירוע הקרוב</div>' +
     '<div style="display:flex;align-items:center;gap:12px;margin-top:5px;">' +
     avatarHTML(ev, 'av-sm') +
     '<div><div class="hero-name">' + ev.name + '</div>' +
-    '<div style="font-size:11px;color:#818cf8;margin-top:2px;">' + getLabel(ev.type, ev.customType) + '</div></div>' +
+    '<div style="font-size:11px;margin-top:2px;opacity:0.8;">' + getLabel(ev.type, ev.customType) + '</div></div>' +
     '</div>' +
     '<span class="hero-badge">' + (ev.daysLeft === 0 ? '🎉 היום!' : ev.daysLeft === 1 ? '🔥 מחר!' : '📅 עוד ' + ev.daysLeft + ' ימים') + '</span>' +
     '</div>';
@@ -1542,8 +1542,9 @@ function renderAppearance() {
   }).join('');
   ['dark','light','auto'].forEach(m => {
     const el = document.getElementById('mode-' + m);
-    if (el) el.classList.toggle('active', settings.mode === m);
+    if (el) el.classList.toggle('active', (settings.mode || 'light') === m);
   });
+  updateModeToggleBtn();
 }
 
 function selectTheme(key) {
@@ -1578,13 +1579,34 @@ function applyCustomColor(hex) {
 
 function setMode(mode) {
   settings.mode = mode; saveSettings();
-  if (mode === 'light') document.body.classList.add('light-mode');
-  else if (mode === 'dark') document.body.classList.remove('light-mode');
-  else {
-    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.body.classList.toggle('light-mode', !dark);
-  }
+  applyMode(mode);
   renderAppearance();
+}
+
+function applyMode(mode) {
+  if (mode === 'dark') {
+    document.body.classList.add('dark-mode');
+  } else if (mode === 'light') {
+    document.body.classList.remove('dark-mode');
+  } else {
+    // auto
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.classList.toggle('dark-mode', prefersDark);
+  }
+  updateModeToggleBtn();
+}
+
+function updateModeToggleBtn() {
+  const btn = document.getElementById('mode-toggle-btn');
+  if (!btn) return;
+  const isDark = document.body.classList.contains('dark-mode');
+  btn.textContent = isDark ? '☀️' : '🌙';
+  btn.title = isDark ? 'עבור למצב בהיר' : 'עבור למצב כהה';
+}
+
+function quickToggleMode() {
+  const isDark = document.body.classList.contains('dark-mode');
+  setMode(isDark ? 'light' : 'dark');
 }
 
 function saveAppearance() { saveSettings(); openScreen('screen-settings'); }
@@ -1809,9 +1831,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => s.style.display = 'none', 500);
   }, 1500);
 
-  // apply theme & mode
+  // apply theme & mode — default light
   applyTheme(settings.theme || 'purple');
-  if (settings.mode === 'light') document.body.classList.add('light-mode');
+  applyMode(settings.mode || 'light');
   if (settings.largeFont) { const sz = settings.fontSizePx || 18; document.documentElement.style.fontSize=sz+'px'; document.body.classList.add('large-font'); }
 
   // init gift tags
