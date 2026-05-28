@@ -9,6 +9,8 @@
   --muted: #666;
   --muted2: #444;
   --accent: #6366f1;
+  --accent-rgb: 99,102,241;
+  --accent-light: #a5b4fc;
   --accent-dim: rgba(99,102,241,0.2);
   --accent-border: rgba(99,102,241,0.4);
   --green: #10b981;
@@ -860,30 +862,30 @@ body.large-font { font-size: 18px; }
 body.large-font .menu-title { font-size: 15px; }
 body.large-font .event-card .card-btn { font-size: 13px; }
 
-/* ===== GOLD BUTTONS ===== */
+/* ===== ACCENT BUTTONS — follow theme color ===== */
 .topbar-btn {
-  background: rgba(234,179,8,0.12);
-  border: 1px solid rgba(234,179,8,0.35);
-  color: #fbbf24;
+  background: rgba(var(--accent-rgb),0.12);
+  border: 1px solid rgba(var(--accent-rgb),0.35);
+  color: var(--accent-light);
 }
-.topbar-btn:hover { background: rgba(234,179,8,0.22); }
+.topbar-btn:hover { background: rgba(var(--accent-rgb),0.22); }
 .back-btn {
-  background: rgba(234,179,8,0.1);
-  border: 1px solid rgba(234,179,8,0.3);
-  color: #fbbf24;
+  background: rgba(var(--accent-rgb),0.1);
+  border: 1px solid rgba(var(--accent-rgb),0.3);
+  color: var(--accent-light);
 }
 .card-btn {
-  background: rgba(234,179,8,0.08);
-  border: 1px solid rgba(234,179,8,0.25);
-  color: #fbbf24;
+  background: rgba(var(--accent-rgb),0.08);
+  border: 1px solid rgba(var(--accent-rgb),0.25);
+  color: var(--accent-light);
 }
 .card-btn.share { color: #34d399; border-color: rgba(52,211,153,0.35); background: rgba(52,211,153,0.08); }
-.card-btn.edit { color: #a5b4fc; border-color: rgba(99,102,241,0.35); background: rgba(99,102,241,0.08); }
-.collapse-btn { border-color: rgba(234,179,8,0.2); color: #fbbf24; }
-.collapse-btn:hover { border-color: rgba(234,179,8,0.5); }
-.settings-bottom-btn { color: #fbbf24; border-color: rgba(234,179,8,0.2); }
-.details-toggle { color: #fbbf24; }
-.menu-arrow { color: #fbbf24; }
+.card-btn.edit { color: var(--accent-light); border-color: rgba(var(--accent-rgb),0.35); background: rgba(var(--accent-rgb),0.08); }
+.collapse-btn { border-color: rgba(var(--accent-rgb),0.2); color: var(--accent-light); }
+.collapse-btn:hover { border-color: rgba(var(--accent-rgb),0.5); }
+.settings-bottom-btn { color: var(--accent-light); border-color: rgba(var(--accent-rgb),0.2); }
+.details-toggle { color: var(--accent-light); }
+.menu-arrow { color: var(--accent-light); }
 
 /* ===== ANIMATIONS ===== */
 @keyframes slideIn {

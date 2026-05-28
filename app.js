@@ -908,12 +908,12 @@ function toggleCustomNotif(el) {
 
 // ========== APPEARANCE ==========
 const THEMES = [
-  { name:'סגול', key:'purple', from:'#6366f1', to:'#8b5cf6' },
-  { name:'כחול', key:'blue', from:'#3b82f6', to:'#06b6d4' },
-  { name:'ירוק', key:'green', from:'#10b981', to:'#34d399' },
-  { name:'כתום', key:'amber', from:'#f59e0b', to:'#fbbf24' },
-  { name:'אדום', key:'red', from:'#ef4444', to:'#f97316' },
-  { name:'ורוד', key:'pink', from:'#ec4899', to:'#a855f7' },
+  { name:'סגול',  key:'purple', from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241',  light:'#a5b4fc' },
+  { name:'כחול',  key:'blue',   from:'#3b82f6', to:'#06b6d4', rgb:'59,130,246',  light:'#93c5fd' },
+  { name:'ירוק',  key:'green',  from:'#10b981', to:'#34d399', rgb:'16,185,129',  light:'#6ee7b7' },
+  { name:'כתום',  key:'amber',  from:'#f59e0b', to:'#fbbf24', rgb:'245,158,11',  light:'#fcd34d' },
+  { name:'אדום',  key:'red',    from:'#ef4444', to:'#f97316', rgb:'239,68,68',   light:'#fca5a5' },
+  { name:'ורוד',  key:'pink',   from:'#ec4899', to:'#a855f7', rgb:'236,72,153',  light:'#f9a8d4' },
 ];
 
 function initAppearanceScreen() {
@@ -928,9 +928,21 @@ function initAppearanceScreen() {
 }
 
 function selectTheme(key) {
-  settings.theme = key; initAppearanceScreen();
+  settings.theme = key;
+  saveSetting('theme', key);
+  applyTheme(key);
+  initAppearanceScreen();
+}
+
+function applyTheme(key) {
   const t = THEMES.find(x => x.key === key);
-  if (t) document.documentElement.style.setProperty('--accent', t.from);
+  if (!t) return;
+  const root = document.documentElement;
+  root.style.setProperty('--accent', t.from);
+  root.style.setProperty('--accent-dim', 'rgba(' + t.rgb + ',0.2)');
+  root.style.setProperty('--accent-border', 'rgba(' + t.rgb + ',0.4)');
+  root.style.setProperty('--accent-rgb', t.rgb);
+  root.style.setProperty('--accent-light', t.light);
 }
 
 function setMode(mode) {
@@ -1147,8 +1159,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Init appearance
   initAppearanceScreen();
-  const t = THEMES.find(x => x.key === settings.theme);
-  if (t) document.documentElement.style.setProperty('--accent', t.from);
+  applyTheme(settings.theme || 'purple');
 
   // Appearance mode cards style
   ['dark','light','auto'].forEach(m => {

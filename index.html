@@ -138,6 +138,20 @@
     <input type="text" class="form-input" id="inp-custom-type" placeholder="הקלד סוג אירוע..." style="display:none;">
     <input type="hidden" id="inp-recurrence" value="yearly">
 
+    <label class="form-label">קבוצה</label>
+    <select class="form-select" id="inp-group-select" onchange="onGroupSelectChange()">
+      <option value="">— בחר קבוצה —</option>
+      <option value="משפחה">👨‍👩‍👧‍👦 משפחה</option>
+      <option value="חברים">👫 חברים</option>
+      <option value="עבודה">💼 עבודה</option>
+      <option value="צבא">🎖️ צבא / מילואים</option>
+      <option value="טיול">✈️ מהטיול</option>
+      <option value="לימודים">📚 לימודים</option>
+      <option value="שכנים">🏠 שכנים</option>
+      <option value="custom">✏️ אחר</option>
+    </select>
+    <input type="text" class="form-input" id="inp-group-custom" placeholder="הקלד שם קבוצה..." style="display:none;">
+
     <hr class="form-divider">
 
     <!-- פרטים נוספים -->
@@ -161,19 +175,6 @@
           </select>
         </div>
       </div>
-      <label class="form-label">קבוצה</label>
-      <select class="form-select" id="inp-group-select" onchange="onGroupSelectChange()">
-        <option value="">— בחר קבוצה —</option>
-        <option value="משפחה">👨‍👩‍👧‍👦 משפחה</option>
-        <option value="חברים">👫 חברים</option>
-        <option value="עבודה">💼 עבודה</option>
-        <option value="צבא">🎖️ צבא / מילואים</option>
-        <option value="טיול">✈️ מהטיול</option>
-        <option value="לימודים">📚 לימודים</option>
-        <option value="שכנים">🏠 שכנים</option>
-        <option value="custom">✏️ אחר</option>
-      </select>
-      <input type="text" class="form-input" id="inp-group-custom" placeholder="הקלד שם קבוצה..." style="display:none;">
       <label class="form-label">הערות</label>
       <textarea class="form-textarea" id="inp-notes" placeholder="תחביבים, העדפות, דברים חשובים..."></textarea>
     </div>
