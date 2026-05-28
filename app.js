@@ -1882,3 +1882,152 @@ function copyMyGreetOrFree(id) {
   playSound('greet');
   navigator.clipboard.writeText(text).then(() => alert('הועתק! 📋'));
 }
+
+// ========== ייבוא VCF ==========
+let _vcfContacts = []; // אנשי קשר מהקובץ
+let _vcfFields = { phone: true, email: true, birthday: true };
+
+function importVCF(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    _vcfContacts = parseVCF(text);
+    if (!_vcfContacts.length) { alert('לא נמצאו אנשי קשר בקובץ'); return; }
+    showVCFPreview();
+  };
+  reader.readAsText(file, 'UTF-8');
+  input.value = ''; // אפס כדי שאפשר לבחור שוב
+}
+
+function parseVCF(text) {
+  const contacts = [];
+  // פצל לכרטיסיות
+  const cards = text.split(/BEGIN:VCARD/i).slice(1);
+  cards.forEach(card => {
+    const get = (key) => {
+      const regex = new RegExp(key + '[^:]*:([^\\r\\n]+)', 'i');
+      const m = card.match(regex);
+      return m ? m[1].trim() : '';
+    };
+    const getAll = (key) => {
+      const regex = new RegExp(key + '[^:]*:([^\\r\\n]+)', 'gi');
+      const results = [];
+      let m;
+      while ((m = regex.exec(card)) !== null) results.push(m[1].trim());
+      return results;
+    };
+
+    // שם
+    let name = get('FN');
+    if (!name) {
+      const n = get('N');
+      if (n) {
+        const parts = n.split(';');
+        name = [parts[1], parts[0]].filter(Boolean).join(' ').trim();
+      }
+    }
+    if (!name) return;
+
+    // נקה תווים מיוחדים
+    name = name.replace(/=\?[^?]+\?[BQ]\?[^?]+\?=/g, '').trim();
+    if (!name) return;
+
+    // טלפון
+    const phones = getAll('TEL').map(p => p.replace(/[^\d+]/g,''));
+    const phone = phones[0] || '';
+
+    // מייל
+    const email = get('EMAIL');
+
+    // יום הולדת
+    let birthday = get('BDAY') || get('item1.BDAY') || get('X-APPLE-BIRTHDAY');
+    if (birthday) {
+      // נקה ופרמט
+      birthday = birthday.replace(/[^0-9\-]/g,'');
+      if (birthday.length === 8) {
+        birthday = birthday.slice(0,4)+'-'+birthday.slice(4,6)+'-'+birthday.slice(6,8);
+      }
+    }
+
+    contacts.push({
+      name, phone, email,
+      birthday: birthday || '',
+      selected: true,
+      alreadyExists: !!events.find(ev => ev.name === name),
+    });
+  });
+  return contacts;
+}
+
+function showVCFPreview() {
+  document.getElementById('vcf-count').textContent =
+    'נמצאו ' + _vcfContacts.length + ' אנשי קשר — בחר מי לייבא:';
+  renderVCFList();
+  openScreen('screen-vcf-preview');
+}
+
+function renderVCFList() {
+  const cont = document.getElementById('vcf-list');
+  cont.innerHTML = _vcfContacts.map((c, i) => {
+    const [bg, fg] = avatarColor(c.name);
+    const details = [
+      _vcfFields.phone && c.phone ? '📱 ' + c.phone : '',
+      _vcfFields.email && c.email ? '✉️ ' + c.email : '',
+      _vcfFields.birthday && c.birthday ? '🎂 ' + c.birthday : '',
+    ].filter(Boolean).join(' · ');
+
+    return '<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,' + (c.selected?'0.06':'0.02') + ');border:1px solid ' + (c.selected?'var(--acc-border)':'var(--border)') + ';border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;cursor:pointer;opacity:' + (c.alreadyExists?'0.5':'1') + ';" onclick="toggleVCFContact(' + i + ')">' +
+      '<div style="width:22px;height:22px;border-radius:50%;border:2px solid ' + (c.selected?'var(--accent)':'var(--muted)') + ';background:' + (c.selected?'var(--accent)':'transparent') + ';display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">' + (c.selected?'✓':'') + '</div>' +
+      '<div class="avatar av-sm" style="background:' + bg + ';color:' + fg + ';flex-shrink:0;">' + c.name[0].toUpperCase() + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+      '<div style="font-size:13px;font-weight:500;">' + c.name + (c.alreadyExists ? ' <span style="font-size:10px;color:var(--amber);">קיים</span>' : '') + '</div>' +
+      (details ? '<div style="font-size:10px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + details + '</div>' : '') +
+      '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function toggleVCFContact(i) {
+  _vcfContacts[i].selected = !_vcfContacts[i].selected;
+  renderVCFList();
+}
+
+function toggleVCFField(el, field) {
+  _vcfFields[field] = !_vcfFields[field];
+  el.classList.toggle('active', _vcfFields[field]);
+  renderVCFList();
+}
+
+function selectAllVCF(val) {
+  _vcfContacts.forEach(c => c.selected = val);
+  renderVCFList();
+}
+
+function confirmVCFImport() {
+  const toImport = _vcfContacts.filter(c => c.selected && !c.alreadyExists);
+  if (!toImport.length) { alert('לא נבחרו אנשי קשר חדשים'); return; }
+
+  let added = 0;
+  toImport.forEach(c => {
+    const ev = {
+      id: Date.now() + added,
+      name: c.name,
+      phone: _vcfFields.phone ? c.phone : '',
+      email: _vcfFields.email ? c.email : '',
+      date: _vcfFields.birthday ? c.birthday : '',
+      type: c.birthday ? 'birthday' : 'custom',
+      gender: 'male',
+      group: '',
+      notes: '',
+      notifications: [],
+    };
+    events.push(ev);
+    added++;
+  });
+
+  saveEvents();
+  _vcfContacts = [];
+  openScreen('screen-contacts');
+  alert('✅ יובאו ' + added + ' אנשי קשר!');
+}
