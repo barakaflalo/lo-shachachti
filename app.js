@@ -574,7 +574,10 @@ function clearForm() {
   document.getElementById('inp-custom-type').style.display = 'none';
   document.getElementById('inp-group-custom').style.display = 'none';
   document.getElementById('sound-label').textContent = 'ברירת מחדל';
-  selectedGiftTags = []; _formPhoto = null; _formEmoji = null;
+  const trimBox = document.getElementById('sound-trim-box');
+  if (trimBox) trimBox.style.display = 'none';
+  selectedGiftTags = []; _formPhoto = null; _formEmoji = null; _soundBlob = null;
+  if (_soundAudio) { _soundAudio.pause(); _soundAudio = null; }
   document.querySelectorAll('.gift-tag').forEach(t => t.classList.remove('selected'));
   document.getElementById('gift-selected-display').style.display = 'none';
   document.getElementById('form-avatar').innerHTML = '?';
@@ -663,6 +666,7 @@ function saveEvent() {
     giftStatus: getSelVal('inp-gift-status') || 'pending',
     photo: _formPhoto || null,
     emoji: _formEmoji || null,
+    customSound: _soundBlob || null,
   };
 
   const editId = document.getElementById('editing-id').value;
@@ -677,7 +681,7 @@ function saveEvent() {
     scheduleNotif(data);
   }
   saveEvents();
-  playSound('save');
+  playEventSound(data);
   clearForm();
   // נווט למסך הראשי בצורה בטוחה לכל דפדפן
   setTimeout(() => openScreen('screen-main'), 50);
@@ -718,6 +722,8 @@ function editEvent(id) {
     document.getElementById('inp-group-custom').style.display = 'block';
   }
   _formPhoto = ev.photo || null; _formEmoji = ev.emoji || null;
+  _soundBlob = ev.customSound || null;
+  if (_soundBlob) document.getElementById('sound-label').textContent = 'צליל שמור ✅';
   updateFormAvatar();
   if (ev.giftIdea || ev.budget) { document.getElementById('collapse-gift').classList.add('open'); document.getElementById('btn-gift').classList.add('open'); }
   if (ev.phone || ev.notes || ev.email) { document.getElementById('collapse-extra').classList.add('open'); document.getElementById('btn-extra').classList.add('open'); }
@@ -780,10 +786,121 @@ function onPhotoSelected(input) {
   reader.readAsDataURL(file);
 }
 
-function playCurrentSound() { playSound('greet'); }
+// ========== צליל מותאם אישית ==========
+let _soundBlob = null; // blob זמני לפני שמירה
+let _soundAudio = null; // אובייקט אודיו נוכחי
+
 function onSoundSelected(input) {
   const file = input.files[0]; if (!file) return;
-  document.getElementById('sound-label').textContent = file.name;
+  if (file.size > 5 * 1024 * 1024) { alert('הקובץ גדול מדי. בחר קובץ עד 5MB'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    _soundBlob = e.target.result; // base64
+    document.getElementById('sound-label').textContent = file.name + ' (טרם נחתך)';
+    // הצג כלי חיתוך
+    const trimBox = document.getElementById('sound-trim-box');
+    if (trimBox) trimBox.style.display = 'block';
+    // נגן לתצוגה מקדימה
+    if (_soundAudio) _soundAudio.pause();
+    _soundAudio = new Audio(_soundBlob);
+    _soundAudio.play().catch(()=>{});
+  };
+  reader.readAsDataURL(file);
+}
+
+function playCurrentSound() {
+  const editId = document.getElementById('editing-id').value;
+  let src = _soundBlob;
+  if (!src && editId) {
+    const ev = events.find(e => e.id === parseInt(editId));
+    src = ev ? ev.customSound : null;
+  }
+  if (!src) { playSound('greet'); return; }
+  if (_soundAudio) _soundAudio.pause();
+  _soundAudio = new Audio(src);
+  _soundAudio.play().catch(()=>{ playSound('greet'); });
+}
+
+function trimAndSaveSound() {
+  if (!_soundBlob) { alert('בחר קובץ קודם'); return; }
+  const startEl = document.getElementById('sound-start');
+  const endEl = document.getElementById('sound-end');
+  const start = parseFloat(startEl ? startEl.value : 0) || 0;
+  const end = parseFloat(endEl ? endEl.value : 15) || 15;
+  if (end - start > 15) { alert('מקסימום 15 שניות'); return; }
+  if (end <= start) { alert('זמן סיום חייב להיות אחרי ההתחלה'); return; }
+
+  // חתוך באמצעות AudioContext
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // המר base64 ל-ArrayBuffer
+  const b64 = _soundBlob.split(',')[1];
+  const binary = atob(b64);
+  const buffer = new ArrayBuffer(binary.length);
+  const view = new Uint8Array(buffer);
+  for (let i = 0; i < binary.length; i++) view[i] = binary.charCodeAt(i);
+
+  audioCtx.decodeAudioData(buffer, decoded => {
+    const sampleRate = decoded.sampleRate;
+    const startSample = Math.floor(start * sampleRate);
+    const endSample = Math.min(Math.floor(end * sampleRate), decoded.length);
+    const length = endSample - startSample;
+    const trimmed = audioCtx.createBuffer(decoded.numberOfChannels, length, sampleRate);
+    for (let ch = 0; ch < decoded.numberOfChannels; ch++) {
+      const data = decoded.getChannelData(ch).slice(startSample, endSample);
+      trimmed.copyToChannel(data, ch);
+    }
+    // המר בחזרה ל-WAV base64
+    const wav = audioBufferToWav(trimmed);
+    const blob = new Blob([wav], { type: 'audio/wav' });
+    const reader = new FileReader();
+    reader.onload = e2 => {
+      _soundBlob = e2.target.result;
+      document.getElementById('sound-label').textContent = start + 's — ' + end + 's (מוכן)';
+      const trimBox = document.getElementById('sound-trim-box');
+      if (trimBox) trimBox.style.display = 'none';
+      // נגן לאישור
+      if (_soundAudio) _soundAudio.pause();
+      _soundAudio = new Audio(_soundBlob);
+      _soundAudio.play().catch(()=>{});
+    };
+    reader.readAsDataURL(blob);
+  }, () => alert('שגיאה בקריאת הקובץ. נסה פורמט אחר (MP3/WAV)'));
+}
+
+// המרת AudioBuffer ל-WAV
+function audioBufferToWav(buffer) {
+  const numCh = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length;
+  const arrayBuffer = new ArrayBuffer(44 + length * numCh * 2);
+  const view = new DataView(arrayBuffer);
+  const writeStr = (offset, str) => { for (let i=0;i<str.length;i++) view.setUint8(offset+i, str.charCodeAt(i)); };
+  writeStr(0,'RIFF');
+  view.setUint32(4, 36+length*numCh*2, true);
+  writeStr(8,'WAVE'); writeStr(12,'fmt ');
+  view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true); view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*numCh*2,true); view.setUint16(32,numCh*2,true);
+  view.setUint16(34,16,true); writeStr(36,'data');
+  view.setUint32(40,length*numCh*2,true);
+  let offset = 44;
+  for (let i=0;i<length;i++) {
+    for (let ch=0;ch<numCh;ch++) {
+      const s = Math.max(-1,Math.min(1,buffer.getChannelData(ch)[i]));
+      view.setInt16(offset, s<0?s*0x8000:s*0x7FFF, true);
+      offset += 2;
+    }
+  }
+  return arrayBuffer;
+}
+
+function playEventSound(ev) {
+  if (ev && ev.customSound) {
+    const audio = new Audio(ev.customSound);
+    audio.play().catch(()=>{ playSound('save'); });
+  } else {
+    playSound('save');
+  }
 }
 
 // ========== GIFT ==========

@@ -238,12 +238,26 @@
         <input type="email" class="form-input" id="inp-email" placeholder="example@mail.com">
       </div>
       <div class="form-group">
-        <label class="form-label">🎵 צליל מותאם אישית</label>
-        <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:var(--rs);padding:8px 10px;">
+        <label class="form-label">🎵 צליל מותאם אישית <span class="hint">(עד 15 שניות)</span></label>
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:var(--rs);padding:8px 10px;margin-bottom:6px;">
           <span style="font-size:12px;color:var(--muted);flex:1;" id="sound-label">ברירת מחדל</span>
           <button onclick="playCurrentSound()" style="background:rgba(var(--acc-rgb),0.2);border:1px solid var(--acc-border);border-radius:var(--rf);padding:4px 10px;font-size:11px;color:var(--acc-light);cursor:pointer;">▶ נגן</button>
           <input type="file" id="sound-input" accept="audio/*" style="display:none;" onchange="onSoundSelected(this)">
-          <button onclick="document.getElementById('sound-input').click()" style="font-size:11px;color:var(--acc-light);background:transparent;border:none;cursor:pointer;">שנה</button>
+          <button onclick="document.getElementById('sound-input').click()" style="font-size:11px;color:var(--acc-light);background:transparent;border:none;cursor:pointer;">📂 בחר</button>
+        </div>
+        <div id="sound-trim-box" style="display:none;background:rgba(var(--acc-rgb),0.08);border:1px solid var(--acc-border);border-radius:var(--rs);padding:10px 12px;">
+          <div style="font-size:11px;color:var(--acc-light);margin-bottom:8px;">✂️ חתוך את הצליל (מקסימום 15 שניות)</div>
+          <div class="form-grid2" style="margin-bottom:8px;">
+            <div>
+              <label class="form-label">התחל (שניות)</label>
+              <input type="number" class="form-input" id="sound-start" placeholder="0" min="0" step="0.5">
+            </div>
+            <div>
+              <label class="form-label">סיים (שניות)</label>
+              <input type="number" class="form-input" id="sound-end" placeholder="15" min="0" step="0.5">
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-bottom:0;" onclick="trimAndSaveSound()">✂️ חתוך ושמור</button>
         </div>
       </div>
       <div class="form-group">
