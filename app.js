@@ -15,7 +15,9 @@ let settings = Object.assign({
 }, JSON.parse(localStorage.getItem('ls2_settings') || '{}'));
 
 let greetings = Object.assign({
-  birthday:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר והצלחה 🎂','מזל טוב {name}! עוד שנה של הצלחות ושמחות 🎉','{name} היקר/ה, יום הולדת שמח! שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגוג עוד הרבה שנים {name} 🎈'],
+  birthday_male:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר והצלחה 🎂','מזל טוב {name}! עוד שנה של הצלחות ושמחות 🎉','{name} היקר, יום הולדת שמח! שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגוג עוד הרבה שנים {name} 🎈'],
+  birthday_female:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר ושמחה 🎂','מזל טוב {name}! עוד שנה מלאת הצלחות ושמחות 🎉','{name} היקרה, יום הולדת שמח! שכל חלומותייך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגגי עוד הרבה שנים {name} 🎈'],
+  birthday:['{name} יום הולדת שמח! שהשנה תביא הצלחה ושמחה 🎂','מזל טוב {name}! 🎉','{name} שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! 🎈'],
   memorial:['חושב עליכם היום ביום האזכרה. מחבק מרחוק 🕯️','זכרו יהיה ברוך לעד 🕯️','זיכרון לברכה. מחשבותינו אתכם 🕯️','בעצב ובכבוד, מציין/ת את יום האזכרה 🕯️','לנצח בלבנו 🕯️'],
   anniversary:['יום נישואין שמח {name}! שתמשיכו לאהוב ולצמוח יחד 💍','מזל טוב! עוד שנה של אהבה 💍','שנה נוספת של אהבה ושמחה {name}! 💑','יום נישואין שמח! שתמשיכו יחד לנצח 💍','ברכות חמות ליום הנישואין! 💞'],
   wedding:['מזל טוב {name}! שתתחילו את דרכם המשותפת באהבה ובאושר 💒','ברכות לחתונה! יום מרגש ומיוחד 💒','מזל טוב לחתן ולכלה! 🥂','שתהיה חתונה שמחה ויפה! 🎊','ברכות מכל הלב ליום המיוחד! 💒'],
@@ -130,15 +132,28 @@ function urgencyBadge(daysLeft, isOver) {
 
 function buildGreeting(ev) {
   const type = ev.type || 'custom';
-  const variants = greetings[type] || greetings.custom;
+  let variants;
+  if (type === 'birthday') {
+    // בחר לפי מין
+    const gender = ev.gender || 'male';
+    if (gender === 'female') variants = greetings['birthday_female'] || greetings['birthday'];
+    else variants = greetings['birthday_male'] || greetings['birthday'];
+  } else {
+    variants = greetings[type] || greetings.custom;
+  }
   const idx = greetVariants[ev.id] || 0;
-  let text = variants[idx] || variants[0];
+  let text = variants[idx % variants.length] || variants[0];
   return text.replace(/{name}/g, ev.name || '');
 }
 
 function nextVariant(id) {
   const ev = events.find(e => e.id === id); if (!ev) return;
-  const variants = greetings[ev.type] || greetings.custom;
+  let variants;
+  if (ev.type === 'birthday') {
+    variants = ev.gender === 'female' ? (greetings['birthday_female'] || greetings['birthday']) : (greetings['birthday_male'] || greetings['birthday']);
+  } else {
+    variants = greetings[ev.type] || greetings.custom;
+  }
   greetVariants[id] = ((greetVariants[id] || 0) + 1) % variants.length;
   const el = document.getElementById('greet-text-' + id);
   if (el) el.textContent = buildGreeting(ev);
@@ -1183,7 +1198,8 @@ function removeCustomNotif(i) {
 // ========== GREETINGS ==========
 function renderGreetings() {
   const types = [
-    {key:'birthday',label:'🎉 יום הולדת'},{key:'memorial',label:'🕯️ אזכרה'},
+    {key:'birthday_male',label:'🎉 יום הולדת — זכר'},{key:'birthday_female',label:'🎉 יום הולדת — נקבה'},
+    {key:'memorial',label:'🕯️ אזכרה'},
     {key:'anniversary',label:'💍 יום נישואין'},{key:'wedding',label:'💒 חתונה'},
     {key:'barmitzvah',label:'✡️ בר/בת מצווה'},{key:'friends',label:'👥 מפגש'},
     {key:'trip',label:'✈️ טיול'},{key:'car',label:'🚗 טסט רכב'},
@@ -1205,7 +1221,8 @@ function renderGreetings() {
 }
 
 function editVariant(type, idx) {
-  const cur = greetings[type][idx];
+  if (!greetings[type]) greetings[type] = [];
+  const cur = greetings[type][idx] || '';
   const nv = prompt('ערוך ברכה ' + (idx+1) + ':', cur);
   if (nv !== null) { greetings[type][idx] = nv; saveGreetings(); renderGreetings(); }
 }
