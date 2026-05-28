@@ -95,14 +95,18 @@ function avatarHTML(ev, size) {
   return '<div class="' + cls + '" style="background:' + bg + ';color:' + fg + ';">' + (ev.name || '?')[0].toUpperCase() + '</div>';
 }
 
-function getRecurrence(type) { return YEARLY.includes(type) ? 'yearly' : 'once'; }
+function getRecurrence(ev) {
+  if (typeof ev === 'string') return YEARLY.includes(ev) ? 'yearly' : 'once';
+  if (ev.recurrence) return ev.recurrence;
+  return YEARLY.includes(ev.type) ? 'yearly' : 'once';
+}
 function calcDays(ev) {
   if (!ev.date) return { daysLeft: null, isOver: false };
   const today = new Date(); today.setHours(0,0,0,0);
   // פרסור ידני כדי למנוע בעיות טיימזון
   const parts = ev.date.split('-');
   const evYear = parseInt(parts[0]), evMonth = parseInt(parts[1])-1, evDay = parseInt(parts[2]);
-  if (getRecurrence(ev.type) === 'yearly') {
+  if (getRecurrence(ev) === 'yearly') {
     let next = new Date(today.getFullYear(), evMonth, evDay);
     if (next < today) next.setFullYear(today.getFullYear() + 1);
     return { daysLeft: Math.round((next - today) / 86400000), isOver: false, nextDate: next };
@@ -295,7 +299,7 @@ function renderCalendar(enriched) {
     if (!ev.date) return;
     const d = new Date(ev.date);
     let y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
-    if (getRecurrence(ev.type) === 'yearly') y = calYear;
+    if (getRecurrence(ev) === 'yearly') y = calYear;
     if (y === calYear && m === calMonth) {
       if (!evDays[day]) evDays[day] = [];
       evDays[day].push(ev);
@@ -347,7 +351,7 @@ function onCalDay(d, m, y) {
   const dayEvents = events.filter(ev => {
     if (!ev.date) return false;
     const ed = new Date(ev.date);
-    const ey = getRecurrence(ev.type) === 'yearly' ? y : ed.getFullYear();
+    const ey = getRecurrence(ev) === 'yearly' ? y : ed.getFullYear();
     return ey === y && ed.getMonth() === m && ed.getDate() === d;
   });
   if (!dayEvents.length) return;
@@ -609,6 +613,31 @@ function cancelForm() { clearForm(); setTimeout(() => openScreen('screen-main'),
 function onTypeChange() {
   const t = document.getElementById('inp-type').value;
   document.getElementById('inp-custom-type').style.display = t === 'custom' ? 'block' : 'none';
+  // קבע אוטומטית כל שנה / חד פעמי לפי סוג
+  const autoYearly = ['birthday','anniversary','memorial','holiday','barmitzvah','graduation'];
+  setRecurrence(autoYearly.includes(t) ? 'yearly' : 'once');
+}
+
+function setRecurrence(val) {
+  document.getElementById('inp-recurrence').value = val;
+  const yearlyEl = document.getElementById('rec-yearly');
+  const onceEl = document.getElementById('rec-once');
+  if (!yearlyEl || !onceEl) return;
+  if (val === 'yearly') {
+    yearlyEl.style.background = 'rgba(var(--acc-rgb),0.2)';
+    yearlyEl.style.border = '2px solid var(--accent)';
+    yearlyEl.querySelector('div').style.color = 'var(--acc-light)';
+    onceEl.style.background = 'rgba(255,255,255,0.04)';
+    onceEl.style.border = '1px solid var(--border2)';
+    onceEl.querySelector('div').style.color = 'var(--muted)';
+  } else {
+    onceEl.style.background = 'rgba(var(--acc-rgb),0.2)';
+    onceEl.style.border = '2px solid var(--accent)';
+    onceEl.querySelector('div').style.color = 'var(--acc-light)';
+    yearlyEl.style.background = 'rgba(255,255,255,0.04)';
+    yearlyEl.style.border = '1px solid var(--border2)';
+    yearlyEl.querySelector('div').style.color = 'var(--muted)';
+  }
 }
 
 function onGroupChange() {
@@ -671,6 +700,7 @@ function saveEvent() {
     name, date,
     type: getSelVal('inp-type'),
     customType: getVal('inp-custom-type'),
+    recurrence: (document.getElementById('inp-recurrence') ? document.getElementById('inp-recurrence').value : null) || null,
     gender: getSelVal('inp-gender') || 'male',
     phone: getVal('inp-phone'),
     phone2: getVal('inp-phone2'),
@@ -740,6 +770,9 @@ function editEvent(id) {
   _formPhoto = ev.photo || null; _formEmoji = ev.emoji || null;
   _soundBlob = ev.customSound || null;
   if (_soundBlob) document.getElementById('sound-label').textContent = 'צליל שמור ✅';
+  // טען recurrence
+  const rec = ev.recurrence || (YEARLY.includes(ev.type) ? 'yearly' : 'once');
+  setTimeout(() => setRecurrence(rec), 50);
   updateFormAvatar();
   if (ev.giftIdea || ev.budget) { document.getElementById('collapse-gift').classList.add('open'); document.getElementById('btn-gift').classList.add('open'); }
   if (ev.phone || ev.notes || ev.email) { document.getElementById('collapse-extra').classList.add('open'); document.getElementById('btn-extra').classList.add('open'); }
@@ -1277,6 +1310,7 @@ function addCustomStore() {
 function saveStores() { saveSettings(); alert('חנויות נשמרו ✅'); }
 // ========== BUDGET ==========
 function renderBudgetSettings() {
+  renderBudgetChart();
   const from = (document.getElementById('budget-from')||{}).value || '';
   const to = (document.getElementById('budget-to')||{}).value || '';
   // מלא רשימת קבוצות
@@ -1686,7 +1720,7 @@ function scheduleNotif(ev) {
 
     notifDays.forEach(n => {
       let eventDate;
-      if (getRecurrence(ev.type) === 'yearly') {
+      if (getRecurrence(ev) === 'yearly') {
         // אירוע שנתי — מצא את המועד הבא
         eventDate = new Date(today.getFullYear(), evMonth, evDay);
         if (eventDate <= today) eventDate.setFullYear(today.getFullYear() + 1);
@@ -2030,4 +2064,58 @@ function confirmVCFImport() {
   _vcfContacts = [];
   openScreen('screen-contacts');
   alert('✅ יובאו ' + added + ' אנשי קשר!');
+}
+
+// ========== גרף תקציב ==========
+function renderBudgetChart() {
+  const chartEl = document.getElementById('budget-chart');
+  if (!chartEl) return;
+  const list = events.filter(e => e.budget);
+  if (!list.length) { chartEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">אין נתוני תקציב</div>'; return; }
+
+  const paid = list.filter(e => e.giftStatus === 'paid');
+  const pending = list.filter(e => e.giftStatus !== 'paid');
+  const paidT = paid.reduce((s,e) => s+(parseInt(e.budget)||0), 0);
+  const pendT = pending.reduce((s,e) => s+(parseInt(e.budget)||0), 0);
+  const total = paidT + pendT;
+  const paidPct = total ? Math.round(paidT/total*100) : 0;
+
+  // חישוב לפי קבוצה
+  const byGroup = {};
+  list.forEach(e => {
+    const g = e.group || 'ללא קבוצה';
+    if (!byGroup[g]) byGroup[g] = 0;
+    byGroup[g] += parseInt(e.budget) || 0;
+  });
+  const maxGroup = Math.max(...Object.values(byGroup));
+
+  // גרף עיגול SVG
+  const r = 36, cx = 45, cy = 45;
+  const circ = 2 * Math.PI * r;
+  const paidDash = circ * paidPct / 100;
+  const pendDash = circ - paidDash;
+
+  chartEl.innerHTML =
+    '<div style="display:flex;align-items:center;gap:14px;padding:10px;background:rgba(255,255,255,0.03);border-radius:var(--rs);margin-bottom:12px;">' +
+    '<svg width="90" height="90" viewBox="0 0 90 90">' +
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>' +
+    (paidPct > 0 ? '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="'+paidDash.toFixed(1)+' '+pendDash.toFixed(1)+'" stroke-dashoffset="'+(-circ/4).toFixed(1)+'" />' : '') +
+    (pendDash > 0 && paidDash > 0 ? '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="'+pendDash.toFixed(1)+' '+paidDash.toFixed(1)+'" stroke-dashoffset="'+(-(circ/4 - paidDash)).toFixed(1)+'" />' : '') +
+    (pendDash > 0 && paidDash === 0 ? '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="'+circ+' 0" stroke-dashoffset="'+(-circ/4).toFixed(1)+'" />' : '') +
+    '<text x="'+cx+'" y="'+(cy-5)+'" text-anchor="middle" fill="var(--acc-light)" font-size="14" font-weight="600" font-family="system-ui">'+paidPct+'%</text>' +
+    '<text x="'+cx+'" y="'+(cy+12)+'" text-anchor="middle" fill="#888" font-size="9" font-family="system-ui">שולם</text>' +
+    '</svg>' +
+    '<div style="flex:1;">' +
+    '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><div style="width:10px;height:10px;border-radius:50%;background:#10b981;flex-shrink:0;"></div><span style="font-size:12px;">שולם: <b style="color:#34d399;">'+paidT+'₪</b></span></div>' +
+    '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;"><div style="width:10px;height:10px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></div><span style="font-size:12px;">פתוח: <b style="color:#fbbf24;">'+pendT+'₪</b></span></div>' +
+    '<div style="font-size:11px;color:var(--muted);">סה"כ: '+total+'₪</div>' +
+    '</div></div>' +
+    '<div style="font-size:11px;color:var(--muted2);margin-bottom:8px;">לפי קבוצה</div>' +
+    Object.entries(byGroup).sort((a,b)=>b[1]-a[1]).map(([g,amt]) => {
+      const pct = maxGroup ? Math.round(amt/maxGroup*100) : 0;
+      return '<div style="margin-bottom:8px;">' +
+        '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>'+g+'</span><span style="color:var(--acc-light);">'+amt+'₪</span></div>' +
+        '<div style="background:rgba(255,255,255,0.06);border-radius:3px;height:6px;"><div style="background:var(--accent);width:'+pct+'%;height:100%;border-radius:3px;transition:width 0.3s;"></div></div>' +
+        '</div>';
+    }).join('');
 }

@@ -191,6 +191,18 @@
         <option value="custom">✏️ אחר...</option>
       </select>
       <input type="text" class="form-input" id="inp-custom-type" placeholder="הקלד סוג אירוע..." style="display:none;margin-top:8px;">
+      <!-- כל שנה / חד פעמי -->
+      <div style="display:flex;gap:8px;margin-top:9px;" id="recurrence-selector">
+        <div id="rec-yearly" onclick="setRecurrence('yearly')" style="flex:1;background:rgba(99,102,241,0.2);border:2px solid var(--accent);border-radius:var(--rs);padding:9px 8px;text-align:center;cursor:pointer;">
+          <div style="font-size:12px;color:var(--acc-light);font-weight:500;">🔄 כל שנה</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">יום הולדת, אזכרה...</div>
+        </div>
+        <div id="rec-once" onclick="setRecurrence('once')" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:var(--rs);padding:9px 8px;text-align:center;cursor:pointer;">
+          <div style="font-size:12px;color:var(--muted);font-weight:500;">📌 חד פעמי</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">טסט, תור, טיול...</div>
+        </div>
+      </div>
+      <input type="hidden" id="inp-recurrence" value="yearly">
     </div>
     <div class="form-group">
       <label class="form-label">קבוצה</label>
@@ -587,6 +599,7 @@
     <span style="font-size:15px;font-weight:600;">💰 הגדרות תקציב</span>
   </div>
   <div style="padding:12px 0;">
+    <div id="budget-chart" style="margin-bottom:14px;"></div>
     <div class="stat-grid" id="budget-stats"></div>
     <div class="section-lbl">סינון תקופה</div>
     <div class="form-grid2" style="margin-bottom:12px;">
