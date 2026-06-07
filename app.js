@@ -2276,7 +2276,17 @@ function applyI18nDOM() {
 
   // כפתורי "חזרה" — data-i18n-back
   document.querySelectorAll('[data-i18n-back]').forEach(el => {
-    el.textContent = dir === 'rtl' ? '← ' + t('btnBack').replace('← ','') : t('btnBack').replace('← ','') + ' →';
+    const label = t('btnBack').replace(/[←→] ?/g, '');
+    el.textContent = dir === 'rtl' ? '← ' + label : label + ' →';
+  });
+
+  // אלמנטים עם HTML פנימי (כמו rightsSub עם <br>)
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val && val !== key && (val.includes('\n') || key === 'rightsSub' || key === 'guideSub' || key === 'vcfAndroid')) {
+      el.innerHTML = val.replace(/\n/g, '<br>');
+    }
   });
 
   // Topbar main — כותרת האפליקציה
