@@ -28,9 +28,32 @@ let settings = Object.assign({
   quietStart:'23:00', quietEnd:'08:00',
 }, JSON.parse(localStorage.getItem('ls2_settings') || '{}'));
 
-// greetings: נטען מ-i18n, עם override אישי מ-localStorage
+// ===== HEBREW GREETINGS FALLBACK (תמיד זמין, גם בלי i18n.js) =====
+const HE_GREETINGS = {
+  birthday_male:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר והצלחה 🎂','מזל טוב {name}! עוד שנה של הצלחות ושמחות 🎉','{name} היקר, יום הולדת שמח! שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגוג עוד הרבה שנים {name} 🎈'],
+  birthday_female:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר ושמחה 🎂','מזל טוב {name}! עוד שנה מלאת הצלחות ושמחות 🎉','{name} היקרה, יום הולדת שמח! שכל חלומותייך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגגי עוד הרבה שנים {name} 🎈'],
+  birthday:['{name} יום הולדת שמח! שהשנה תביא הצלחה ושמחה 🎂','מזל טוב {name}! 🎉','{name} שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! 🎈'],
+  memorial:['חושב עליכם היום ביום האזכרה. מחבק מרחוק 🕯️','זכרו יהיה ברוך לעד 🕯️','זיכרון לברכה. מחשבותינו אתכם 🕯️','בעצב ובכבוד, מציין/ת את יום האזכרה 🕯️','לנצח בלבנו 🕯️'],
+  anniversary:['יום נישואין שמח {name}! שתמשיכו לאהוב ולצמוח יחד 💍','מזל טוב! עוד שנה של אהבה 💍','שנה נוספת של אהבה ושמחה {name}! 💑','יום נישואין שמח! שתמשיכו יחד לנצח 💍','ברכות חמות ליום הנישואין! 💞'],
+  wedding:['מזל טוב {name}! שתתחילו את דרכם המשותפת באהבה ובאושר 💒','ברכות לחתונה! יום מרגש ומיוחד 💒','מזל טוב לחתן ולכלה! 🥂','שתהיה חתונה שמחה ויפה! 🎊','ברכות מכל הלב ליום המיוחד! 💒'],
+  barmitzvah:['מזל טוב על בר/בת המצווה! ✡️','ברכות לאבן הדרך המיוחדת! ✡️','מזל טוב! יום גדול ומשמעותי ✨','ברכות חמות לאירוע המיוחד! ✡️','מזל טוב! שתמשיך בדרך טובה ✡️'],
+  friends:['מחכה לפגישה! 😊','יהיה כיף לראות אותך! 🤗','מצפה למפגש! 👋','יאללה נתראה! 😄','מחכה בקוצר רוח! 🎉'],
+  trip:['טיסה טובה {name}! ✈️ שתהיה חופשה נהדרת','נסיעה טובה! 🌍 תהנה/י','חופשה מענגת! ✈️','שתחזור/י בריא/ה ושלם/ה! 🧳','טיול נעים {name}! 🏖️'],
+  car:['בהצלחה בטסט! 🚗','יעבור חלק! 🔧','בהצלחה! 🚙','הכל יהיה בסדר גמור! 🔑','יצא מהטסט עם פס ירוק! ✅'],
+  medical:['בהצלחה בתור! 🏥 הבריאות קודמת','שיהיה בסדר! 💊','בריאות מעל הכל! 🏥','שתרגיש/י טוב! 💙','בהצלחה! שיהיה בשורות טובות 🌿'],
+  holiday:['חג שמח! 🎊','מועדים לשמחה! 🕎','חג שמח וכשר! ✨','ברכות לחג! 🎉','שיהיה חג מאושר {name}! 🌟'],
+  graduation:['מזל טוב על הסיום {name}! 🎓 עתיד מזהיר לפניך','ברכות על הגמר! 🎓','מזל טוב! כל הכבוד על ההשגה 🎓','ברכות חמות על סיום הלימודים! 📚','מזל טוב! הצלחה בדרך הבאה 🌟'],
+  custom:['מזל טוב! 🎉','ברכות! ✨','כל הכבוד! 👏','שיהיה בהצלחה! 🌟','ברכות חמות! 💙'],
+};
+
+// greetings: נטען מ-i18n אם זמין, אחרת עברית, עם override אישי מ-localStorage
 function getBaseGreetings() {
-  return (I18N[getLang()] || I18N['he']).greetings;
+  try {
+    const langData = (typeof I18N !== 'undefined') && (I18N[getLang()] || I18N['he']);
+    return (langData && langData.greetings) ? langData.greetings : HE_GREETINGS;
+  } catch(e) {
+    return HE_GREETINGS;
+  }
 }
 let greetings = Object.assign({}, getBaseGreetings(), JSON.parse(localStorage.getItem('ls2_greetings') || '{}'));
 function reloadGreetings() {
@@ -141,15 +164,18 @@ function buildGreeting(ev) {
   const type = ev.type || 'custom';
   let variants;
   if (type === 'birthday') {
-    // בחר לפי מין
     const gender = ev.gender || 'male';
     if (gender === 'female') variants = greetings['birthday_female'] || greetings['birthday'];
     else variants = greetings['birthday_male'] || greetings['birthday'];
   } else {
     variants = greetings[type] || greetings.custom;
   }
+  // הגנה: אם variants ריק, השתמש בfallback
+  if (!variants || !variants.length) {
+    variants = HE_GREETINGS[type] || HE_GREETINGS.custom;
+  }
   const idx = greetVariants[ev.id] || 0;
-  let text = variants[idx % variants.length] || variants[0];
+  let text = variants[idx % variants.length] || variants[0] || 'מזל טוב! 🎉';
   return text.replace(/{name}/g, ev.name || '');
 }
 
@@ -161,6 +187,7 @@ function nextVariant(id) {
   } else {
     variants = greetings[ev.type] || greetings.custom;
   }
+  if (!variants || !variants.length) variants = HE_GREETINGS[ev.type] || HE_GREETINGS.custom;
   greetVariants[id] = ((greetVariants[id] || 0) + 1) % variants.length;
   const el = document.getElementById('greet-text-' + id);
   if (el) el.textContent = buildGreeting(ev);
@@ -2245,31 +2272,29 @@ function renderLanguageScreen() {
 }
 
 function changeLang(code) {
-  // בדיקת בטיחות — אם i18n לא נטען
-  if (typeof I18N === 'undefined' || !I18N[code]) {
-    alert('יש לרענן את הדף כדי לטעון תמיכת שפות');
-    return;
-  }
-
-  // שמור שפה
-  setLang(code);
-  reloadGreetings();
-
-  // רינדר מחדש תוכן דינמי קודם
-  renderMain();
-
-  // עדכן כל הDOM הסטטי אחרי הרינדור
-  applyI18nDOM();
-
-  // רינדר מחדש את מסך השפה (כדי לעדכן ✓)
-  renderLanguageScreen();
-
-  // הודעת אישור
-  const banner = document.getElementById('lang-saved-banner');
-  if (banner) {
-    banner.textContent = t('langSaved');
-    banner.style.display = 'block';
-    setTimeout(() => { banner.style.display = 'none'; }, 2000);
+  try {
+    // שמור שפה
+    setLang(code);
+    // טען ברכות לשפה החדשה
+    reloadGreetings();
+    // רינדר מחדש תוכן דינמי
+    renderMain();
+    // עדכן DOM סטטי
+    if (typeof applyI18nDOM === 'function') applyI18nDOM();
+    // עדכן מסך שפה
+    renderLanguageScreen();
+    // הודעת אישור
+    const banner = document.getElementById('lang-saved-banner');
+    if (banner) {
+      const msg = (typeof t === 'function') ? t('langSaved') : '✅';
+      banner.textContent = msg;
+      banner.style.display = 'block';
+      setTimeout(() => { banner.style.display = 'none'; }, 2000);
+    }
+  } catch(err) {
+    console.error('[changeLang] Error:', err);
+    // נסה לפחות לשמור את השפה
+    try { localStorage.setItem('ls2_lang', code); } catch(e) {}
   }
 }
 
