@@ -1854,13 +1854,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => s.style.display = 'none', 500);
   }, 1500);
 
-  // service worker
+  // service worker — אנסרגיסטר SWs ישנים ורשום v25
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(() => {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      const promises = regs
+        .filter(r => r.active && !r.active.scriptURL.includes('sw.js'))
+        .map(r => r.unregister());
+      return Promise.all(promises);
+    }).then(() => {
+      return navigator.serviceWorker.register('sw.js');
+    }).then(reg => {
+      reg.update(); // כפה בדיקת עדכון
       if ('Notification' in window && Notification.permission !== 'granted') {
         Notification.requestPermission().then(p => { if (p === 'granted') events.forEach(scheduleNotif); });
       }
-    });
+    }).catch(err => console.log('[SW] Registration failed:', err));
+
+    // אם i18n לא נטען — נקה cache לגמרי
+    if (typeof I18N === 'undefined') {
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+    }
   }
   setTimeout(() => requestOneSignalPermission(), 3000);
 
