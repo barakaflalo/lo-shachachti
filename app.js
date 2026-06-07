@@ -1,5 +1,19 @@
 // ===== לא שכחתי v2 — app.js =====
 
+// ===== i18n SAFETY FALLBACK =====
+// אם i18n.js לא נטען (Service Worker ישן) — מניע קריסה
+if (typeof I18N === 'undefined' || typeof t === 'undefined') {
+  console.warn('i18n.js not loaded — using Hebrew fallback');
+  window.I18N = { he: { dir:'rtl', lang:'he' } };
+  window._lang = 'he';
+  window.t = function(key) {
+    // החזר key כ-fallback — עדיף על קריסה
+    return key;
+  };
+  window.setLang = function(l) { window._lang = l; };
+  window.getLang = function() { return window._lang || 'he'; };
+}
+
 // ========== STORAGE ==========
 let events = JSON.parse(localStorage.getItem('ls2_events') || '[]');
 let settings = Object.assign({
@@ -2218,6 +2232,12 @@ function renderLanguageScreen() {
 }
 
 function changeLang(code) {
+  // בדיקת בטיחות — אם i18n לא נטען
+  if (typeof I18N === 'undefined' || !I18N[code]) {
+    alert('יש לרענן את הדף כדי לטעון תמיכת שפות');
+    return;
+  }
+
   // שמור שפה
   setLang(code);
   reloadGreetings();
