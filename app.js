@@ -608,11 +608,11 @@ function clearForm() {
 function cancelForm() { clearForm(); setTimeout(() => openScreen('screen-main'), 50); }
 
 function onTypeChange() {
-  const t = document.getElementById('inp-type').value;
-  document.getElementById('inp-custom-type').style.display = t === 'custom' ? 'block' : 'none';
+  const evType = document.getElementById('inp-type').value;
+  document.getElementById('inp-custom-type').style.display = evType === 'custom' ? 'block' : 'none';
   // קבע אוטומטית כל שנה / חד פעמי לפי סוג
   const autoYearly = ['birthday','anniversary','memorial','holiday','barmitzvah','graduation'];
-  setRecurrence(autoYearly.includes(t) ? 'yearly' : 'once');
+  setRecurrence(autoYearly.includes(evType) ? 'yearly' : 'once');
 }
 
 function setRecurrence(val) {
@@ -1238,14 +1238,14 @@ function renderGreetings() {
     {key:'medical',label:'🏥 תור רפואי'},{key:'holiday',label:'🎊 חג'},
     {key:'graduation',label:'🎓 סיום לימודים'},{key:'custom',label:'✨ אחר'},
   ];
-  document.getElementById('greetings-list').innerHTML = types.map(t =>
+  document.getElementById('greetings-list').innerHTML = types.map(tp =>
     '<div class="card" style="margin-bottom:10px;">' +
-    '<div style="font-size:13px;font-weight:500;margin-bottom:10px;">' + t.label + '</div>' +
-    (greetings[t.key]||[]).map((v,i) =>
+    '<div style="font-size:13px;font-weight:500;margin-bottom:10px;">' + tp.label + '</div>' +
+    (greetings[tp.key]||[]).map((v,i) =>
       '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,0.04);">' +
       '<span style="font-size:10px;color:var(--muted);width:16px;flex-shrink:0;margin-top:3px;">' + (i+1) + '</span>' +
       '<div style="flex:1;font-size:12px;color:var(--muted);line-height:1.6;">' + v + '</div>' +
-      '<button onclick="editVariant(\'' + t.key + '\',' + i + ')" style="font-size:10px;color:var(--acc-light);background:transparent;border:none;cursor:pointer;flex-shrink:0;">✏️</button>' +
+      '<button onclick="editVariant(\'' + tp.key + '\',' + i + ')" style="font-size:10px;color:var(--acc-light);background:transparent;border:none;cursor:pointer;flex-shrink:0;">✏️</button>' +
       '</div>'
     ).join('') +
     '</div>'
@@ -1523,18 +1523,18 @@ function confirmDeleteAll() {
 // ========== APPEARANCE ==========
 function renderAppearance() {
   const grid = document.getElementById('theme-grid'); if (!grid) return;
-  grid.innerHTML = THEMES.map(t => {
-    const isActive = settings.theme === t.key;
-    if (t.custom) {
+  grid.innerHTML = THEMES.map(theme => {
+    const isActive = settings.theme === theme.key;
+    if (theme.custom) {
       return '<div onclick="openCustomColor()" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;position:relative;">' +
         '<div style="width:28px;height:28px;border-radius:50%;background:' + (isActive&&settings.customColor?settings.customColor:'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)') + ';margin:0 auto 5px;"></div>' +
-        '<div style="font-size:10px;color:' + (isActive?'var(--acc-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
+        '<div style="font-size:10px;color:' + (isActive?'var(--acc-light)':'var(--muted)') + ';">' + theme.name + (isActive?' ✓':'') + '</div>' +
         '<input type="color" id="custom-color-picker" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;" onchange="applyCustomColor(this.value)">' +
         '</div>';
     }
-    return '<div onclick="selectTheme(\'' + t.key + '\')" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;">' +
-      '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,' + t.from + ',' + t.to + ');margin:0 auto 5px;"></div>' +
-      '<div style="font-size:10px;color:' + (isActive?'var(--acc-light)':'var(--muted)') + ';">' + t.name + (isActive?' ✓':'') + '</div>' +
+    return '<div onclick="selectTheme(\'' + theme.key + '\')" style="border:' + (isActive?'2px solid var(--accent)':'1px solid var(--border)') + ';border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;">' +
+      '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,' + theme.from + ',' + theme.to + ');margin:0 auto 5px;"></div>' +
+      '<div style="font-size:10px;color:' + (isActive?'var(--acc-light)':'var(--muted)') + ';">' + theme.name + (isActive?' ✓':'') + '</div>' +
       '</div>';
   }).join('');
   ['dark','light','auto'].forEach(m => {
@@ -1550,13 +1550,13 @@ function selectTheme(key) {
 
 function applyTheme(key) {
   if (key === 'custom' && settings.customColor) { applyCustomColor(settings.customColor); return; }
-  const t = THEMES.find(x => x.key === key); if (!t) return;
+  const themeObj = THEMES.find(x => x.key === key); if (!themeObj) return;
   const r = document.documentElement;
-  r.style.setProperty('--accent', t.from);
-  r.style.setProperty('--acc-rgb', t.rgb);
-  r.style.setProperty('--acc-light', t.light);
-  r.style.setProperty('--acc-dim', 'rgba(' + t.rgb + ',0.2)');
-  r.style.setProperty('--acc-border', 'rgba(' + t.rgb + ',0.4)');
+  r.style.setProperty('--accent', themeObj.from);
+  r.style.setProperty('--acc-rgb', themeObj.rgb);
+  r.style.setProperty('--acc-light', themeObj.light);
+  r.style.setProperty('--acc-dim', 'rgba(' + themeObj.rgb + ',0.2)');
+  r.style.setProperty('--acc-border', 'rgba(' + themeObj.rgb + ',0.4)');
 }
 
 function openCustomColor() { document.getElementById('custom-color-picker').click(); }
@@ -2251,17 +2251,16 @@ function applyI18nDOM() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const val = t(key);
-    if (val && val !== key) {
-      // שמור על אלמנטים פנימיים (כמו <b>)
-      if (el.children.length === 0) {
-        el.textContent = val;
-      } else {
-        // יש children — עדכן רק text node ראשון
-        for (let node of el.childNodes) {
-          if (node.nodeType === 3 && node.textContent.trim()) {
-            node.textContent = val;
-            break;
-          }
+    if (!val || typeof val !== 'string' || val === key) return;
+    // שמור על אלמנטים פנימיים (כמו <b>)
+    if (el.children.length === 0) {
+      el.textContent = val;
+    } else {
+      // יש children — עדכן רק text node ראשון
+      for (let node of el.childNodes) {
+        if (node.nodeType === 3 && node.textContent.trim()) {
+          node.textContent = val;
+          break;
         }
       }
     }
@@ -2284,7 +2283,7 @@ function applyI18nDOM() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const val = t(key);
-    if (val && val !== key && (val.includes('\n') || key === 'rightsSub' || key === 'guideSub' || key === 'vcfAndroid')) {
+    if (val && typeof val === 'string' && val !== key && (val.includes('\n') || key === 'rightsSub' || key === 'guideSub' || key === 'vcfAndroid')) {
       el.innerHTML = val.replace(/\n/g, '<br>');
     }
   });
