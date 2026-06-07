@@ -14,22 +14,14 @@ let settings = Object.assign({
   quietStart:'23:00', quietEnd:'08:00',
 }, JSON.parse(localStorage.getItem('ls2_settings') || '{}'));
 
-let greetings = Object.assign({
-  birthday_male:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר והצלחה 🎂','מזל טוב {name}! עוד שנה של הצלחות ושמחות 🎉','{name} היקר, יום הולדת שמח! שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגוג עוד הרבה שנים {name} 🎈'],
-  birthday_female:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר ושמחה 🎂','מזל טוב {name}! עוד שנה מלאת הצלחות ושמחות 🎉','{name} היקרה, יום הולדת שמח! שכל חלומותייך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגגי עוד הרבה שנים {name} 🎈'],
-  birthday:['{name} יום הולדת שמח! שהשנה תביא הצלחה ושמחה 🎂','מזל טוב {name}! 🎉','{name} שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! 🎈'],
-  memorial:['חושב עליכם היום ביום האזכרה. מחבק מרחוק 🕯️','זכרו יהיה ברוך לעד 🕯️','זיכרון לברכה. מחשבותינו אתכם 🕯️','בעצב ובכבוד, מציין/ת את יום האזכרה 🕯️','לנצח בלבנו 🕯️'],
-  anniversary:['יום נישואין שמח {name}! שתמשיכו לאהוב ולצמוח יחד 💍','מזל טוב! עוד שנה של אהבה 💍','שנה נוספת של אהבה ושמחה {name}! 💑','יום נישואין שמח! שתמשיכו יחד לנצח 💍','ברכות חמות ליום הנישואין! 💞'],
-  wedding:['מזל טוב {name}! שתתחילו את דרכם המשותפת באהבה ובאושר 💒','ברכות לחתונה! יום מרגש ומיוחד 💒','מזל טוב לחתן ולכלה! 🥂','שתהיה חתונה שמחה ויפה! 🎊','ברכות מכל הלב ליום המיוחד! 💒'],
-  barmitzvah:['מזל טוב על בר/בת המצווה! ✡️','ברכות לאבן הדרך המיוחדת! ✡️','מזל טוב! יום גדול ומשמעותי ✨','ברכות חמות לאירוע המיוחד! ✡️','מזל טוב! שתמשיך בדרך טובה ✡️'],
-  friends:['מחכה לפגישה! 😊','יהיה כיף לראות אותך! 🤗','מצפה למפגש! 👋','יאללה נתראה! 😄','מחכה בקוצר רוח! 🎉'],
-  trip:['טיסה טובה {name}! ✈️ שתהיה חופשה נהדרת','נסיעה טובה! 🌍 תהנה/י','חופשה מענגת! ✈️','שתחזור/י בריא/ה ושלם/ה! 🧳','טיול נעים {name}! 🏖️'],
-  car:['בהצלחה בטסט! 🚗','יעבור חלק! 🔧','בהצלחה! 🚙','הכל יהיה בסדר גמור! 🔑','יצא מהטסט עם פס ירוק! ✅'],
-  medical:['בהצלחה בתור! 🏥 הבריאות קודמת','שיהיה בסדר! 💊','בריאות מעל הכל! 🏥','שתרגיש/י טוב! 💙','בהצלחה! שיהיה בשורות טובות 🌿'],
-  holiday:['חג שמח! 🎊','מועדים לשמחה! 🕎','חג שמח וכשר! ✨','ברכות לחג! 🎉','שיהיה חג מאושר {name}! 🌟'],
-  graduation:['מזל טוב על הסיום {name}! 🎓 עתיד מזהיר לפניך','ברכות על הגמר! 🎓','מזל טוב! כל הכבוד על ההשגה 🎓','ברכות חמות על סיום הלימודים! 📚','מזל טוב! הצלחה בדרך הבאה 🌟'],
-  custom:['מזל טוב! 🎉','ברכות! ✨','כל הכבוד! 👏','שיהיה בהצלחה! 🌟','ברכות חמות! 💙'],
-}, JSON.parse(localStorage.getItem('ls2_greetings') || '{}'));
+// greetings: נטען מ-i18n, עם override אישי מ-localStorage
+function getBaseGreetings() {
+  return (I18N[getLang()] || I18N['he']).greetings;
+}
+let greetings = Object.assign({}, getBaseGreetings(), JSON.parse(localStorage.getItem('ls2_greetings') || '{}'));
+function reloadGreetings() {
+  greetings = Object.assign({}, getBaseGreetings(), JSON.parse(localStorage.getItem('ls2_greetings') || '{}'));
+}
 
 let myGreetings = JSON.parse(localStorage.getItem('ls2_my_greetings') || '["","","","",""]');
 const greetVariants = {};
@@ -39,45 +31,42 @@ function saveSettings() { localStorage.setItem('ls2_settings', JSON.stringify(se
 function saveGreetings() { localStorage.setItem('ls2_greetings', JSON.stringify(greetings)); }
 
 // ========== CONSTANTS ==========
-const EVENT_LABELS = {
-  birthday:'🎉 יום הולדת', wedding:'💒 חתונה', anniversary:'💍 יום נישואין',
-  memorial:'🕯️ אזכרה', barmitzvah:'✡️ בר/בת מצווה', friends:'👥 מפגש',
-  trip:'✈️ טיול', car:'🚗 טסט רכב', medical:'🏥 תור רפואי',
-  holiday:'🎊 חג', graduation:'🎓 סיום לימודים', custom:'✨ אירוע'
-};
-const FIXED_GROUPS = ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];
+function getEventLabels() {
+  return {
+    birthday: t('typeLabelBirthday'), wedding: t('typeLabelWedding'),
+    anniversary: t('typeLabelAnniversary'), memorial: t('typeLabelMemorial'),
+    barmitzvah: t('typeLabelBarmitzvah'), friends: t('typeLabelFriends'),
+    trip: t('typeLabelTrip'), car: t('typeLabelCar'), medical: t('typeLabelMedical'),
+    holiday: t('typeLabelHoliday'), graduation: t('typeLabelGraduation'), custom: t('typeLabelCustom')
+  };
+}
+function getFixedGroups() { return ['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים']; }
+const FIXED_GROUPS = getFixedGroups();
 const YEARLY = ['birthday','anniversary','memorial','holiday','barmitzvah','graduation'];
 const ALL_STORES = ['Amazon','KSP','זאפ','IVORY','BUG','Etsy','ASOS','iDigital','Walmart','eBay','AliExpress'];
-const GIFT_OPTIONS = [
-  {e:'⌚',l:'שעון'},{e:'👕',l:'בגדים'},{e:'👟',l:'נעליים'},{e:'🖼️',l:'תמונה'},
-  {e:'📱',l:'סלולר'},{e:'🎮',l:'גיימינג'},{e:'📚',l:'ספרים'},{e:'💄',l:'קוסמטיקה'},
-  {e:'🌸',l:'פרחים'},{e:'🍫',l:'שוקולד'},{e:'🍷',l:'יין'},{e:'☕',l:'קפה'},
-  {e:'🎒',l:'תיק'},{e:'💍',l:'תכשיטים'},{e:'🏠',l:'לבית'},{e:'🎵',l:'אוזניות'},
-  {e:'📺',l:'טלוויזיה'},{e:'✈️',l:'חוויה'},{e:'💆',l:'ספא'},{e:'🎟️',l:'כרטיסים'},
-  {e:'💰',l:'גיפט קארד'},{e:'🧴',l:'טיפוח'}
-];
+function getGiftOptions() { return t('giftTags'); }
 const AVATAR_COLORS = [
   ['#1e1b4b','#a5b4fc'],['#042c53','#93c5fd'],['#052e16','#86efac'],
   ['#451a03','#fed7aa'],['#2e1065','#c4b5fd'],['#0c1e3c','#93c5fd'],
   ['#1a0a2e','#c084fc'],['#0c2615','#4ade80'],
 ];
 const THEMES = [
-  {name:'סגול', key:'purple', from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241', light:'#a5b4fc'},
-  {name:'כחול', key:'blue', from:'#3b82f6', to:'#06b6d4', rgb:'59,130,246', light:'#93c5fd'},
-  {name:'ירוק', key:'green', from:'#10b981', to:'#34d399', rgb:'16,185,129', light:'#6ee7b7'},
-  {name:'כתום', key:'amber', from:'#f59e0b', to:'#fbbf24', rgb:'245,158,11', light:'#fcd34d'},
-  {name:'אדום', key:'red', from:'#ef4444', to:'#f97316', rgb:'239,68,68', light:'#fca5a5'},
-  {name:'ורוד', key:'pink', from:'#ec4899', to:'#a855f7', rgb:'236,72,153', light:'#f9a8d4'},
-  {name:'טורקיז', key:'teal', from:'#14b8a6', to:'#06b6d4', rgb:'20,184,166', light:'#5eead4'},
-  {name:'זהב', key:'gold', from:'#d97706', to:'#f59e0b', rgb:'217,119,6', light:'#fbbf24'},
-  {name:'לילך', key:'violet', from:'#7c3aed', to:'#9333ea', rgb:'124,58,237', light:'#c4b5fd'},
-  {name:'כחול כהה', key:'navy', from:'#1d4ed8', to:'#2563eb', rgb:'29,78,216', light:'#93c5fd'},
-  {name:'ניאון', key:'lime', from:'#65a30d', to:'#84cc16', rgb:'101,163,13', light:'#bef264'},
-  {name:'מותאם', key:'custom', from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241', light:'#a5b4fc', custom:true},
+  {nameKey:'themeViolet', name:'סגול', key:'purple', from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241', light:'#a5b4fc'},
+  {nameKey:'themeBlue', name:'כחול', key:'blue', from:'#3b82f6', to:'#06b6d4', rgb:'59,130,246', light:'#93c5fd'},
+  {nameKey:'themeGreen', name:'ירוק', key:'green', from:'#10b981', to:'#34d399', rgb:'16,185,129', light:'#6ee7b7'},
+  {nameKey:'themeAmber', name:'כתום', key:'amber', from:'#f59e0b', to:'#fbbf24', rgb:'245,158,11', light:'#fcd34d'},
+  {nameKey:'themeRed', name:'אדום', key:'red', from:'#ef4444', to:'#f97316', rgb:'239,68,68', light:'#fca5a5'},
+  {nameKey:'themePink', name:'ורוד', key:'pink', from:'#ec4899', to:'#a855f7', rgb:'236,72,153', light:'#f9a8d4'},
+  {nameKey:'themeTeal', name:'טורקיז', key:'teal', from:'#14b8a6', to:'#06b6d4', rgb:'20,184,166', light:'#5eead4'},
+  {nameKey:'themeGold', name:'זהב', key:'gold', from:'#d97706', to:'#f59e0b', rgb:'217,119,6', light:'#fbbf24'},
+  {nameKey:'themeLilac', name:'לילך', key:'violet', from:'#7c3aed', to:'#9333ea', rgb:'124,58,237', light:'#c4b5fd'},
+  {nameKey:'themeNavy', name:'כחול כהה', key:'navy', from:'#1d4ed8', to:'#2563eb', rgb:'29,78,216', light:'#93c5fd'},
+  {nameKey:'themeLime', name:'ניאון', key:'lime', from:'#65a30d', to:'#84cc16', rgb:'101,163,13', light:'#bef264'},
+  {nameKey:'themeCustom', name:'מותאם', key:'custom', from:'#6366f1', to:'#8b5cf6', rgb:'99,102,241', light:'#a5b4fc', custom:true},
 ];
 
 // ========== UTILS ==========
-function getLabel(type, custom) { return EVENT_LABELS[type] || custom || '✨ אירוע'; }
+function getLabel(type, custom) { return getEventLabels()[type] || custom || t('typeLabelCustom'); }
 function avatarColor(name) {
   const i = ((name || 'A').charCodeAt(0) - 65) % AVATAR_COLORS.length;
   return AVATAR_COLORS[Math.max(0, i)];
@@ -117,21 +106,21 @@ function calcDays(ev) {
 }
 
 function countdownHTML(daysLeft, isOver) {
-  if (isOver || daysLeft === null) return '<span class="cd-far">עבר</span>';
-  if (daysLeft === 0) return '<span class="cd-today">🎉 היום!</span>';
-  if (daysLeft === 1) return '<span class="cd-today">🔥 מחר!</span>';
-  if (daysLeft <= 7) return '<span class="cd-soon">⚡ עוד ' + daysLeft + ' ימים</span>';
-  if (daysLeft <= 30) return '<span class="cd-normal">📅 עוד ' + daysLeft + ' ימים</span>';
-  return '<span class="cd-far">📅 עוד ' + daysLeft + ' ימים</span>';
+  if (isOver || daysLeft === null) return '<span class="cd-far">' + t('passed') + '</span>';
+  if (daysLeft === 0) return '<span class="cd-today">🎉 ' + t('today') + '</span>';
+  if (daysLeft === 1) return '<span class="cd-today">🔥 ' + t('tomorrow') + '</span>';
+  if (daysLeft <= 7) return '<span class="cd-soon">⚡ ' + t('inDays', {n: daysLeft}) + '</span>';
+  if (daysLeft <= 30) return '<span class="cd-normal">📅 ' + t('inDays', {n: daysLeft}) + '</span>';
+  return '<span class="cd-far">📅 ' + t('inDays', {n: daysLeft}) + '</span>';
 }
 
 function urgencyBadge(daysLeft, isOver) {
-  if (isOver || daysLeft === null) return '<span class="badge badge-gray">עבר</span>';
-  if (daysLeft === 0) return '<span class="badge badge-red">היום!</span>';
-  if (daysLeft === 1) return '<span class="badge badge-red">מחר</span>';
-  if (daysLeft <= 7) return '<span class="badge badge-amber">' + daysLeft + ' ימים</span>';
-  if (daysLeft <= 30) return '<span class="badge badge-purple">' + daysLeft + ' ימים</span>';
-  return '<span class="badge badge-gray">' + daysLeft + ' ימים</span>';
+  if (isOver || daysLeft === null) return '<span class="badge badge-gray">' + t('passed') + '</span>';
+  if (daysLeft === 0) return '<span class="badge badge-red badge-urgent">' + t('today') + '</span>';
+  if (daysLeft === 1) return '<span class="badge badge-red badge-urgent">' + t('tomorrow') + '</span>';
+  if (daysLeft <= 7) return '<span class="badge badge-amber">' + daysLeft + ' ' + t('daysLeft') + '</span>';
+  if (daysLeft <= 30) return '<span class="badge badge-purple">' + daysLeft + ' ' + t('daysLeft') + '</span>';
+  return '<span class="badge badge-gray">' + daysLeft + ' ' + t('daysLeft') + '</span>';
 }
 
 function buildGreeting(ev) {
@@ -181,6 +170,7 @@ function openScreen(id) {
     'screen-print': initPrint,
     'screen-guide': renderGuide,
     'screen-appearance': renderAppearance,
+    'screen-language': renderLanguageScreen,
   };
   if (map[id]) map[id]();
 }
@@ -253,9 +243,9 @@ function renderMain() {
     const budgetTotal = events.reduce((s,e) => s+(parseInt(e.budget)||0), 0);
     statsEl.style.display = '';
     statsEl.innerHTML =
-      '<div class="stat-card"><div class="stat-num">' + u30 + '</div><div class="stat-label">אירועים ב-30 יום</div></div>' +
-      (settings.showBudget ? '<div class="stat-card"><div class="stat-num green">' + budgetTotal + '₪</div><div class="stat-label">תקציב מתנות</div></div>' :
-       '<div class="stat-card"><div class="stat-num">' + events.length + '</div><div class="stat-label">סה"כ אירועים</div></div>');
+      '<div class="stat-card"><div class="stat-num">' + u30 + '</div><div class="stat-label">' + t('statsEvents30') + '</div></div>' +
+      (settings.showBudget ? '<div class="stat-card"><div class="stat-num green">' + budgetTotal + '₪</div><div class="stat-label">' + t('statsBudget') + '</div></div>' :
+       '<div class="stat-card"><div class="stat-num">' + events.length + '</div><div class="stat-label">' + t('statsTotal') + '</div></div>');
   } else { statsEl.style.display = 'none'; }
 
   // calendar
@@ -288,7 +278,7 @@ function renderMain() {
 }
 
 function renderCalendar(enriched) {
-  const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  const months = t('calMonths');
   const today = new Date();
   const first = new Date(calYear, calMonth, 1).getDay();
   const days = new Date(calYear, calMonth+1, 0).getDate();
@@ -330,7 +320,7 @@ function renderCalendar(enriched) {
     '<span>' + months[calMonth] + ' ' + calYear + '</span>' +
     '<span class="cal-nav" onclick="changeMonth(1)">‹</span>' +
     '</div>' +
-    '<div class="cal-days-header"><div class="cal-day-name">א</div><div class="cal-day-name">ב</div><div class="cal-day-name">ג</div><div class="cal-day-name">ד</div><div class="cal-day-name">ה</div><div class="cal-day-name">ו</div><div class="cal-day-name">ש</div></div>' +
+    '<div class="cal-days-header">' + t('calDays').map(d => '<div class="cal-day-name">' + d + '</div>').join('') + '</div>' +
     '<div class="cal-grid">' + grid + '</div>' +
     '</div>';
 }
@@ -356,7 +346,7 @@ function onCalDay(d, m, y) {
     return ey === y && ed.getMonth() === m && ed.getDate() === d;
   });
   if (!dayEvents.length) return;
-  const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  const months = t('calMonths');
   document.getElementById('cal-popup-title').textContent = '📅 ' + d + ' ' + months[m];
   document.getElementById('cal-popup-list').innerHTML = dayEvents.map(ev => {
     const calc = calcDays(ev);
@@ -387,7 +377,7 @@ function renderHero(enriched) {
   const upcoming = enriched.filter(e => e.daysLeft !== null).sort((a,b) => a.daysLeft - b.daysLeft);
   const heroEl = document.getElementById('main-hero');
   if (!upcoming.length && events.length === 0 && settings.isFirstTime) {
-    heroEl.innerHTML = '<div class="hero-welcome" onclick="openModal(\'modal-welcome-guide\')">' +
+    heroEl.innerHTML = '<div class="hero-welcome" onclick="openModal(\'modal-welcome-guide\')">'  +
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
       '<div style="font-size:28px;">🎉</div>' +
       '<div><div style="font-size:14px;font-weight:600;">ברוך הבא ל"לא שכחתי"!</div>' +
@@ -469,7 +459,7 @@ function buildCard(ev) {
   const giftHtml = (ev.giftIdea || ev.budget) ? (
     '<div class="gift-box"><div style="display:flex;justify-content:space-between;align-items:center;">' +
     '<span style="font-size:11px;color:var(--green);">🎁 ' + (ev.giftIdea||'') + (ev.budget ? ' | ' + ev.budget + '₪' : '') + '</span>' +
-    '<button onclick="event.stopPropagation();toggleGift(' + ev.id + ')" style="background:' + (ev.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:3px 9px;border-radius:var(--rf);font-size:11px;cursor:pointer;">' + (ev.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע') + '</button>' +
+    '<button onclick="event.stopPropagation();toggleGift(' + ev.id + ')" style="background:' + (ev.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:3px 9px;border-radius:var(--rf);font-size:11px;cursor:pointer;">' + (ev.giftStatus==='paid'?t('giftBought'):t('giftTodo')) + '</button>' +
     '</div><div class="store-links">' + storeLinks + '</div></div>'
   ) : '';
 
@@ -548,8 +538,8 @@ function openDetail(id) {
     (ev.email ? '<div class="detail-row"><span class="detail-label">✉️ מייל</span><a href="mailto:' + ev.email + '" style="color:var(--acc-light);">' + ev.email + '</a></div>' : '') +
     (ev.notes ? '<div class="detail-row"><span class="detail-label">💡 הערות</span><span style="color:var(--muted);">' + ev.notes + '</span></div>' : '') +
     '</div>' +
-    ((ev.giftIdea||ev.budget) ? '<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 ' + (ev.giftIdea||'') + (ev.budget?' | '+ev.budget+'₪':'') + '</span><button onclick="toggleGift(' + ev.id + ');renderMain();" style="background:' + (ev.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">' + (ev.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע') + '</button></div><div class="store-links">' + storeLinks + '</div></div>' : '') +
-    '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>💬 ברכה</span><div style="display:flex;gap:6px;align-items:center;"><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ');updateDetailGreet(' + ev.id + ')">הבא ›</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.18);color:var(--acc-light);" onclick="openAiGreet(' + ev.id + ')">✨ AI</button></div></div><div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button><button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button></div></div>' +
+    ((ev.giftIdea||ev.budget) ? '<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 ' + (ev.giftIdea||'') + (ev.budget?' | '+ev.budget+'₪':'') + '</span><button onclick="toggleGift(' + ev.id + ');renderMain();" style="background:' + (ev.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">' + (ev.giftStatus==='paid'?t('giftBought'):t('giftTodo')) + '</button></div><div class="store-links">' + storeLinks + '</div></div>' : '') +
+    '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>💬 ברכה</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ');updateDetailGreet(' + ev.id + ')">הבא ›</button></div><div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button><button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button></div></div>' +
     '<div style="display:flex;gap:8px;">' +
     (ev.phone ? '<button class="card-btn" style="flex:1;" onclick="window.location.href=\'tel:' + ev.phone + '\'">📱 התקשר</button>' : '') +
     '<button class="card-btn" style="flex:1;" onclick="shareEvent(' + ev.id + ')">📤 שתף</button>' +
@@ -568,7 +558,7 @@ function updateDetailGreet(id) {
 function editCurrentDetail() { if (_detailId) editEvent(_detailId); }
 
 function deleteEventDirect(id) {
-  if (!confirm('מחק את האירוע לצמיתות?')) return;
+  if (!confirm(t('alertDeleteEvent'))) return;
   events = events.filter(e => e.id !== id);
   saveEvents(); playSound('delete'); openScreen('screen-main');
 }
@@ -578,7 +568,7 @@ let selectedGiftTags = [];
 let _formPhoto = null, _formEmoji = null;
 
 function openAddForm(group) {
-  document.getElementById('form-title').textContent = 'אירוע חדש';
+  document.getElementById('form-title').textContent = t('formNewTitle');
   document.getElementById('editing-id').value = '';
   document.getElementById('btn-delete-form').style.display = 'none';
   clearForm();
@@ -663,7 +653,7 @@ function toggleCollapse(id) {
 
 function initGiftTags() {
   const c = document.getElementById('gift-tags-container'); if (!c) return;
-  c.innerHTML = GIFT_OPTIONS.map(o =>
+  c.innerHTML = getGiftOptions().map(o =>
     '<div class="gift-tag" data-label="' + o.l + '" onclick="toggleGiftTag(this,\'' + o.l + '\')">' + o.e + ' ' + o.l + '</div>'
   ).join('');
 }
@@ -1314,7 +1304,7 @@ function addCustomStore() {
   renderStores();
 }
 
-function saveStores() { saveSettings(); alert('חנויות נשמרו ✅'); }
+function saveStores() { saveSettings(); alert(t('alertStoresSaved')); }
 // ========== BUDGET ==========
 function renderBudgetSettings() {
   renderBudgetChart();
@@ -1358,7 +1348,7 @@ function printBudgetReport(groupFilter) {
   win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>שם</th><th>תאריך</th><th>קבוצה</th><th>תקציב</th><th>סטטוס</th></tr>');
   list.forEach(e => win.document.write(
     '<tr><td>'+(e.name||'')+'</td><td>'+(e.date||'')+'</td><td>'+(e.group||'')+'</td><td>'+(e.budget||'')+'₪</td>' +
-    '<td>'+(e.giftStatus==='paid'?'✅ נקנה':'⏳ טרם נקנה')+'</td></tr>'
+    '<td>'+(e.giftStatus==='paid'?t('giftBought'):'⏳ טרם נקנה')+'</td></tr>'
   ));
   win.document.write('</table></body></html>'); win.print();
 }
@@ -1414,7 +1404,7 @@ function printReport() {
   const from = (document.getElementById('print-from')||{}).value || '';
   const to = (document.getElementById('print-to')||{}).value || '';
   const list = getReportList(from, to);
-  const labels = {all:'הכל',upcoming:'קרובים',group:'לפי קבוצה',budget:'תקציב'};
+  const labels = {all:'הכל',upcoming:'קרובים',group:t('budgetByGroup'),budget:'תקציב'};
   const win = window.open('');
   win.document.write('<html dir="rtl"><body style="font-family:sans-serif;padding:20px;"><h2>לא שכחתי — דוח ' + labels[reportType] + '</h2>');
   if (from||to) win.document.write('<p style="color:#888;">תקופה: ' + (from||'') + ' — ' + (to||'') + '</p>');
@@ -1619,20 +1609,11 @@ function quickToggleMode() {
 function saveAppearance() { saveSettings(); openScreen('screen-settings'); }
 
 // ========== GUIDE ==========
-const DAILY_TIPS = [
-  'לחץ על יום בלוח השנה כדי לראות את האירועים של אותו יום!',
-  'לחץ "הבא ›" בברכה כדי לראות 5 וריאנטים שונים!',
-  'הוסף תמונה או אמוג\'י לאיש קשר לחוויה יותר אישית 📸',
-  'ייצא גיבוי מדי פעם — הגדרות ← גיבוי והדפסה',
-  'שנה את צבע האפליקציה — הגדרות ← מראה ← ערכת צבעים 🎨',
-  'הוסף קבוצות לאנשי קשר לסינון מהיר במסך הראשי',
-  'ייבא ימי הולדת מפייסבוק — הגדרות ← מערכת ← ייבוא 📘',
-];
-
 function renderGuide() {
-  const tip = DAILY_TIPS[new Date().getDay() % DAILY_TIPS.length];
+  const tips = t('dailyTips');
+  const tip = tips[new Date().getDay() % tips.length];
   const el = document.getElementById('daily-tip');
-  if (el) el.innerHTML = '<div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;">💡 טיפ יומי</div><div style="font-size:11px;color:var(--muted);">' + tip + '</div>';
+  if (el) el.innerHTML = '<div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;">💡 ' + t('welcomeTip').replace('⭐ ','') + '</div><div style="font-size:11px;color:var(--muted);">' + tip + '</div>';
 }
 
 const CHAPTERS = {
@@ -1831,6 +1812,12 @@ function scheduleNotif(ev) {
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', () => {
+  // init language first
+  const savedLang = localStorage.getItem('ls2_lang') || 'he';
+  setLang(savedLang);
+  reloadGreetings();
+  applyI18nDOM();
+
   // splash
   setTimeout(() => {
     const s = document.getElementById('splash');
@@ -2158,7 +2145,7 @@ function renderBudgetChart() {
   const chartEl = document.getElementById('budget-chart');
   if (!chartEl) return;
   const list = events.filter(e => e.budget);
-  if (!list.length) { chartEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">אין נתוני תקציב</div>'; return; }
+  if (!list.length) { chartEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">' + t('budgetNoData') + '</div>'; return; }
 
   const paid = list.filter(e => e.giftStatus === 'paid');
   const pending = list.filter(e => e.giftStatus !== 'paid');
@@ -2207,171 +2194,82 @@ function renderBudgetChart() {
     }).join('');
 }
 
-// ========== AI GREETING (BYOK) ==========
-let _aiEventId = null;
-let _aiResult = '';
-
-function openAiGreet(id) {
-  _aiEventId = id;
-  _aiResult = '';
-  document.getElementById('ai-result-box').style.display = 'none';
-  document.getElementById('ai-result-text').textContent = '';
-  document.getElementById('ai-extra-input').value = '';
-
-  const hasKey = !!getAiKey();
-  document.getElementById('ai-setup-step').style.display = hasKey ? 'none' : 'block';
-  document.getElementById('ai-generate-step').style.display = hasKey ? 'block' : 'none';
-
-  if (hasKey) {
-    const provider = localStorage.getItem('ls2_ai_provider') || 'openai';
-    const key = getAiKey();
-    document.getElementById('ai-key-preview').textContent =
-      provider.toUpperCase() + ' · ' + key.slice(0, 8) + '••••••••' + key.slice(-4);
-    document.getElementById('ai-provider-select').value = provider;
-  }
-
-  openModal('modal-ai-greet');
+// ========== LANGUAGE / i18n ==========
+function renderLanguageScreen() {
+  const langs = [
+    { code:'he', flag:'🇮🇱', label:'עברית', native:'עברית' },
+    { code:'en', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', flag2:'🌐', label:'English', native:'English' },
+    { code:'ru', flag:'🇷🇺', label:'Русский', native:'Русский' },
+    { code:'es', flag:'🇪🇸', label:'Español', native:'Español' },
+    { code:'ar', flag:'🇸🇦', label:'العربية', native:'العربية' },
+  ];
+  const cur = getLang();
+  const el = document.getElementById('language-list');
+  if (!el) return;
+  el.innerHTML = langs.map(l =>
+    '<div class="menu-item' + (l.code === cur ? ' highlight' : '') + '" onclick="changeLang(\'' + l.code + '\')" style="cursor:pointer;">' +
+    '<span class="menu-icon" style="font-size:20px;">' + (l.flag2 || l.flag) + '</span>' +
+    '<div style="flex:1;"><div class="menu-title">' + l.native + '</div>' +
+    '<div class="menu-sub">' + l.label + '</div></div>' +
+    (l.code === cur ? '<span style="color:var(--acc-light);font-size:16px;">✓</span>' : '<span class="menu-arrow">›</span>') +
+    '</div>'
+  ).join('');
 }
 
-function getAiKey() {
-  return localStorage.getItem('ls2_ai_key') || '';
+function changeLang(code) {
+  setLang(code);
+  reloadGreetings();
+  applyI18nDOM();
+  renderLanguageScreen();
+  // Reload entire app UI
+  applyMode(settings.mode || 'dark');
+  renderMain();
+  alert(t('langSaved'));
 }
 
-function saveAiKey() {
-  const key = document.getElementById('ai-key-input').value.trim();
-  const provider = document.getElementById('ai-provider-select').value;
-  if (!key) { alert('נא להזין מפתח API'); return; }
-  localStorage.setItem('ls2_ai_key', key);
-  localStorage.setItem('ls2_ai_provider', provider);
-
-  document.getElementById('ai-setup-step').style.display = 'none';
-  document.getElementById('ai-generate-step').style.display = 'block';
-  document.getElementById('ai-key-preview').textContent =
-    provider.toUpperCase() + ' · ' + key.slice(0, 8) + '••••••••' + key.slice(-4);
-  document.getElementById('ai-key-input').value = '';
+function openLanguageScreen() {
+  openScreen('screen-language');
 }
 
-function showAiSetup() {
-  document.getElementById('ai-setup-step').style.display = 'block';
-  document.getElementById('ai-generate-step').style.display = 'none';
-  document.getElementById('ai-result-box').style.display = 'none';
-  const provider = localStorage.getItem('ls2_ai_provider') || 'openai';
-  document.getElementById('ai-provider-select').value = provider;
-  onAiProviderChange();
-}
+// ========== applyI18nDOM — עדכן כל הטקסטים הסטטיים ב-HTML ==========
+function applyI18nDOM() {
+  const set = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+  const setHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+  const setAttr = (id, attr, key) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, t(key)); };
 
-function onAiProviderChange() {
-  const p = document.getElementById('ai-provider-select').value;
-  const link = document.getElementById('ai-get-key-link');
-  if (link) {
-    link.href = p === 'gemini'
-      ? 'https://aistudio.google.com/app/apikey'
-      : 'https://platform.openai.com/api-keys';
-    link.textContent = p === 'gemini' ? 'קבל מפתח Gemini חינמי ›' : 'קבל מפתח OpenAI ›';
-  }
-}
+  // Splash
+  const splashTitle = document.querySelector('.splash-title');
+  if (splashTitle) splashTitle.textContent = t('splashTitle');
+  const splashSub = document.querySelector('.splash-sub');
+  if (splashSub) splashSub.textContent = t('splashSub');
 
-function toggleAiKeyVisibility() {
-  const inp = document.getElementById('ai-key-input');
-  const eye = document.getElementById('ai-key-eye');
-  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = '🙈'; }
-  else { inp.type = 'password'; eye.textContent = '👁️'; }
-}
+  // Topbar main
+  const topbarTitle = document.querySelector('#screen-main .topbar-title');
+  if (topbarTitle) topbarTitle.textContent = t('topbarTitle');
 
-async function generateAiGreeting() {
-  const ev = events.find(e => e.id === _aiEventId);
-  if (!ev) return;
+  // Add event button
+  const addBtn = document.querySelector('.add-event-btn');
+  if (addBtn) addBtn.textContent = t('btnAdd');
 
-  const key = getAiKey();
-  const provider = localStorage.getItem('ls2_ai_provider') || 'openai';
-  const style = document.getElementById('ai-style-select').value;
-  const extra = document.getElementById('ai-extra-input').value.trim();
+  // Settings btn
+  const settingsBtn = document.querySelector('.settings-btn');
+  if (settingsBtn) settingsBtn.textContent = t('btnSettings');
 
-  const styleLabels = {
-    warm:'חמה ואישית', funny:'הומוריסטית', formal:'רשמית', short:'קצרה ומדויקת', poetic:'שירית'
-  };
+  // Search placeholder
+  const si = document.getElementById('search-input');
+  if (si) si.setAttribute('placeholder', t('searchPlaceholder'));
+  const sc = document.querySelector('#screen-search .search-cancel');
+  if (sc) sc.textContent = t('searchCancel');
 
-  const prompt = `כתוב ברכה בעברית לאירוע "${getLabel(ev.type, ev.customType)}" עבור ${ev.name}.
-סגנון: ${styleLabels[style] || 'חמה ואישית'}.
-${ev.group ? 'קבוצה/קשר: ' + ev.group + '.' : ''}
-${extra ? 'פרטים: ' + extra + '.' : ''}
-כתוב רק את הברכה עצמה, ללא הסברים. עד 3 משפטים. כלול אמוג׳י מתאים.`;
+  // Update cur-lang-label
+  const langNames = {he:'עברית', en:'English', ru:'Русский', es:'Español', ar:'العربية'};
+  const ll = document.getElementById('cur-lang-label');
+  if (ll) ll.textContent = langNames[getLang()] || 'עברית';
 
-  const btn = document.getElementById('ai-generate-btn');
-  const resultBox = document.getElementById('ai-result-box');
-  const resultText = document.getElementById('ai-result-text');
-  const dots = document.getElementById('ai-loading-dots');
-
-  btn.disabled = true;
-  btn.textContent = '⏳ מייצר...';
-  resultBox.style.display = 'block';
-  resultText.style.display = 'none';
-  dots.style.display = 'block';
-
-  try {
-    let text = '';
-
-    if (provider === 'gemini') {
-      const res = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        }
-      );
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    } else {
-      // OpenAI
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + key
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          max_tokens: 200,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      text = data.choices?.[0]?.message?.content || '';
-    }
-
-    _aiResult = text.trim();
-    resultText.textContent = _aiResult;
-    resultText.style.display = 'block';
-    dots.style.display = 'none';
-
-  } catch (err) {
-    dots.style.display = 'none';
-    resultText.style.display = 'block';
-    resultText.textContent = '❌ שגיאה: ' + (err.message || 'בדוק את המפתח');
-    _aiResult = '';
-  }
-
-  btn.disabled = false;
-  btn.textContent = '✨ צור ברכה';
-}
-
-function useAiGreeting() {
-  if (!_aiResult) return;
-  const ev = events.find(e => e.id === _aiEventId);
-  if (!ev) return;
-  const phone = ev.phone || '';
-  const msg = encodeURIComponent(_aiResult);
-  closeModal('modal-ai-greet');
-  window.open('https://wa.me/' + phone.replace(/\D/g,'') + '?text=' + msg, '_blank');
-}
-
-function copyAiGreeting() {
-  if (!_aiResult) return;
-  navigator.clipboard.writeText(_aiResult).then(() => {
-    const btn = document.querySelector('#modal-ai-greet .greet-btn.sec');
-    if (btn) { const orig = btn.textContent; btn.textContent = '✅ הועתק!'; setTimeout(() => btn.textContent = orig, 1500); }
-  });
+  // dir on html
+  const lang = getLang();
+  const dir = (I18N[lang] || I18N['he']).dir;
+  document.documentElement.setAttribute('dir', dir);
+  document.documentElement.setAttribute('lang', (I18N[lang] || I18N['he']).lang);
+  document.title = t('appName');
 }
