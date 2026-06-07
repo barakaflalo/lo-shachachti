@@ -1812,10 +1812,25 @@ function scheduleNotif(ev) {
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', () => {
-  // init language first
+  // 1. apply theme & mode ראשון (לפני i18n)
+  applyTheme(settings.theme || 'purple');
+  applyMode(settings.mode || 'light');
+  if (settings.largeFont) { const sz = settings.fontSizePx || 18; document.documentElement.style.fontSize=sz+'px'; document.body.classList.add('large-font'); }
+
+  // 2. init language
   const savedLang = localStorage.getItem('ls2_lang') || 'he';
   setLang(savedLang);
   reloadGreetings();
+
+  // 3. init gift tags
+  initGiftTags();
+  document.getElementById('inp-gift-idea').addEventListener('input', updateGiftDisplay);
+  document.getElementById('inp-name').addEventListener('input', updateFormAvatar);
+
+  // 4. render main (תוכן דינמי)
+  renderMain();
+
+  // 5. apply i18n אחרון — אחרי כל הרינדור
   applyI18nDOM();
 
   // splash
@@ -1825,16 +1840,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => s.style.display = 'none', 500);
   }, 1500);
 
-  // apply theme & mode — default light
-  applyTheme(settings.theme || 'purple');
-  applyMode(settings.mode || 'light');
-  if (settings.largeFont) { const sz = settings.fontSizePx || 18; document.documentElement.style.fontSize=sz+'px'; document.body.classList.add('large-font'); }
-
-  // init gift tags
-  initGiftTags();
-  document.getElementById('inp-gift-idea').addEventListener('input', updateGiftDisplay);
-  document.getElementById('inp-name').addEventListener('input', updateFormAvatar);
-
   // service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').then(() => {
@@ -1843,7 +1848,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  // בקש הרשאת OneSignal אחרי 3 שניות
   setTimeout(() => requestOneSignalPermission(), 3000);
 
   // scroll to top button
@@ -1855,9 +1859,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // עדכן מצב toggle גופן גדול
   const togFont = document.getElementById('tog-font');
   if (togFont && settings.largeFont) togFont.classList.add('on');
-
-  // render main
-  renderMain();
 });
 
 // ========== ברכה חופשית ==========
@@ -2217,20 +2218,26 @@ function renderLanguageScreen() {
 }
 
 function changeLang(code) {
+  // שמור שפה
   setLang(code);
   reloadGreetings();
-  applyI18nDOM();
-  renderLanguageScreen();
-  // Reload entire app UI
-  const mode = settings.mode || 'dark';
-  applyMode(mode);
+
+  // רינדר מחדש תוכן דינמי קודם
   renderMain();
-  // Also re-render open screens if needed
-  const active = document.querySelector('.screen.active');
-  if (active && active.id !== 'screen-main' && active.id !== 'screen-language') {
-    openScreen(active.id);
+
+  // עדכן כל הDOM הסטטי אחרי הרינדור
+  applyI18nDOM();
+
+  // רינדר מחדש את מסך השפה (כדי לעדכן ✓)
+  renderLanguageScreen();
+
+  // הודעת אישור
+  const banner = document.getElementById('lang-saved-banner');
+  if (banner) {
+    banner.textContent = t('langSaved');
+    banner.style.display = 'block';
+    setTimeout(() => { banner.style.display = 'none'; }, 2000);
   }
-  setTimeout(() => alert(t('langSaved')), 100);
 }
 
 function openLanguageScreen() {
