@@ -802,5 +802,87 @@
   </a>
 </div>
 <script src="app.js"></script>
+
+<!-- ========== MODAL — AI GREETING ========== -->
+<div class="modal-overlay center" id="modal-ai-greet">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <span style="font-size:15px;font-weight:600;">✨ ברכה בעזרת AI</span>
+      <button class="icon-btn" onclick="closeModal('modal-ai-greet')">✕</button>
+    </div>
+
+    <!-- שלב 1: הגדרת מפתח -->
+    <div id="ai-setup-step" style="display:none;">
+      <div style="text-align:center;margin-bottom:14px;">
+        <div style="font-size:32px;margin-bottom:8px;">🤖</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;">
+          הזן מפתח API שלך מ-<b style="color:var(--acc-light);">OpenAI</b> או <b style="color:var(--acc-light);">Gemini</b><br>
+          המפתח נשמר רק אצלך, לא נשלח לשום שרת
+        </div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <select class="form-select" id="ai-provider-select" onchange="onAiProviderChange()" style="margin-bottom:8px;">
+          <option value="openai">OpenAI (ChatGPT)</option>
+          <option value="gemini">Google Gemini</option>
+        </select>
+        <div style="position:relative;">
+          <input type="password" class="form-input" id="ai-key-input"
+            placeholder="sk-... או AIza..."
+            style="padding-left:40px;" />
+          <button onclick="toggleAiKeyVisibility()" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;" id="ai-key-eye">👁️</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+        🔒 המפתח נשמר רק ב-localStorage שלך<br>
+        🌐 <a id="ai-get-key-link" href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--acc-light);">קבל מפתח חינמי ›</a>
+      </div>
+      <button class="btn-primary" onclick="saveAiKey()" style="width:100%;">💾 שמור מפתח ✓</button>
+    </div>
+
+    <!-- שלב 2: יצירת ברכה -->
+    <div id="ai-generate-step">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:rgba(var(--acc-rgb),0.08);border-radius:var(--rf);padding:8px 10px;">
+        <span style="font-size:11px;color:var(--muted);">מפתח:</span>
+        <span style="font-size:11px;color:var(--acc-light);flex:1;" id="ai-key-preview">—</span>
+        <button onclick="showAiSetup()" style="font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;">החלף</button>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <label class="form-label">סגנון הברכה</label>
+        <select class="form-select" id="ai-style-select">
+          <option value="warm">חמה ואישית</option>
+          <option value="funny">הומוריסטית</option>
+          <option value="formal">רשמית</option>
+          <option value="short">קצרה ולעניין</option>
+          <option value="poetic">שירית</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label class="form-label">פרטים נוספים (אופציונלי)</label>
+        <input type="text" class="form-input" id="ai-extra-input"
+          placeholder="לדוג׳: אוהב כדורגל, טיול לאיטליה..." />
+      </div>
+
+      <button class="btn-primary" id="ai-generate-btn" onclick="generateAiGreeting()" style="width:100%;margin-bottom:10px;">
+        ✨ צור ברכה
+      </button>
+
+      <!-- תוצאה -->
+      <div id="ai-result-box" style="display:none;">
+        <div style="background:rgba(var(--acc-rgb),0.08);border:1px solid var(--acc-border);border-radius:var(--rf);padding:12px;margin-bottom:10px;position:relative;">
+          <div style="font-size:13px;line-height:1.7;color:var(--text);" id="ai-result-text"></div>
+          <div id="ai-loading-dots" style="display:none;text-align:center;padding:8px;font-size:20px;letter-spacing:4px;color:var(--acc-light);">•••</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-primary" onclick="useAiGreeting()" style="flex:1;">📱 שלח וואטסאפ</button>
+          <button class="greet-btn sec" onclick="copyAiGreeting()" style="flex:1;">📋 העתק</button>
+          <button class="greet-btn sec" onclick="generateAiGreeting()" style="padding:0 10px;">🔄</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

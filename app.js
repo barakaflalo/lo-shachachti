@@ -549,7 +549,7 @@ function openDetail(id) {
     (ev.notes ? '<div class="detail-row"><span class="detail-label">💡 הערות</span><span style="color:var(--muted);">' + ev.notes + '</span></div>' : '') +
     '</div>' +
     ((ev.giftIdea||ev.budget) ? '<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 ' + (ev.giftIdea||'') + (ev.budget?' | '+ev.budget+'₪':'') + '</span><button onclick="toggleGift(' + ev.id + ');renderMain();" style="background:' + (ev.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">' + (ev.giftStatus==='paid'?'✅ נקנה':'⏳ לביצוע') + '</button></div><div class="store-links">' + storeLinks + '</div></div>' : '') +
-    '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>💬 ברכה</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ');updateDetailGreet(' + ev.id + ')">הבא ›</button></div><div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button><button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button></div></div>' +
+    '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>💬 ברכה</span><div style="display:flex;gap:6px;align-items:center;"><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ');updateDetailGreet(' + ev.id + ')">הבא ›</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.18);color:var(--acc-light);" onclick="openAiGreet(' + ev.id + ')">✨ AI</button></div></div><div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button><button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button></div></div>' +
     '<div style="display:flex;gap:8px;">' +
     (ev.phone ? '<button class="card-btn" style="flex:1;" onclick="window.location.href=\'tel:' + ev.phone + '\'">📱 התקשר</button>' : '') +
     '<button class="card-btn" style="flex:1;" onclick="shareEvent(' + ev.id + ')">📤 שתף</button>' +
@@ -2205,4 +2205,173 @@ function renderBudgetChart() {
         '<div style="background:rgba(255,255,255,0.06);border-radius:3px;height:6px;"><div style="background:var(--accent);width:'+pct+'%;height:100%;border-radius:3px;transition:width 0.3s;"></div></div>' +
         '</div>';
     }).join('');
+}
+
+// ========== AI GREETING (BYOK) ==========
+let _aiEventId = null;
+let _aiResult = '';
+
+function openAiGreet(id) {
+  _aiEventId = id;
+  _aiResult = '';
+  document.getElementById('ai-result-box').style.display = 'none';
+  document.getElementById('ai-result-text').textContent = '';
+  document.getElementById('ai-extra-input').value = '';
+
+  const hasKey = !!getAiKey();
+  document.getElementById('ai-setup-step').style.display = hasKey ? 'none' : 'block';
+  document.getElementById('ai-generate-step').style.display = hasKey ? 'block' : 'none';
+
+  if (hasKey) {
+    const provider = localStorage.getItem('ls2_ai_provider') || 'openai';
+    const key = getAiKey();
+    document.getElementById('ai-key-preview').textContent =
+      provider.toUpperCase() + ' · ' + key.slice(0, 8) + '••••••••' + key.slice(-4);
+    document.getElementById('ai-provider-select').value = provider;
+  }
+
+  openModal('modal-ai-greet');
+}
+
+function getAiKey() {
+  return localStorage.getItem('ls2_ai_key') || '';
+}
+
+function saveAiKey() {
+  const key = document.getElementById('ai-key-input').value.trim();
+  const provider = document.getElementById('ai-provider-select').value;
+  if (!key) { alert('נא להזין מפתח API'); return; }
+  localStorage.setItem('ls2_ai_key', key);
+  localStorage.setItem('ls2_ai_provider', provider);
+
+  document.getElementById('ai-setup-step').style.display = 'none';
+  document.getElementById('ai-generate-step').style.display = 'block';
+  document.getElementById('ai-key-preview').textContent =
+    provider.toUpperCase() + ' · ' + key.slice(0, 8) + '••••••••' + key.slice(-4);
+  document.getElementById('ai-key-input').value = '';
+}
+
+function showAiSetup() {
+  document.getElementById('ai-setup-step').style.display = 'block';
+  document.getElementById('ai-generate-step').style.display = 'none';
+  document.getElementById('ai-result-box').style.display = 'none';
+  const provider = localStorage.getItem('ls2_ai_provider') || 'openai';
+  document.getElementById('ai-provider-select').value = provider;
+  onAiProviderChange();
+}
+
+function onAiProviderChange() {
+  const p = document.getElementById('ai-provider-select').value;
+  const link = document.getElementById('ai-get-key-link');
+  if (link) {
+    link.href = p === 'gemini'
+      ? 'https://aistudio.google.com/app/apikey'
+      : 'https://platform.openai.com/api-keys';
+    link.textContent = p === 'gemini' ? 'קבל מפתח Gemini חינמי ›' : 'קבל מפתח OpenAI ›';
+  }
+}
+
+function toggleAiKeyVisibility() {
+  const inp = document.getElementById('ai-key-input');
+  const eye = document.getElementById('ai-key-eye');
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = '🙈'; }
+  else { inp.type = 'password'; eye.textContent = '👁️'; }
+}
+
+async function generateAiGreeting() {
+  const ev = events.find(e => e.id === _aiEventId);
+  if (!ev) return;
+
+  const key = getAiKey();
+  const provider = localStorage.getItem('ls2_ai_provider') || 'openai';
+  const style = document.getElementById('ai-style-select').value;
+  const extra = document.getElementById('ai-extra-input').value.trim();
+
+  const styleLabels = {
+    warm:'חמה ואישית', funny:'הומוריסטית', formal:'רשמית', short:'קצרה ומדויקת', poetic:'שירית'
+  };
+
+  const prompt = `כתוב ברכה בעברית לאירוע "${getLabel(ev.type, ev.customType)}" עבור ${ev.name}.
+סגנון: ${styleLabels[style] || 'חמה ואישית'}.
+${ev.group ? 'קבוצה/קשר: ' + ev.group + '.' : ''}
+${extra ? 'פרטים: ' + extra + '.' : ''}
+כתוב רק את הברכה עצמה, ללא הסברים. עד 3 משפטים. כלול אמוג׳י מתאים.`;
+
+  const btn = document.getElementById('ai-generate-btn');
+  const resultBox = document.getElementById('ai-result-box');
+  const resultText = document.getElementById('ai-result-text');
+  const dots = document.getElementById('ai-loading-dots');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ מייצר...';
+  resultBox.style.display = 'block';
+  resultText.style.display = 'none';
+  dots.style.display = 'block';
+
+  try {
+    let text = '';
+
+    if (provider === 'gemini') {
+      const res = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        }
+      );
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } else {
+      // OpenAI
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + key
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          max_tokens: 200,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      text = data.choices?.[0]?.message?.content || '';
+    }
+
+    _aiResult = text.trim();
+    resultText.textContent = _aiResult;
+    resultText.style.display = 'block';
+    dots.style.display = 'none';
+
+  } catch (err) {
+    dots.style.display = 'none';
+    resultText.style.display = 'block';
+    resultText.textContent = '❌ שגיאה: ' + (err.message || 'בדוק את המפתח');
+    _aiResult = '';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✨ צור ברכה';
+}
+
+function useAiGreeting() {
+  if (!_aiResult) return;
+  const ev = events.find(e => e.id === _aiEventId);
+  if (!ev) return;
+  const phone = ev.phone || '';
+  const msg = encodeURIComponent(_aiResult);
+  closeModal('modal-ai-greet');
+  window.open('https://wa.me/' + phone.replace(/\D/g,'') + '?text=' + msg, '_blank');
+}
+
+function copyAiGreeting() {
+  if (!_aiResult) return;
+  navigator.clipboard.writeText(_aiResult).then(() => {
+    const btn = document.querySelector('#modal-ai-greet .greet-btn.sec');
+    if (btn) { const orig = btn.textContent; btn.textContent = '✅ הועתק!'; setTimeout(() => btn.textContent = orig, 1500); }
+  });
 }
