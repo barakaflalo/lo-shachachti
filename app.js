@@ -438,13 +438,13 @@ function renderEventsList(enriched) {
     if (!events.length) {
       el.innerHTML = '<div class="empty-state">' +
         '<div class="empty-icon">📭</div>' +
-        '<div class="empty-title">עדיין אין אירועים</div>' +
+        '<div class="empty-title">' + t('heroEmpty') + '</div>' +
         '<div class="empty-sub">לחץ "הוסף אירוע" כדי להתחיל<br><span style="font-size:11px;color:var(--muted);">או לחץ על היום בלוח השנה למדריך</span></div>' +
         '<button class="btn-secondary" style="max-width:220px;margin:0 auto 8px;" onclick="openModal(\'modal-welcome-guide\')">📖 מדריך למתחילים</button>' +
         '<button class="btn-primary" style="max-width:220px;margin:0 auto;" onclick="openAddForm()">➕ הוסף אירוע ראשון</button>' +
         '</div>';
     } else {
-      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">לא נמצאו אירועים בטווח זה</div>';
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);">' + t('searchEmpty') + '</div>';
     }
     return;
   }
@@ -475,7 +475,7 @@ function buildCard(ev) {
     '<div class="event-actions">' +
     '<button class="card-btn share" onclick="shareEvent(' + ev.id + ')">📱 שתף</button>' +
     '<button class="card-btn" onclick="editEvent(' + ev.id + ')">✏️ ערוך</button>' +
-    '<button class="card-btn" onclick="toggleDetails(' + ev.id + ',this)">⚙️ עוד ▼</button>' +
+    '<button class="card-btn" onclick="toggleDetails(' + ev.id + ',this)">⚙️ ' + t('greetNext').replace(' ›','') + ' ▼</button>' +
     '</div>' +
     '<div class="details-panel" id="dp-' + ev.id + '">' +
     (ev.group ? '<div class="detail-row"><span class="detail-label">🏷️ קבוצה</span><span>' + ev.group + '</span></div>' : '') +
@@ -486,10 +486,10 @@ function buildCard(ev) {
     giftHtml +
     // חלון 1 — ברכות קבועות
     '<div class="greet-box" style="margin-bottom:8px;">' +
-    '<div class="greet-label"><span>💬 ברכות קבועות</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ')">הבא ›</button></div>' +
+    '<div class="greet-label"><span>' + t('greetLabel') + '</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ')">' + t('greetNext') + '</button></div>' +
     '<div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div>' +
     '<div class="greet-actions">' +
-    '<button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button>' +
+    '<button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">' + t('greetWhatsapp') + '</button>' +
     '<button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button>' +
     '</div></div>' +
     // חלון 2 — ברכות אישיות + חופשי
@@ -497,10 +497,10 @@ function buildCard(ev) {
     '<div class="greet-label"><span>📝 ברכה אישית</span>' +
     (myGreetings.some(g=>g) ? '<button class="greet-next-btn" onclick="nextMyGreet(' + ev.id + ')">הבא ›</button>' : '') +
     '</div>' +
-    '<div class="greet-text" id="my-greet-text-' + ev.id + '">' + (myGreetings.find(g=>g) ? myGreetings.find(g=>g).replace(/{name}/g, ev.name||'') : 'לחץ ✏️ לכתיבת ברכה חופשית') + '</div>' +
-    '<textarea id="free-greet-ta-' + ev.id + '" class="form-textarea" style="min-height:55px;margin-bottom:8px;display:none;" placeholder="כתוב ברכה חופשית..."></textarea>' +
+    '<div class="greet-text" id="my-greet-text-' + ev.id + '">' + (myGreetings.find(g=>g) ? myGreetings.find(g=>g).replace(/{name}/g, ev.name||'') : t('greetFree')) + '</div>' +
+    '<textarea id="free-greet-ta-' + ev.id + '" class="form-textarea" style="min-height:55px;margin-bottom:8px;display:none;" placeholder="' + t('greetFreePlaceholder') + '"></textarea>' +
     '<div class="greet-actions">' +
-    '<button class="greet-btn" onclick="sendMyGreetOrFree(' + ev.id + ')">📱 וואטסאפ</button>' +
+    '<button class="greet-btn" onclick="sendMyGreetOrFree(' + ev.id + ')">' + t('greetWhatsapp') + '</button>' +
     '<button class="greet-btn sec" onclick="copyMyGreetOrFree(' + ev.id + ')">📋 העתק</button>' +
     '<button class="greet-btn sec" onclick="toggleFreeGreet(' + ev.id + ')" style="flex:0;padding:8px 10px;">✏️</button>' +
     '</div></div>' +
@@ -510,7 +510,7 @@ function buildCard(ev) {
 function toggleDetails(id, btn) {
   const p = document.getElementById('dp-' + id);
   p.classList.toggle('open');
-  btn.textContent = p.classList.contains('open') ? '▲ הסתר' : '⚙️ עוד ▼';
+  btn.textContent = p.classList.contains('open') ? t('btnCancel') : '⚙️ ' + t('btnAdd2');
 }
 
 // ========== DETAIL ==========
@@ -539,7 +539,7 @@ function openDetail(id) {
     (ev.notes ? '<div class="detail-row"><span class="detail-label">💡 הערות</span><span style="color:var(--muted);">' + ev.notes + '</span></div>' : '') +
     '</div>' +
     ((ev.giftIdea||ev.budget) ? '<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 ' + (ev.giftIdea||'') + (ev.budget?' | '+ev.budget+'₪':'') + '</span><button onclick="toggleGift(' + ev.id + ');renderMain();" style="background:' + (ev.giftStatus==='paid'?'var(--green)':'var(--amber)') + ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">' + (ev.giftStatus==='paid'?t('giftBought'):t('giftTodo')) + '</button></div><div class="store-links">' + storeLinks + '</div></div>' : '') +
-    '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>💬 ברכה</span><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ');updateDetailGreet(' + ev.id + ')">הבא ›</button></div><div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">📱 וואטסאפ</button><button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">📋 העתק</button></div></div>' +
+    '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>' + t('greetLabel') + '</span><div style="display:flex;gap:6px;align-items:center;"><button class="greet-next-btn" onclick="nextVariant(' + ev.id + ');updateDetailGreet(' + ev.id + ')">' + t('greetNext') + '</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.18);color:var(--acc-light);" onclick="openAiGreet(' + ev.id + ')">' + t('greetAI') + '</button></div></div><div class="greet-text" id="greet-text-' + ev.id + '">' + buildGreeting(ev) + '</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp(' + ev.id + ')">' + t('greetWhatsapp') + '</button><button class="greet-btn sec" onclick="copyGreet(' + ev.id + ')">' + t('greetCopy') + '</button></div></div>' +
     '<div style="display:flex;gap:8px;">' +
     (ev.phone ? '<button class="card-btn" style="flex:1;" onclick="window.location.href=\'tel:' + ev.phone + '\'">📱 התקשר</button>' : '') +
     '<button class="card-btn" style="flex:1;" onclick="shareEvent(' + ev.id + ')">📤 שתף</button>' +
@@ -1099,7 +1099,7 @@ function renderContacts() {
     cont.innerHTML = '<div class="empty-state"><div style="font-size:28px;margin-bottom:8px;">👥</div><div style="margin-bottom:14px;">אין אנשים בקבוצה "' + contactsGroupFilter + '"</div><button class="btn-primary" onclick="openAddForm(\'' + contactsGroupFilter + '\')" style="max-width:220px;margin:0 auto;">➕ הוסף ל' + contactsGroupFilter + '</button></div>';
     return;
   }
-  if (!list.length) { cont.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">לא נמצאו אנשי קשר</div>'; return; }
+  if (!list.length) { cont.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">' + t('searchEmpty') + '</div>'; return; }
 
   const byGroup = {};
   list.forEach(e => { const g = e.group||'ללא קבוצה'; if (!byGroup[g]) byGroup[g]=[]; byGroup[g].push(e); });
@@ -1906,12 +1906,12 @@ function renderFilterBar() {
   const sort = settings.defaultSort || 'date';
   el.innerHTML =
     '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
-    '<div class="chip' + (filter==='30'?' active':'') + '" onclick="setQuickFilter(\'30\')">⏳ 30 יום</div>' +
-    '<div class="chip' + (filter==='future'?' active':'') + '" onclick="setQuickFilter(\'future\')">📅 עתידיים</div>' +
-    '<div class="chip' + (filter==='all'?' active':'') + '" onclick="setQuickFilter(\'all\')">♾️ הכל</div>' +
-    '<div class="chip' + (filter==='past'?' active':'') + '" onclick="setQuickFilter(\'past\')">📂 שעברו</div>' +
-    '<div class="chip' + (sort==='date'?' active':'') + '" onclick="setQuickSort(\'date\')">📅 תאריך</div>' +
-    '<div class="chip' + (sort==='name'?' active':'') + '" onclick="setQuickSort(\'name\')">🔤 שם</div>' +
+    '<div class="chip' + (filter==='30'?' active':'') + '" onclick="setQuickFilter(\'30\')">⏳ ' + t('filter30') + '</div>' +
+    '<div class="chip' + (filter==='future'?' active':'') + '" onclick="setQuickFilter(\'future\')">📅 ' + t('filterFuture') + '</div>' +
+    '<div class="chip' + (filter==='all'?' active':'') + '" onclick="setQuickFilter(\'all\')">♾️ ' + t('filterAll') + '</div>' +
+    '<div class="chip' + (filter==='past'?' active':'') + '" onclick="setQuickFilter(\'past\')">📂 ' + t('filterPast') + '</div>' +
+    '<div class="chip' + (sort==='date'?' active':'') + '" onclick="setQuickSort(\'date\')">📅 ' + t('sortDate').replace('📅 ','') + '</div>' +
+    '<div class="chip' + (sort==='name'?' active':'') + '" onclick="setQuickSort(\'name\')">🔤 ' + t('sortName').replace('🔤 ','') + '</div>' +
     '</div>';
 }
 
@@ -1958,7 +1958,7 @@ function toggleFreeGreet(id) {
   if (!isOpen) {
     // מלא textarea עם הטקסט הנוכחי
     const curText = disp ? disp.textContent : '';
-    ta.value = curText === 'לחץ ✏️ לכתיבת ברכה חופשית' ? '' : curText;
+    ta.value = curText === t('greetFree') ? '' : curText;
     ta.focus();
   } else {
     // שמור טקסט חופשי ב-display
@@ -1970,7 +1970,7 @@ function getMyGreetText(id) {
   const ta = document.getElementById('free-greet-ta-'+id);
   const disp = document.getElementById('my-greet-text-'+id);
   if (ta && ta.style.display !== 'none' && ta.value.trim()) return ta.value.trim();
-  if (disp && disp.textContent !== 'לחץ ✏️ לכתיבת ברכה חופשית') return disp.textContent;
+  if (disp && disp.textContent !== t('greetFree')) return disp.textContent;
   return '';
 }
 
@@ -2222,9 +2222,15 @@ function changeLang(code) {
   applyI18nDOM();
   renderLanguageScreen();
   // Reload entire app UI
-  applyMode(settings.mode || 'dark');
+  const mode = settings.mode || 'dark';
+  applyMode(mode);
   renderMain();
-  alert(t('langSaved'));
+  // Also re-render open screens if needed
+  const active = document.querySelector('.screen.active');
+  if (active && active.id !== 'screen-main' && active.id !== 'screen-language') {
+    openScreen(active.id);
+  }
+  setTimeout(() => alert(t('langSaved')), 100);
 }
 
 function openLanguageScreen() {
@@ -2233,10 +2239,6 @@ function openLanguageScreen() {
 
 // ========== applyI18nDOM — עדכן כל הטקסטים הסטטיים ב-HTML ==========
 function applyI18nDOM() {
-  const set = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
-  const setHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
-  const setAttr = (id, attr, key) => { const el = document.getElementById(id); if (el) el.setAttribute(attr, t(key)); };
-
   // Splash
   const splashTitle = document.querySelector('.splash-title');
   if (splashTitle) splashTitle.textContent = t('splashTitle');
@@ -2247,13 +2249,13 @@ function applyI18nDOM() {
   const topbarTitle = document.querySelector('#screen-main .topbar-title');
   if (topbarTitle) topbarTitle.textContent = t('topbarTitle');
 
+  // Settings btn in topbar
+  const mainSettingsBtn = document.getElementById('main-settings-btn');
+  if (mainSettingsBtn) mainSettingsBtn.textContent = '⚙️ ' + t('screenSettings');
+
   // Add event button
   const addBtn = document.querySelector('.add-event-btn');
   if (addBtn) addBtn.textContent = t('btnAdd');
-
-  // Settings btn
-  const settingsBtn = document.querySelector('.settings-btn');
-  if (settingsBtn) settingsBtn.textContent = t('btnSettings');
 
   // Search placeholder
   const si = document.getElementById('search-input');
