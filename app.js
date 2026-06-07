@@ -2237,41 +2237,106 @@ function openLanguageScreen() {
   openScreen('screen-language');
 }
 
-// ========== applyI18nDOM — עדכן כל הטקסטים הסטטיים ב-HTML ==========
+// ========== applyI18nDOM — עדכן כל הטקסטים ב-HTML לפי data-i18n ==========
 function applyI18nDOM() {
-  // Splash
-  const splashTitle = document.querySelector('.splash-title');
-  if (splashTitle) splashTitle.textContent = t('splashTitle');
-  const splashSub = document.querySelector('.splash-sub');
-  if (splashSub) splashSub.textContent = t('splashSub');
+  const lang = getLang();
+  const dir = (I18N[lang] || I18N['he']).dir;
 
-  // Topbar main
+  // כיוון ושפה
+  document.documentElement.setAttribute('dir', dir);
+  document.documentElement.setAttribute('lang', (I18N[lang] || I18N['he']).lang);
+  document.title = t('appName');
+
+  // עבור על כל האלמנטים עם data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val && val !== key) {
+      // שמור על אלמנטים פנימיים (כמו <b>)
+      if (el.children.length === 0) {
+        el.textContent = val;
+      } else {
+        // יש children — עדכן רק text node ראשון
+        for (let node of el.childNodes) {
+          if (node.nodeType === 3 && node.textContent.trim()) {
+            node.textContent = val;
+            break;
+          }
+        }
+      }
+    }
+  });
+
+  // עדכן placeholder עם data-i18n-ph
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const key = el.getAttribute('data-i18n-ph');
+    const val = t(key);
+    if (val && val !== key) el.setAttribute('placeholder', val);
+  });
+
+  // כפתורי "חזרה" — data-i18n-back
+  document.querySelectorAll('[data-i18n-back]').forEach(el => {
+    el.textContent = dir === 'rtl' ? '← ' + t('btnBack').replace('← ','') : t('btnBack').replace('← ','') + ' →';
+  });
+
+  // Topbar main — כותרת האפליקציה
   const topbarTitle = document.querySelector('#screen-main .topbar-title');
   if (topbarTitle) topbarTitle.textContent = t('topbarTitle');
 
-  // Settings btn in topbar
+  // כפתור הגדרות
   const mainSettingsBtn = document.getElementById('main-settings-btn');
   if (mainSettingsBtn) mainSettingsBtn.textContent = '⚙️ ' + t('screenSettings');
 
-  // Add event button
+  // כפתור "הוסף אירוע"
   const addBtn = document.querySelector('.add-event-btn');
   if (addBtn) addBtn.textContent = t('btnAdd');
 
   // Search placeholder
   const si = document.getElementById('search-input');
   if (si) si.setAttribute('placeholder', t('searchPlaceholder'));
-  const sc = document.querySelector('#screen-search .search-cancel');
-  if (sc) sc.textContent = t('searchCancel');
+
+  // contacts search
+  const cs = document.getElementById('contacts-search');
+  if (cs) cs.setAttribute('placeholder', t('contactsSearch'));
+
+  // gift idea placeholder
+  const gi = document.getElementById('inp-gift-idea');
+  if (gi) gi.setAttribute('placeholder', t('placeholderGift'));
+
+  // name placeholder
+  const ni = document.getElementById('inp-name');
+  if (ni) ni.setAttribute('placeholder', t('placeholderName'));
+
+  // custom type placeholder
+  const ct = document.getElementById('inp-custom-type');
+  if (ct) ct.setAttribute('placeholder', t('placeholderCustomType'));
+
+  // custom group placeholder
+  const cg = document.getElementById('inp-group-custom');
+  if (cg) cg.setAttribute('placeholder', t('placeholderCustomGroup'));
+
+  // notes placeholder
+  const no = document.getElementById('inp-notes');
+  if (no) no.setAttribute('placeholder', t('placeholderNotes'));
+
+  // custom store placeholder
+  const store = document.getElementById('inp-custom-store');
+  if (store) store.setAttribute('placeholder', t('placeholderCustomStore'));
+
+  // phone2 placeholder
+  const p2 = document.getElementById('inp-phone2');
+  if (p2) p2.setAttribute('placeholder', t('placeholderPhone2'));
 
   // Update cur-lang-label
   const langNames = {he:'עברית', en:'English', ru:'Русский', es:'Español', ar:'العربية'};
   const ll = document.getElementById('cur-lang-label');
-  if (ll) ll.textContent = langNames[getLang()] || 'עברית';
+  if (ll) ll.textContent = langNames[lang] || 'עברית';
 
-  // dir on html
-  const lang = getLang();
-  const dir = (I18N[lang] || I18N['he']).dir;
-  document.documentElement.setAttribute('dir', dir);
-  document.documentElement.setAttribute('lang', (I18N[lang] || I18N['he']).lang);
-  document.title = t('appName');
+  // vcf import button text
+  const vcfBtn = document.querySelector('#screen-vcf-preview .back-btn[onclick*="confirmVCFImport"]');
+  if (vcfBtn) vcfBtn.textContent = t('vcfImportBtn');
+
+  // sound label default
+  const sl = document.getElementById('sound-label');
+  if (sl && sl.textContent.trim() === 'ברירת מחדל') sl.textContent = t('soundDefault');
 }
