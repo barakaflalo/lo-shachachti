@@ -3659,21 +3659,44 @@ async function syncGoogleCalendar(){
     const now = new Date();
     const tMin = new Date(now.getFullYear()-1,now.getMonth(),now.getDate()).toISOString();
     const tMax = new Date(now.getFullYear(),now.getMonth()+6,now.getDate()).toISOString();
-    const r = await fetch(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events?'+
-      'timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+
-      '&maxResults=500&singleEvents=true&orderBy=startTime',
+    // שלוף מ-כל לוחות השנה (לא רק primary)
+    const calsRes = await fetch(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList',
       {headers:{'Authorization':'Bearer '+token}});
-    if(!r.ok){
-      if(r.status===401){
+    if(!calsRes.ok){
+      if(calsRes.status===401){
         localStorage.removeItem('gcal_access_token');
         localStorage.removeItem('gcal_token_expiry');
         renderScreen('screen-google-cal');openScreen('screen-google-cal');return;
       }
-      throw new Error('Error '+r.status);
+      throw new Error('Error '+calsRes.status);
     }
-    const data = await r.json();
-    const result = mergeWithGoogleEvents(data.items||[], lang);
+    const calsData = await calsRes.json();
+    const calendars = (calsData.items||[]).filter(c=>
+      c.accessRole==='owner' || c.accessRole==='writer' || c.primary
+    );
+
+    // שלוף אירועים מכל לוח שנה
+    let allEvents = [];
+    for(const cal of calendars){
+      try{
+        const r = await fetch(
+          'https://www.googleapis.com/calendar/v3/calendars/'+
+          encodeURIComponent(cal.id)+'/events?'+
+          'timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+
+          '&maxResults=500&singleEvents=true&orderBy=startTime',
+          {headers:{'Authorization':'Bearer '+token}});
+        if(r.ok){
+          const data = await r.json();
+          allEvents = allEvents.concat(data.items||[]);
+        }
+      }catch(e){ /* דלג על שגיאות בcalendar ספציפי */ }
+    }
+
+    // הצג מידע על מה נמצא
+    console.log('Found calendars:', calendars.length, '| Total events:', allEvents.length);
+
+    const result = mergeWithGoogleEvents(allEvents, lang);
     if(resultEl){
       resultEl.style.display='block';
       resultEl.innerHTML = '<div class="card" style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.3);">'+
@@ -3685,9 +3708,14 @@ async function syncGoogleCalendar(){
     }
     renderMain();
   }catch(err){
+    console.error('Sync error:', err);
     if(resultEl){
       resultEl.style.display='block';
-      resultEl.innerHTML='<div class="card" style="background:rgba(239,68,68,0.08);">\u274C '+err.message+'</div>';
+      const msg = err.status===403 ?
+        '❌ אין הרשאה. נסה להתנתק ולהתחבר מחדש.' :
+        '❌ '+err.message;
+      resultEl.innerHTML='<div class="card" style="background:rgba(239,68,68,0.08);">'+msg+
+        '<br><button class="btn-ghost" style="margin-top:8px;" onclick="disconnectGoogle()">🔄 התנתק והתחבר מחדש</button></div>';
     }
   }finally{
     if(btn){btn.disabled=false;btn.textContent='\u{1F504} '+(lang.gcalSync||'סנכרן עכשיו');}
