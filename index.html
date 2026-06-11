@@ -1569,7 +1569,7 @@ const SCREEN_RENDERERS = {
       ${MI('👤', lang.menuUserSettings||'הגדרות משתמש', lang.menuUserSettingsSub||'מסך ראשי, מראה, צלילים', "openScreen('screen-user-settings')")}
       ${MI('⚙️', lang.menuSystemSettings||'הגדרות מערכת', lang.menuSystemSettingsSub||'ברכות, התראות, ייבוא', "openScreen('screen-system-settings')")}
       ${MI('💰', lang.menuBudget||'הגדרות תקציב', lang.menuBudgetSub||'ערוך, חשב, הדפס', "openScreen('screen-budget-settings')")}
-      ${MI('🖨️', lang.menuBackup||'גיבוי והדפסה', lang.menuBackupSub||'ייצוא, שחזור, דוחות', "openScreen('screen-backup')")}
+      ${MI('🗂️', lang.menuBackupImport||'ייבוא, גיבוי והדפסה', lang.menuBackupImportSub||'ייבוא, גיבוי, ייצוא, דוחות', "openScreen('screen-backup')")}
       ${MI('🛒', lang.menuStores||'חנויות מועדפות', 'Amazon, KSP...', "openScreen('screen-stores')")}
       ${MI('📖', lang.menuGuide||'מדריך למשתמש', lang.menuGuideSub||"פרקים, טיפים, פיצ'רים", "openScreen('screen-guide')")}
       <div id="btn-install-pwa" onclick="installApp()" style="display:none;align-items:center;justify-content:center;gap:8px;background:var(--acc-dim);border:1px solid var(--acc-border);border-radius:var(--rs);padding:12px;margin-top:10px;cursor:pointer;font-size:13px;font-weight:500;color:var(--acc-light);">
@@ -1628,9 +1628,8 @@ const SCREEN_RENDERERS = {
       <div class="section-lbl">${lang.sectionGreetings||'ברכות ותוכן'}</div>
       ${MI('💬', lang.menuGreetings||'ברכות קבועות', lang.menuGreetingsSub||'5 וריאנטים לכל סוג אירוע', "openScreen('screen-greetings')")}
       ${MI('📝', lang.menuMyGreetings||'ברכות אישיות', lang.menuMyGreetingsSub||'ברכות שכתבת בעצמך', "openScreen('screen-my-greetings')")}
-      <div class="section-lbl" style="margin-top:10px;">${lang.sectionNotifImport||'התראות וייבוא'}</div>
+      <div class="section-lbl" style="margin-top:10px;">${lang.sectionNotifImport||'התראות'}</div>
       ${MI('🔔', lang.menuNotifications||'התראות', lang.menuNotificationsSub||'ניהול כל ההתראות', "openScreen('screen-notifications')")}
-      ${MI('📥', lang.menuImport||'ייבוא לוח שנה', lang.menuImportSub||'ICS, גוגל, פייסבוק', "openScreen('screen-import')")}
       <div class="section-lbl" style="margin-top:10px;">${lang.sectionLanguage||'שפה'}</div>
       <div class="menu-item" onclick="openLangScreen('screen-system-settings')">
         <span class="menu-icon">🌐</span>
@@ -1783,16 +1782,20 @@ const SCREEN_RENDERERS = {
 
   'screen-backup': () => {
     const lang = LANGUAGES[currentLang] || LANGUAGES['he'];
-    return TB(lang.screenBackup||'גיבוי והדפסה', 'screen-settings') + `
+    const gcalConnected = !!localStorage.getItem('gcal_access_token') && parseInt(localStorage.getItem('gcal_token_expiry')||'0') > Date.now();
+    return TB(lang.screenBackupImport||'ייבוא, גיבוי והדפסה', 'screen-settings') + `
     <div style="padding:12px 0;">
-      <div class="section-lbl">${lang.sectionBackup||'גיבוי נתונים'}</div>
+      <div class="section-lbl">📥 ${lang.sectionImport||'ייבוא'}</div>
+      ${MI('🔄', (gcalConnected ? '✅ ' : '') + (lang.menuGcalSync||'סנכרון גוגל קלנדר'), lang.menuGcalSyncSub||'ייבוא + ייצוא אוטומטי', "openScreen('screen-google-cal')", !gcalConnected)}
+      ${MI('📅', lang.menuImport||'ייבוא קובץ ICS', lang.menuImportSub||'גוגל, אפל, אאוטלוק', "openScreen('screen-import')")}
+      <div class="section-lbl" style="margin-top:10px;">💾 ${lang.sectionBackup||'גיבוי נתונים'}</div>
       ${MI('📤', lang.backupExport||'ייצוא קובץ גיבוי', lang.backupExportSub||'JSON — לשחזור מלא', 'exportJSON()')}
       <div class="menu-item" onclick="document.getElementById('restore-input').click()"><span class="menu-icon">📥</span>
         <div style="flex:1;"><div class="menu-title">${lang.backupRestore||'שחזור מגיבוי'}</div>
         <div class="menu-sub">${lang.backupRestoreSub||'העלה קובץ JSON'}</div></div></div>
       <input type="file" id="restore-input" accept=".json" style="display:none" onchange="restoreBackup(this)">
       ${MI('📊', lang.backupCSV||'ייצוא CSV', lang.backupCSVSub||'לאקסל או גוגל שיטס', 'exportCSVAll()')}
-      <div class="section-lbl" style="margin-top:10px;">${lang.sectionReports||'דוחות'}</div>
+      <div class="section-lbl" style="margin-top:10px;">🖨️ ${lang.sectionReports||'דוחות'}</div>
       ${MI('🖨️', lang.backupPrint||'הדפס דוח', lang.backupPrintSub||'לפי סוג, תאריך, קבוצה', "openScreen('screen-print')")}
       <hr class="form-divider">
       <button class="btn-danger" onclick="confirmDeleteAll()">🗑️ ${lang.btnDeleteAll||'מחק את כל הנתונים'}</button>
