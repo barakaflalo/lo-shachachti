@@ -2263,12 +2263,40 @@ const SCREEN_RENDERERS = {
 
   'screen-holidays': () => {
     const lang = LANGUAGES[currentLang] || LANGUAGES['he'];
-    return TB('🗓️ ' + (lang.menuHolidays||'חגים בלוח שנה'), 'screen-system-settings') + `
-    <div style="padding:12px 0;">
+    const selected = JSON.parse(localStorage.getItem('ls2_holidays_selected')||'["jewish","israeli"]');
+    const religions = [
+      {key:'jewish',  icon:'✡️', name_he:'יהודי',         name_en:'Jewish',          color:'#3b82f6'},
+      {key:'christian',icon:'✝️', name_he:'נוצרי',        name_en:'Christian',       color:'#10b981'},
+      {key:'muslim',  icon:'☪️', name_he:'מוסלמי',        name_en:'Muslim',          color:'#f59e0b'},
+      {key:'israeli', icon:'🇮🇱', name_he:'ישראלי לאומי', name_en:'Israeli National', color:'#6366f1'},
+    ];
+    const rows = religions.map(r => {
+      const isOn = selected.includes(r.key);
+      const db = HOLIDAYS_DB[r.key];
+      const count = db ? db.events.filter(e=>e.date>='2026'&&e.date<='2028').length : 0;
+      const name = lang.dir==='rtl' ? r.name_he : r.name_en;
+      return `<div class="toggle-row" style="padding:14px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:14px;height:14px;border-radius:50%;background:${r.color};flex-shrink:0;"></div>
+          <div>
+            <div style="font-size:14px;font-weight:500;">${r.icon} ${name}</div>
+            <div style="font-size:11px;color:var(--muted);">${count} ${lang.holidayDates||'תאריכים'}</div>
+          </div>
+        </div>
+        <div class="toggle${isOn?' on':''}" data-religion="${r.key}" onclick="toggleHolidayReligion(this)"></div>
+      </div>`;
+    }).join('');
+    return TB('🗓️ ' + (lang.menuHolidays||'חגים בלוח שנה'), 'screen-system-settings') +
+    `<div style="padding:12px 0;">
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7;">
-        ${lang.holidaysDesc||'בחר אילו חגים יסומנו בלוח השנה. החגים יופיעו כנקודה צבעונית ולא כאירועים.'}
+        ${lang.holidaysDesc||'בחר אילו חגים יסומנו בלוח השנה בנקודות צבעוניות.'}
       </div>
-      <div id="holidays-settings-content"></div>
+      ${rows}
+      <div style="margin-top:16px;padding:12px;background:var(--acc-dim);border-radius:var(--rs);">
+        <div style="font-size:11px;color:var(--muted);line-height:1.8;">
+          💡 ${lang.holidaysInfo||'החגים מסומנים בנקודה צבעונית בלוח ולא מופיעים כאירועים ברשימה'}
+        </div>
+      </div>
     </div>`;
   },
 
@@ -4343,8 +4371,9 @@ function toggleHolidayReligion(el){
   else selected.push(religion);
   localStorage.setItem('ls2_holidays_selected', JSON.stringify(selected));
   el.classList.toggle('on');
-  // רנדר מחדש את הלוח
   renderMain();
+  // רנדר מחדש את המסך עם הבחירה החדשה
+  renderScreen('screen-holidays');
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
