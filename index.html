@@ -1737,6 +1737,7 @@ const SCREEN_RENDERERS = {
           <button class="btn-primary" onclick="syncGoogleCalendar()" id="btn-gcal-sync" style="margin-bottom:8px;">
             \u{1F504} ${lang.gcalSync||'\u05e1\u05e0\u05db\u05e8\u05df \u05e2\u05db\u05e9\u05d9\u05d5'}
           </button>
+          <button class="btn-ghost" onclick="debugGoogleCalendar()" style="font-size:11px;margin-bottom:4px;">🔍 בדוק מה גוגל מחזיר</button>
           <button class="btn-ghost" onclick="disconnectGoogle()" style="font-size:11px;">
             ${lang.gcalDisconnect||'\u05d4\u05ea\u05e0\u05ea\u05e7 \u05de\u05d2\u05d5\u05d2\u05dc'}
           </button>
@@ -3846,6 +3847,40 @@ async function pickContact(){
       console.error('Contact Picker error:', err);
     }
   }
+}
+
+
+async function debugGoogleCalendar(){
+  const token = localStorage.getItem('gcal_access_token');
+  if(!token){ alert('לא מחובר!'); return; }
+  try{
+    const uRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+      {headers:{'Authorization':'Bearer '+token}});
+    const uData = await uRes.json();
+    const cRes = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList',
+      {headers:{'Authorization':'Bearer '+token}});
+    const cData = await cRes.json();
+    let msg = '👤 מחובר: ' + (uData.email||'לא ידוע') + '\n\n';
+    msg += '📅 לוחות שנה (' + (cData.items||[]).length + '):\n';
+    (cData.items||[]).forEach(c => {
+      msg += '  ' + (c.summary||c.id) + ' (' + c.accessRole + ')\n';
+    });
+    const now = new Date();
+    const tMin = new Date(now.getFullYear()-1,0,1).toISOString();
+    const tMax = new Date(now.getFullYear()+1,0,1).toISOString();
+    const eRes = await fetch(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events?'+
+      'timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+
+      '&maxResults=10&singleEvents=true',
+      {headers:{'Authorization':'Bearer '+token}});
+    const eData = await eRes.json();
+    msg += '\n📋 אירועים ב-primary (' + (eData.items||[]).length + '):\n';
+    (eData.items||[]).slice(0,5).forEach(e => {
+      msg += '  ' + (e.summary||'ללא שם') + ' — ' + (e.start&&(e.start.date||e.start.dateTime&&e.start.dateTime.slice(0,10))||'?') + '\n';
+    });
+    if(cData.error) msg += '\nשגיאה: ' + JSON.stringify(cData.error);
+    alert(msg);
+  }catch(err){ alert('שגיאה: ' + err.message); }
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
