@@ -584,6 +584,7 @@ body.dark-mode #splash { background: #12121f; }
 
 </style>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer onerror="console.log('OneSignal not loaded')"></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -633,13 +634,18 @@ body.dark-mode #splash { background: #12121f; }
 
 <div class="modal-overlay center" id="modal-about">
   <div class="modal-box" style="text-align:center;">
-    <div style="font-size:52px;margin-bottom:10px;">🔔</div>
-    <div style="font-size:20px;font-weight:600;margin-bottom:4px;">לא שכחתי</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">גרסה 2.0</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">פותח על ידי <b style="color:var(--text);">ברק אפללו</b><br>כל הזכויות שמורות © 2026</div>
-    <a href="mailto:loshachachti.app@gmail.com?subject=באג/הצעה" style="display:block;padding:10px;background:var(--acc-dim);border:1px solid var(--acc-border);color:var(--acc-light);border-radius:var(--rs);font-size:12px;text-decoration:none;margin-bottom:10px;">🐛 דווח על באג / הצעה</a>
-    <button class="btn-primary" onclick="shareApp()">📤 שתף את האפליקציה</button>
-    <button class="btn-ghost" onclick="closeModal('modal-about')">סגור</button>
+    <div style="font-size:48px;margin-bottom:8px;">🔔</div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px;">לא שכחתי</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">v3.0 · AppNest · ברק אפללו</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;">
+      האפליקציה שתזכיר לך כל אירוע חשוב.<br>
+      5 שפות · AI ברכות · PWA · ייבוא/ייצוא
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+      <a href="https://barakaflalo.github.io/lo-shachachti" target="_blank"
+         style="font-size:11px;color:var(--acc-light);">🌐 barakaflalo.github.io/lo-shachachti</a>
+    </div>
+    <button class="btn-primary" onclick="closeModal('modal-about')">סגור</button>
   </div>
 </div>
 
@@ -647,7 +653,7 @@ body.dark-mode #splash { background: #12121f; }
   <div class="modal-box" style="text-align:center;">
     <div class="modal-icon">©</div>
     <div class="modal-title">זכויות יוצרים</div>
-    <div class="modal-sub">כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "לא שכחתי" — גרסה 2.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span></div>
+    <div class="modal-sub">כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "לא שכחתי" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span></div>
     <a href="mailto:loshachachti.app@gmail.com" style="display:block;padding:10px;background:var(--acc-dim);border:1px solid var(--acc-border);color:var(--acc-light);border-radius:var(--rs);font-size:12px;text-decoration:none;margin-bottom:10px;">✉️ loshachachti.app@gmail.com</a>
     <button class="btn-ghost" onclick="closeModal('modal-rights')">סגור</button>
   </div>
@@ -696,7 +702,7 @@ body.dark-mode #splash { background: #12121f; }
       <div style="font-size:16px;font-weight:600;margin-bottom:4px;" id="today-modal-title">היום יש אירוע!</div>
     </div>
     <div id="today-modal-events"></div>
-    <button class="btn-primary" onclick="closeModal('modal-today')">אחלה! 🎊</button>
+    <button class="btn-primary" id="btn-great" onclick="closeModal('modal-today')">אחלה! 🎊</button>
   </div>
 </div>
 
@@ -731,20 +737,14 @@ body.dark-mode #splash { background: #12121f; }
       <button class="icon-btn" onclick="openScreen('screen-search')" title="חיפוש">🔍</button>
       <button class="icon-btn" onclick="openLangScreen('screen-main')" title="Language" id="lang-btn">🌐</button>
       <button class="icon-btn" onclick="quickToggleMode()" id="mode-toggle-btn" title="שנה מראה">🌙</button>
-      <button class="settings-btn" onclick="openScreen('screen-settings')">⚙️ הגדרות</button>
+      <button class="settings-btn" id="tb-settings" onclick="openScreen('screen-settings')">⚙️ הגדרות</button>
     </div>
   </div>
   <div style="padding:12px 0 0;">
     <div class="stat-grid" id="main-stats"></div>
     <button class="add-event-btn" id="tb-add" onclick="openAddForm()">➕ הוסף אירוע</button>
     <div id="main-calendar"></div>
-    <div class="cal-popup" id="cal-popup">
-      <div class="cal-popup-header">
-        <span id="cal-popup-title"></span>
-        <span style="cursor:pointer;color:var(--muted);" onclick="closeCalPopup()">✕</span>
-      </div>
-      <div id="cal-popup-list"></div>
-    </div>
+
     <div id="main-hero"></div>
     <div id="main-filter-bar" style="margin-bottom:8px;"></div>
     <div class="filter-row" id="main-group-filters"></div>
@@ -857,6 +857,176 @@ body.dark-mode #splash { background: #12121f; }
     <span style="color:#d4a853;font-size:16px;">›</span>
   </a>
 </div>
+
+<!-- ========== MODAL: AI GREETING ========== -->
+<div class="modal-overlay center" id="modal-ai-greet">
+  <div class="modal-box" style="max-height:85vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:600;">✨ ברכה עם AI</div>
+      <span onclick="closeModal('modal-ai-greet')" style="cursor:pointer;color:var(--muted);font-size:20px;">✕</span>
+    </div>
+
+    <!-- שלב 1: הגדרת מפתח -->
+    <div id="ai-setup-step">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;">
+        כדי לייצר ברכה אישית עם AI, צריך מפתח API חינמי מ-OpenAI או Google Gemini.
+      </div>
+      <div class="form-group">
+        <label class="form-label">🔑 ספק AI</label>
+        <select class="form-select" id="ai-provider-select" onchange="onAiProviderChange()">
+          <option value="openai">OpenAI (GPT)</option>
+          <option value="gemini">Google Gemini</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🔑 מפתח API</label>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" type="password" id="ai-key-input" placeholder="sk-..." style="flex:1;">
+          <button class="back-btn" onclick="toggleAiKeyVisibility()" id="ai-key-eye" style="padding:8px 12px;">👁️</button>
+        </div>
+        <a id="ai-get-key-link" href="https://platform.openai.com/api-keys" target="_blank"
+           style="font-size:11px;color:var(--acc-light);display:block;margin-top:5px;">קבל מפתח OpenAI ›</a>
+      </div>
+      <button class="btn-primary" onclick="saveAiKey()">💾 שמור מפתח</button>
+    </div>
+
+    <!-- שלב 2: יצירת ברכה -->
+    <div id="ai-generate-step" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--muted);" id="ai-key-preview"></div>
+        <button class="back-btn" onclick="showAiSetup()" style="font-size:11px;padding:4px 8px;">✏️ החלף</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">🎨 סגנון</label>
+        <select class="form-select" id="ai-style-select">
+          <option value="warm" id="ai-style-warm">חמה ואישית</option>
+          <option value="funny" id="ai-style-funny">הומוריסטית</option>
+          <option value="formal" id="ai-style-formal">רשמית</option>
+          <option value="short" id="ai-style-short">קצרה ומדויקת</option>
+          <option value="poetic" id="ai-style-poetic">שירית</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">💡 פרטים נוספים (אופציונלי)</label>
+        <input class="form-input" type="text" id="ai-extra-input" placeholder="גיל, תחביבים, מאפיינים...">
+      </div>
+      <button class="btn-primary" id="ai-generate-btn" onclick="generateAiGreeting()">✨ צור ברכה</button>
+    </div>
+
+    <!-- תוצאה -->
+    <div id="ai-result-box" style="display:none;margin-top:12px;">
+      <div id="ai-loading-dots" style="display:none;text-align:center;padding:12px;font-size:20px;">⏳</div>
+      <div id="ai-result-text" style="background:var(--acc-dim);border-radius:var(--rs);padding:12px;font-size:13px;line-height:1.7;min-height:60px;white-space:pre-wrap;"></div>
+      <div class="greet-actions" style="margin-top:10px;">
+        <button class="greet-btn" onclick="useAiGreeting()" id="btn-ai-send">📱 שלח וואטסאפ</button>
+        <button class="greet-btn sec" onclick="copyAiGreeting()" id="btn-ai-copy">📋 העתק</button>
+        <button class="greet-btn sec" onclick="generateAiGreeting()" style="flex:0;padding:0 10px">🔄</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== MODAL: GOOGLE CALENDAR SETUP ========== -->
+<div class="modal-overlay center" id="modal-gcal-guide">
+  <div class="modal-box" style="max-height:85vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:600;">🔧 הגדרת גוגל קלנדר</div>
+      <span onclick="closeModal('modal-gcal-guide')" style="cursor:pointer;color:var(--muted);font-size:20px;">✕</span>
+    </div>
+
+    <div class="tip-card" style="margin-bottom:14px;">
+      <div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;">⏱️ זמן הגדרה: ~5 דקות</div>
+      <div style="font-size:11px;color:var(--muted);">צריך לעשות פעם אחת בלבד</div>
+    </div>
+
+    <!-- שלב 1 -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div class="step-num">1</div>
+        <div style="font-size:13px;font-weight:500;">צור Google Cloud Project</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
+        כנס ל-<a href="https://console.cloud.google.com" target="_blank" style="color:var(--acc-light);">console.cloud.google.com</a><br>
+        ← Select a project ← New Project<br>
+        שם: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">lo-shachachti</code>
+      </div>
+    </div>
+
+    <!-- שלב 2 -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div class="step-num">2</div>
+        <div style="font-size:13px;font-weight:500;">הפעל Google Calendar API</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
+        APIs &amp; Services → Library<br>
+        חפש: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">Google Calendar API</code> → Enable
+      </div>
+    </div>
+
+    <!-- שלב 3 -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div class="step-num">3</div>
+        <div style="font-size:13px;font-weight:500;">OAuth Consent Screen</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
+        APIs &amp; Services → OAuth consent screen<br>
+        בחר: External → Create<br>
+        App name: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">לא שכחתי</code><br>
+        הוסף את האימייל שלך ב-Test Users
+      </div>
+    </div>
+
+    <!-- שלב 4 -->
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div class="step-num">4</div>
+        <div style="font-size:13px;font-weight:500;">צור OAuth Client ID</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
+        Credentials → + Create Credentials → OAuth client ID<br>
+        Type: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">Web application</code><br>
+        Authorized JavaScript origins:
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:6px;margin-top:4px;font-size:11px;font-family:monospace;direction:ltr;text-align:left;">
+          https://barakaflalo.github.io
+        </div>
+        Authorized redirect URIs:
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:6px;margin-top:4px;font-size:11px;font-family:monospace;direction:ltr;text-align:left;">
+          https://barakaflalo.github.io/lo-shachachti/
+        </div>
+      </div>
+    </div>
+
+    <!-- שלב 5 -->
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div class="step-num">5</div>
+        <div style="font-size:13px;font-weight:500;">העתק Client ID</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
+        יופיע: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">123456789-abc...apps.googleusercontent.com</code><br>
+        העתק אותו — תצטרך אותו בשלב הבא
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--muted);line-height:1.8;">
+        🔒 <b>פרטיות:</b> הנתונים עוברים ישירות בין הטלפון לגוגל.<br>
+        לא עוברים לשרת. ניתן לנתק בכל עת.
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="closeModal('modal-gcal-guide');promptAndConnect()">
+      ✅ מוכן — התחבר עם גוגל
+    </button>
+    <button class="btn-ghost" onclick="closeModal('modal-gcal-guide')" style="margin-top:6px;">
+      אחר כך
+    </button>
+  </div>
+</div>
+
 <script>const LANGUAGES={he:{dir:'rtl',lang:'he',name:'עברית',appName:'לא שכחתי',appSub:'האפליקציה שתזכיר לך כל אירוע חשוב',today:'היום!',tomorrow:'מחר',daysLeft:'ימים',passed:'עבר',inDays:'עוד {n} ימים',btnAdd:'➕ הוסף אירוע',btnSave:'💾 שמור אירוע',btnSaveEdit:'💾 שמור וערוך פרטים נוספים',btnCancel:'← ביטול',btnBack:'← חזרה',btnEdit:'✏️ ערוך',btnDelete:'🗑️ מחק אירוע',screenSettings:'הגדרות',formNewTitle:'אירוע חדש',formEditTitle:'✏️ עריכת אירוע',labelName:'שם האדם / האירוע *',labelDate:'תאריך *',labelType:'סוג האירוע',labelGroup:'קבוצה',labelGender:'מין',labelPhone:'טלפון',labelPhone2:'טלפון נוסף',labelEmail:'מייל',labelNotes:'הערות',labelBudget:'תקציב (₪)',labelStatus:'סטטוס',greetLabel:'💬 ברכה',greetNext:'הבא ›',greetAI:'✨ AI',greetWhatsapp:'📱 וואטסאפ',greetCopy:'📋 העתק',greetPersonal:'📝 ברכה אישית',greetFree:'לחץ ✏️ לכתיבת ברכה חופשית',greetFreePlaceholder:'כתוב ברכה חופשית...',giftBought:'✅ נקנה',giftTodo:'⏳ לביצוע',heroUpcoming:'האירוע הקרוב',heroWelcome:'ברוך הבא ל"לא שכחתי"!',heroWelcomeSub:'לחץ לקבלת מדריך קצר',heroGuide:'📖 איך מתחילים?',heroEmpty:'אין אירועים קרובים',filter30:'30 יום',filterFuture:'עתידיים',filterAll:'הכל',filterPast:'שעברו',sortDate:'תאריך',sortName:'שם',searchPlaceholder:'חפש שם, סוג, קבוצה...',noEvents:'עדיין אין אירועים',noEventsRange:'לא נמצאו אירועים בטווח זה',alertNameDate:'שם ותאריך הם שדות חובה',alertDelete:'מחק את האירוע לצמיתות?',alertDeleteAll:'מחק את כל הנתונים לצמיתות?!',alertStoresSaved:'חנויות נשמרו ✅',alertNoKey:'נא להזין מפתח API',alertRestoreConfirm:'שחזור יחליף את כל הנתונים. להמשיך?',alertImported:'יובאו {n} אירועים',alertNoNew:'לא נמצאו אירועים חדשים',langSaved:'שפה עודכנה ✅',todayTitle:'היום יש אירוע!',todayTitlePlural:'היום יש {n} אירועים!',btnGreat:'אחלה! 🎊',btnGenerate:'✨ צור ברכה',screenBudget:'💰 הגדרות תקציב',budgetPaid:'שולם',budgetPending:'פתוח',budgetTotal:'סה"כ',budgetByGroup:'לפי קבוצה',budgetNoData:'אין נתוני תקציב',genderMale:'זכר',genderFemale:'נקבה',
 calDays:['א','ב','ג','ד','ה','ו','ש'],calMonths:['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'],
 typeLabel:{birthday:'🎉 יום הולדת',wedding:'💒 חתונה',anniversary:'💍 יום נישואין',memorial:'🕯️ אזכרה',barmitzvah:'✡️ בר/בת מצווה',friends:'👥 מפגש',trip:'✈️ טיול',car:'🚗 טסט רכב',medical:'🏥 תור רפואי',holiday:'🎊 חג',graduation:'🎓 סיום לימודים',custom:'✨ אירוע'},
@@ -865,7 +1035,7 @@ aiStyles:{warm:'חמה ואישית',funny:'הומוריסטית',formal:'רשמ
 giftTags:[{e:'⌚',l:'שעון'},{e:'👕',l:'בגדים'},{e:'👟',l:'נעליים'},{e:'🖼️',l:'תמונה'},{e:'📱',l:'סלולר'},{e:'🎮',l:'גיימינג'},{e:'📚',l:'ספרים'},{e:'💄',l:'קוסמטיקה'},{e:'🌸',l:'פרחים'},{e:'🍫',l:'שוקולד'},{e:'🍷',l:'יין'},{e:'☕',l:'קפה'},{e:'🎒',l:'תיק'},{e:'💍',l:'תכשיטים'},{e:'🏠',l:'לבית'},{e:'🎵',l:'אוזניות'},{e:'📺',l:'טלוויזיה'},{e:'✈️',l:'חוויה'},{e:'💆',l:'ספא'},{e:'🎟️',l:'כרטיסים'},{e:'💰',l:'גיפט קארד'},{e:'🧴',l:'טיפוח'}],
 dailyTips:['לחץ "הבא ›" בברכה כדי לראות 5 וריאנטים שונים!','ייבא אנשי קשר מהטלפון ישירות לאפליקציה 📱','הוסף תמונה לאיש קשר לזיהוי מהיר 📸','הגדר תקציב מתנה לכל אירוע — לא תחרוג! 💰','שלח ברכה בוואטסאפ בלחיצה אחת 📱','גבה את הנתונים שלך אחת לחודש 💾','השתמש בסינון "30 יום" לתעדוף האירועים הקרובים ⏳'],
 'screenSettings':'הגדרות','screenUserSettings':'הגדרות משתמש','screenSystemSettings':'הגדרות מערכת','screenContacts':'אנשי קשר','screenNotifications':'התראות','screenImport':'ייבוא','screenImportICS':'ייבוא ICS','screenBackup':'גיבוי והדפסה','screenPrint':'🖨️ הדפס דוח','screenStores':'🛒 חנויות','screenGreetings':'💬 ברכות קבועות','screenMyGreetings':'📝 ברכות אישיות','screenAppearance':'🌓 מראה','screenGuide':'📖 מדריך','screenGoogleCal':'🗓️ גוגל קלנדר','screenImportFB':'📘 פייסבוק','screenVCF':'בחר אנשי קשר','menuContacts':'אנשי קשר שלי','menuContactsSub':'כל הפרטים במקום אחד','menuUserSettings':'הגדרות משתמש','menuUserSettingsSub':'מסך ראשי, מראה, צלילים','menuSystemSettings':'הגדרות מערכת','menuSystemSettingsSub':'ברכות, התראות, ייבוא','menuBudget':'הגדרות תקציב','menuBudgetSub':'ערוך, חשב, הדפס','menuBackup':'גיבוי והדפסה','menuBackupSub':'ייצוא, שחזור, דוחות','menuStores':'חנויות מועדפות','menuGuide':'מדריך למשתמש','menuGreetings':'ברכות קבועות','menuGreetingsSub':'5 וריאנטים לכל סוג אירוע','menuMyGreetings':'ברכות אישיות','menuMyGreetingsSub':'ברכות שכתבת בעצמך','menuNotifications':'התראות','menuNotificationsSub':'ניהול כל ההתראות','menuImport':'ייבוא לוח שנה','menuImportSub':'ICS, גוגל, פייסבוק','menuLanguage':'שפה','labelName':'שם האדם / האירוע *','labelDate':'תאריך *','labelType':'סוג האירוע','labelGroup':'קבוצה','labelGender':'מין','labelPhone':'טלפון','labelPhone2':'טלפון נוסף','labelEmail':'מייל','labelNotes':'הערות','labelBudget':'תקציב (₪)','labelStatus':'סטטוס','labelGiftIdea':'רעיון למתנה','recYearly':'🔄 כל שנה','recYearlySub':'יום הולדת, אזכרה...','recOnce':'📌 חד פעמי','recOnceSub':'טסט, תור, טיול...','genderMaleOpt':'👨 זכר','genderFemaleOpt':'👩 נקבה','genderOtherOpt':'🧑 לא צוין','giftPendingOpt':'🛒 טרם נקנה','giftPaidOpt':'✅ נקנה','placeholderName':'שם האדם','placeholderCustomType':'הקלד סוג אירוע...','placeholderCustomGroup':'הקלד שם קבוצה...','placeholderNotes':'תחביבים, העדפות, דברים חשובים...','placeholderGift':'✏️ רעיון אחר...','placeholderStore':'＋ הוסף חנות בעצמך','formNewTitle':'אירוע חדש','formEditTitle':'✏️ עריכת אירוע','btnShare':'שתף','btnAbout':'אודות','btnAppearance':'מראה','btnRights':'זכויות','btnSaveGeneric':'💾 שמור','btnSaveAppearance':'שמור מראה','btnDeleteAll':'מחק הכל','btnPrint':'הדפס','btnPrintAll':'הדפס הכל','btnPrintGroup':'הדפס לפי קבוצה','btnExportExcel':'ייצא לאקסל','btnImportVCF':'ייבא מהטלפון (.vcf)','btnAddManual':'הוסף ידנית','btnImportSelected':'ייבא נבחרים','btnSelectAll':'בחר הכל','btnDeselectAll':'בטל הכל','btnPickICS':'בחר קובץ ICS','btnUseICS':'ייבוא ICS במקום','btnShareApp':'שתף את האפליקציה','btnEnableNotif':'אפשר התראות עכשיו','btnAddNotif':'הוסף תזכורת','btnLater':'אחר כך','btnClose':'סגור','btnGreat':'אחלה! 🎊','btnCancelSearch':'ביטול','togStats':'סטטיסטיקות','togHero':'האירוע הקרוב','togBudget':'תקציב מתנות','togCalendar':'לוח שנה','togSounds':'צלילים','togConfetti':'קונפטי','togLargeFont':'גופן גדול','togAnimations':'אנימציות','togNotif':'התראות מופעלות','togNotifSound':'צלילי התראה','togVibrate':'רטט','togDayBefore':'יום לפני','togWeekBefore':'שבוע לפני','togGiftReminder':'תזכורת מתנה','sectionMainScreen':'מה יוצג במסך הראשי','sectionAppearance':'מראה וחוויה','sectionDefaults':'סינון ומיון ברירת מחדל','sectionGreetings':'ברכות ותוכן','sectionNotifImport':'התראות וייבוא','sectionLanguage':'שפה','sectionBackup':'גיבוי נתונים','sectionReports':'דוחות','sectionReportType':'סוג דוח','sectionDateRange':'טווח תאריכים','sectionPeriodFilter':'סינון תקופה','sectionPrint':'הדפסה','sectionNotifGeneral':'הגדרות כלליות','sectionNotifDefaults':'ברירת מחדל לאירועים חדשים','sectionCalendar':'לוח שנה','sectionContacts':'אנשי קשר','sectionDisplayMode':'מצב תצוגה','sectionTheme':'ערכת צבעים','modeDark':'כהה','modeLight':'בהיר','modeAuto':'אוטו','reportAll':'הכל','reportUpcoming':'קרובים','reportGroup':'קבוצה','reportBudget':'תקציב','vcfPhone':'טלפון','vcfEmail':'מייל','vcfBirthday':'יום הולדת','importICS':'קובץ ICS','importICSSub':'גוגל קלנדר, אפל, אאוטלוק','importGoogle':'גוגל קלנדר','importPhone':'מהטלפון','importCSV':'קובץ CSV','importFB':'פייסבוק','backupExport':'ייצוא קובץ גיבוי','backupRestore':'שחזור מגיבוי','backupCSV':'ייצוא CSV','backupPrint':'הדפס דוח','sortGroup':'קבוצה',
-'printColName':'שם','printColDate':'תאריך','printColType':'סוג','printColGroup':'קבוצה','printColBudget':'תקציב','printColStatus':'סטטוס','promptEmojiTitle':'הכנס אמוג\'י:','promptFontSize':'גודל גופן (14-24):','promptFontSizeErr':'הכנס מספר בין 14 ל-24','promptGiftDays':'כמה ימים לפני האירוע?','promptQuietStart':'שעת התחלה (HH:MM):','promptQuietEnd':'שעת סיום (HH:MM):','promptEditGreeting':'ערוך ברכה','alertGreetingsSaved':'ברכות נשמרו ✅','alertRestoredOK':'שוחזר בהצלחה ✅','alertRestoreErr':'שגיאה בקריאת קובץ הגיבוי','alertFBErr':'שגיאה בקריאת קובץ ה-JSON','alertNoContacts':'לא נמצאו אנשי קשר בקובץ','alertNoSelected':'לא נבחרו אנשי קשר חדשים','alertVCFImported':'יובאו {n} אנשי קשר!','alertNoGreeting':'אין ברכה. לחץ ✏️ לכתיבת ברכה','alertNoGreetingShort':'אין ברכה','alertNotifEnabled':'✅ התראות הופעלו!','alertNotifDenied':'לא אושר. בדוק הגדרות הדפדפן.','alertAIError':'בדוק את המפתח','vcfFoundContacts':'נמצאו {n} אנשי קשר — בחר מי לייבא:','vcfExistsLabel':'קיים','guideStart':'🚀 התחלה מהירה','guideStartSub':'הוספת אירוע ראשון','guideStartTip':'לחץ "שמור וערוך פרטים" להוסיף מיד טלפון, מתנה ותזכורות!','guideEventsSub':'סוגים, קבוצות, תזכורות','guideGiftsSub':'מעקב, רעיונות, חנויות','guideGreetingsSub':'שליחה בוואטסאפ בלחיצה','guideNotifSub':'הגדרת תזכורות מראש','guideBackupSub':'ייבוא מגוגל, פייסבוק','guideSecrets':'⭐ פיצ\'רים נסתרים','guideSecretsSub':'דברים שרוב המשתמשים לא מגלים!','reportAndMore':'ועוד {n}...','daysBeforeLabel':' ימים לפני','greetingLabel':'ברכה ','writePersonalGreeting':'כתוב ברכה אישית...','myGreetingsPlaceholder':'כתוב ברכה אישית...','notifEnabledAlert':'✅ התראות הופעלו!','copied':'הועתק!','aiGetKeyLink':'קבל מפתח','aiChangeKey':'החלף','before':'לפני','allGroups':'כל הקבוצות','optional':'אופציונלי','groupNone':'— בחר קבוצה —','groupCustom':'קבוצה אחרת','sectionExtra':'＋ פרטים נוספים','sectionGift':'🎁 מתנה ותקציב','labelSound':'צליל מותאם אישית','soundDefault':'ברירת מחדל','soundPlay':'נגן','soundPick':'בחר','soundTrimTitle':'חתוך (מקסימום 15 שניות)','soundTrimStart':'התחל (שניות)','soundTrimEnd':'סיים (שניות)','soundTrimBtn':'חתוך ושמור','btnAdd2':'הוסף','storesDesc':'בחר חנויות לחיפוש מתנות','greetingsDesc':'5 וריאנטים לכל סוג אירוע. לחץ ✏️ לעריכה.','myGreetingsDesc':'כתוב עד 5 ברכות אישיות שלך','dailyTipLabel':'טיפ יומי','labelFrom':'מתאריך','labelTo':'עד תאריך','notifEnableTitle':'הפעל התראות','notifEnableSub':'קבל התראות גם כשהאפליקציה סגורה','togNotifSub':'הפעל או כבה הכל','togDayBeforeSub':'בשעה 09:00','quietHoursTitle':'שעות שקט','importChoose':'בחר מאיפה לייבא','icsHowTitle':'איך מייצאים מגוגל קלנדר?','icsStep1':'כנס ל-calendar.google.com במחשב','icsStep2':'הגדרות ← ייצוא','icsStep3':'פתח את קובץ ה-ZIP','icsStep4':'העלה את קובץ ה-.ics כאן','icsDropZone':'גרור קובץ ICS לכאן','icsDropSub':'או לחץ לבחירת קובץ','fbWarning':'פייסבוק לא מאפשרת גישה ישירה. הורד ידנית והעלה כאן.','fbHowTitle':'איך מורידים מפייסבוק?','fbStep1':'פתח פייסבוק ← הגדרות ← מידע שלי','fbStep2':'לחץ "הורד עותק של המידע שלך"','fbStep3':'בחר: חברים + ימי הולדת בלבד','fbStep4':'הורד JSON והעלה כאן','fbDropZone':'גרור קובץ JSON לכאן','gcalWarning':'⚠️ חיבור ישיר לגוגל דורש שרת.<br>הדרך הקלה: ייצא ICS מגוגל.','backupExportSub':'JSON — לשחזור מלא','backupRestoreSub':'העלה קובץ JSON','backupCSVSub':'לאקסל או גוגל שיטס','backupPrintSub':'לפי סוג, תאריך, קבוצה','importGoogleSub':'ייבוא ICS מגוגל','importPhoneSub':'ייבוא ישיר — אנדרואיד כרום','importCSVSub':'אקסל, Google Sheets','importFBSub':'חברים וימי הולדת','vcfTitle':'בחר אנשי קשר','vcfImportBtn':'ייבא ✓','vcfFieldsTitle':'אילו שדות לייבא?','purple_name':'סגול','blue_name':'כחול','green_name':'ירוק','amber_name':'כתום','red_name':'אדום','pink_name':'ורוד','teal_name':'טורקיז','gold_name':'זהב','violet_name':'לילך','navy_name':'כחול כהה','lime_name':'ניאון','custom_name':'מותאם','sentDaysAgo':'נשלח לפני {n} ימים','sentYesterday':'נשלח אתמול','sentToday':'נשלח היום ✓',greetings:{birthday_male:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר והצלחה 🎂','מזל טוב {name}! עוד שנה של הצלחות ושמחות 🎉','{name} היקר, יום הולדת שמח! שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגוג עוד הרבה שנים {name} 🎈'],birthday_female:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר ושמחה 🎂','מזל טוב {name}! עוד שנה מלאת הצלחות ושמחות 🎉','{name} היקרה, יום הולדת שמח! שכל חלומותייך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגגי עוד הרבה שנים {name} 🎈'],birthday:['{name} יום הולדת שמח! 🎂','מזל טוב {name}! 🎉','{name} שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! 🎈'],memorial:['חושב עליכם היום ביום האזכרה. מחבק מרחוק 🕯️','זכרו יהיה ברוך לעד 🕯️','זיכרון לברכה. מחשבותינו אתכם 🕯️','בעצב ובכבוד, מציין/ת את יום האזכרה 🕯️','לנצח בלבנו 🕯️'],anniversary:['יום נישואין שמח {name}! שתמשיכו לאהוב ולצמוח יחד 💍','מזל טוב! עוד שנה של אהבה 💍','שנה נוספת של אהבה ושמחה {name}! 💑','יום נישואין שמח! שתמשיכו יחד לנצח 💍','ברכות חמות ליום הנישואין! 💞'],wedding:['מזל טוב {name}! שתתחילו את דרכם המשותפת באהבה ובאושר 💒','ברכות לחתונה! יום מרגש ומיוחד 💒','מזל טוב לחתן ולכלה! 🥂','שתהיה חתונה שמחה ויפה! 🎊','ברכות מכל הלב ליום המיוחד! 💒'],barmitzvah:['מזל טוב על בר/בת המצווה! ✡️','ברכות לאבן הדרך המיוחדת! ✡️','מזל טוב! יום גדול ומשמעותי ✨','ברכות חמות לאירוע המיוחד! ✡️','מזל טוב! שתמשיך בדרך טובה ✡️'],friends:['מחכה לפגישה! 😊','יהיה כיף לראות אותך! 🤗','מצפה למפגש! 👋','יאללה נתראה! 😄','מחכה בקוצר רוח! 🎉'],trip:['טיסה טובה {name}! ✈️ שתהיה חופשה נהדרת','נסיעה טובה! 🌍 תהנה/י','חופשה מענגת! ✈️','שתחזור/י בריא/ה ושלם/ה! 🧳','טיול נעים {name}! 🏖️'],car:['בהצלחה בטסט! 🚗','יעבור חלק! 🔧','בהצלחה! 🚙','הכל יהיה בסדר גמור! 🔑','יצא מהטסט עם פס ירוק! ✅'],medical:['בהצלחה בתור! 🏥 הבריאות קודמת','שיהיה בסדר! 💊','בריאות מעל הכל! 🏥','שתרגיש/י טוב! 💙','בהצלחה! שיהיה בשורות טובות 🌿'],holiday:['חג שמח! 🎊','מועדים לשמחה! 🕎','חג שמח וכשר! ✨','ברכות לחג! 🎉','שיהיה חג מאושר {name}! 🌟'],graduation:['מזל טוב על הסיום {name}! 🎓 עתיד מזהיר לפניך','ברכות על הגמר! 🎓','מזל טוב! כל הכבוד על ההשגה 🎓','ברכות חמות על סיום הלימודים! 📚','מזל טוב! הצלחה בדרך הבאה 🌟'],custom:['מזל טוב! 🎉','ברכות! ✨','כל הכבוד! 👏','שיהיה בהצלחה! 🌟','ברכות חמות! 💙']}},
+'printColName':'שם','printColDate':'תאריך','printColType':'סוג','printColGroup':'קבוצה','printColBudget':'תקציב','printColStatus':'סטטוס','promptEmojiTitle':'הכנס אמוג\'י:','promptFontSize':'גודל גופן (14-24):','promptFontSizeErr':'הכנס מספר בין 14 ל-24','promptGiftDays':'כמה ימים לפני האירוע?','promptQuietStart':'שעת התחלה (HH:MM):','promptQuietEnd':'שעת סיום (HH:MM):','promptEditGreeting':'ערוך ברכה','alertGreetingsSaved':'ברכות נשמרו ✅','alertRestoredOK':'שוחזר בהצלחה ✅','alertRestoreErr':'שגיאה בקריאת קובץ הגיבוי','alertFBErr':'שגיאה בקריאת קובץ ה-JSON','alertNoContacts':'לא נמצאו אנשי קשר בקובץ','alertNoSelected':'לא נבחרו אנשי קשר חדשים','alertVCFImported':'יובאו {n} אנשי קשר!','alertNoGreeting':'אין ברכה. לחץ ✏️ לכתיבת ברכה','alertNoGreetingShort':'אין ברכה','alertNotifEnabled':'✅ התראות הופעלו!','alertNotifDenied':'לא אושר. בדוק הגדרות הדפדפן.','alertAIError':'בדוק את המפתח','vcfFoundContacts':'נמצאו {n} אנשי קשר — בחר מי לייבא:','vcfExistsLabel':'קיים','guideStart':'🚀 התחלה מהירה','guideStartSub':'הוספת אירוע ראשון','guideStartTip':'לחץ "שמור וערוך פרטים" להוסיף מיד טלפון, מתנה ותזכורות!','guideEventsSub':'סוגים, קבוצות, תזכורות','guideGiftsSub':'מעקב, רעיונות, חנויות','guideGreetingsSub':'שליחה בוואטסאפ בלחיצה','guideNotifSub':'הגדרת תזכורות מראש','guideBackupSub':'ייבוא מגוגל, פייסבוק','guideSecrets':'⭐ פיצ\'רים נסתרים','guideSecretsSub':'דברים שרוב המשתמשים לא מגלים!','reportAndMore':'ועוד {n}...','daysBeforeLabel':' ימים לפני','greetingLabel':'ברכה ','writePersonalGreeting':'כתוב ברכה אישית...','myGreetingsPlaceholder':'כתוב ברכה אישית...','notifEnabledAlert':'✅ התראות הופעלו!','copied':'הועתק!','aiGetKeyLink':'קבל מפתח','aiChangeKey':'החלף','before':'לפני','allGroups':'כל הקבוצות','optional':'אופציונלי','groupNone':'— בחר קבוצה —','groupCustom':'קבוצה אחרת','sectionExtra':'＋ פרטים נוספים','sectionGift':'🎁 מתנה ותקציב','labelSound':'צליל מותאם אישית','soundDefault':'ברירת מחדל','soundPlay':'נגן','soundPick':'בחר','soundTrimTitle':'חתוך (מקסימום 15 שניות)','soundTrimStart':'התחל (שניות)','soundTrimEnd':'סיים (שניות)','soundTrimBtn':'חתוך ושמור','btnAdd2':'הוסף','storesDesc':'בחר חנויות לחיפוש מתנות','greetingsDesc':'5 וריאנטים לכל סוג אירוע. לחץ ✏️ לעריכה.','myGreetingsDesc':'כתוב עד 5 ברכות אישיות שלך','dailyTipLabel':'טיפ יומי','labelFrom':'מתאריך','labelTo':'עד תאריך','notifEnableTitle':'הפעל התראות','notifEnableSub':'קבל התראות גם כשהאפליקציה סגורה','togNotifSub':'הפעל או כבה הכל','togDayBeforeSub':'בשעה 09:00','quietHoursTitle':'שעות שקט','importChoose':'בחר מאיפה לייבא','icsHowTitle':'איך מייצאים מגוגל קלנדר?','icsStep1':'כנס ל-calendar.google.com במחשב','icsStep2':'הגדרות ← ייצוא','icsStep3':'פתח את קובץ ה-ZIP','icsStep4':'העלה את קובץ ה-.ics כאן','icsDropZone':'גרור קובץ ICS לכאן','icsDropSub':'או לחץ לבחירת קובץ','fbWarning':'פייסבוק לא מאפשרת גישה ישירה. הורד ידנית והעלה כאן.','fbHowTitle':'איך מורידים מפייסבוק?','fbStep1':'פתח פייסבוק ← הגדרות ← מידע שלי','fbStep2':'לחץ "הורד עותק של המידע שלך"','fbStep3':'בחר: חברים + ימי הולדת בלבד','fbStep4':'הורד JSON והעלה כאן','fbDropZone':'גרור קובץ JSON לכאן','gcalWarning':'⚠️ חיבור ישיר לגוגל דורש שרת.<br>הדרך הקלה: ייצא ICS מגוגל.','backupExportSub':'JSON — לשחזור מלא','backupRestoreSub':'העלה קובץ JSON','backupCSVSub':'לאקסל או גוגל שיטס','backupPrintSub':'לפי סוג, תאריך, קבוצה','importGoogleSub':'ייבוא ICS מגוגל','importPhoneSub':'ייבוא ישיר — אנדרואיד כרום','importCSVSub':'אקסל, Google Sheets','importFBSub':'חברים וימי הולדת','vcfTitle':'בחר אנשי קשר','vcfImportBtn':'ייבא ✓','vcfFieldsTitle':'אילו שדות לייבא?','purple_name':'סגול','blue_name':'כחול','green_name':'ירוק','amber_name':'כתום','red_name':'אדום','pink_name':'ורוד','teal_name':'טורקיז','gold_name':'זהב','violet_name':'לילך','navy_name':'כחול כהה','lime_name':'ניאון','custom_name':'מותאם','sentDaysAgo':'נשלח לפני {n} ימים','sentYesterday':'נשלח אתמול','sentToday':'נשלח היום ✓','gcalTitle':'סנכרון עם גוגל קלנדר','gcalDesc':'חבר גוגל קלנדר לסנכרון דו-כיווני','gcalConnect':'התחבר עם גוגל','gcalConnected':'מחובר לגוגל קלנדר','gcalSync':'סנכרן עכשיו','gcalSyncing':'מסנכרן...','gcalSyncDone':'סנכרון הושלם!','gcalDisconnect':'התנתק מגוגל','gcalDisconnectConfirm':'להתנתק מגוגל קלנדר?','gcalAdded':'נוספו לאפליקציה','gcalSkipped':'כבר קיימים','gcalTotal':'סך הכל בגוגל','gcalExported':'נוסף לגוגל קלנדר!','gcalGroupName':'גוגל קלנדר','gcalEnterClientId':'הזן Google Client ID','menuGcalSync':'סנכרון גוגל קלנדר','menuGcalSyncSub':'ייבוא ייצוא אוטומטי','gcalPrivacy':'פרטיות ואבטחה','gcalPrivacyText':'הנתונים נשארים בטלפון בלבד',greetings:{birthday_male:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר והצלחה 🎂','מזל טוב {name}! עוד שנה של הצלחות ושמחות 🎉','{name} היקר, יום הולדת שמח! שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגוג עוד הרבה שנים {name} 🎈'],birthday_female:['יום הולדת שמח {name}! שהשנה תביא לך בריאות, אושר ושמחה 🎂','מזל טוב {name}! עוד שנה מלאת הצלחות ושמחות 🎉','{name} היקרה, יום הולדת שמח! שכל חלומותייך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! שתחגגי עוד הרבה שנים {name} 🎈'],birthday:['{name} יום הולדת שמח! 🎂','מזל טוב {name}! 🎉','{name} שכל חלומותיך יתגשמו ✨','שנה שמחה ובריאה {name}! 🥳','יום הולדת שמח! 🎈'],memorial:['חושב עליכם היום ביום האזכרה. מחבק מרחוק 🕯️','זכרו יהיה ברוך לעד 🕯️','זיכרון לברכה. מחשבותינו אתכם 🕯️','בעצב ובכבוד, מציין/ת את יום האזכרה 🕯️','לנצח בלבנו 🕯️'],anniversary:['יום נישואין שמח {name}! שתמשיכו לאהוב ולצמוח יחד 💍','מזל טוב! עוד שנה של אהבה 💍','שנה נוספת של אהבה ושמחה {name}! 💑','יום נישואין שמח! שתמשיכו יחד לנצח 💍','ברכות חמות ליום הנישואין! 💞'],wedding:['מזל טוב {name}! שתתחילו את דרכם המשותפת באהבה ובאושר 💒','ברכות לחתונה! יום מרגש ומיוחד 💒','מזל טוב לחתן ולכלה! 🥂','שתהיה חתונה שמחה ויפה! 🎊','ברכות מכל הלב ליום המיוחד! 💒'],barmitzvah:['מזל טוב על בר/בת המצווה! ✡️','ברכות לאבן הדרך המיוחדת! ✡️','מזל טוב! יום גדול ומשמעותי ✨','ברכות חמות לאירוע המיוחד! ✡️','מזל טוב! שתמשיך בדרך טובה ✡️'],friends:['מחכה לפגישה! 😊','יהיה כיף לראות אותך! 🤗','מצפה למפגש! 👋','יאללה נתראה! 😄','מחכה בקוצר רוח! 🎉'],trip:['טיסה טובה {name}! ✈️ שתהיה חופשה נהדרת','נסיעה טובה! 🌍 תהנה/י','חופשה מענגת! ✈️','שתחזור/י בריא/ה ושלם/ה! 🧳','טיול נעים {name}! 🏖️'],car:['בהצלחה בטסט! 🚗','יעבור חלק! 🔧','בהצלחה! 🚙','הכל יהיה בסדר גמור! 🔑','יצא מהטסט עם פס ירוק! ✅'],medical:['בהצלחה בתור! 🏥 הבריאות קודמת','שיהיה בסדר! 💊','בריאות מעל הכל! 🏥','שתרגיש/י טוב! 💙','בהצלחה! שיהיה בשורות טובות 🌿'],holiday:['חג שמח! 🎊','מועדים לשמחה! 🕎','חג שמח וכשר! ✨','ברכות לחג! 🎉','שיהיה חג מאושר {name}! 🌟'],graduation:['מזל טוב על הסיום {name}! 🎓 עתיד מזהיר לפניך','ברכות על הגמר! 🎓','מזל טוב! כל הכבוד על ההשגה 🎓','ברכות חמות על סיום הלימודים! 📚','מזל טוב! הצלחה בדרך הבאה 🌟'],custom:['מזל טוב! 🎉','ברכות! ✨','כל הכבוד! 👏','שיהיה בהצלחה! 🌟','ברכות חמות! 💙']}},
 en:{dir:'ltr',lang:'en',name:'English',appName:'Never Forgot',appSub:'The app that reminds you of every important event',today:'Today!',tomorrow:'Tomorrow',daysLeft:'days',passed:'Passed',inDays:'In {n} days',btnAdd:'➕ Add Event',btnSave:'💾 Save Event',btnSaveEdit:'💾 Save & Edit Details',btnCancel:'← Cancel',btnBack:'← Back',btnEdit:'✏️ Edit',btnDelete:'🗑️ Delete Event',screenSettings:'Settings',formNewTitle:'New Event',formEditTitle:'✏️ Edit Event',labelName:'Person / Event name *',labelDate:'Date *',labelType:'Event type',labelGroup:'Group',labelGender:'Gender',labelPhone:'Phone',labelPhone2:'Second phone',labelEmail:'Email',labelNotes:'Notes',labelBudget:'Budget ($)',labelStatus:'Status',greetLabel:'💬 Greeting',greetNext:'Next ›',greetAI:'✨ AI',greetWhatsapp:'📱 WhatsApp',greetCopy:'📋 Copy',greetPersonal:'📝 Personal greeting',greetFree:'Tap ✏️ to write a greeting',greetFreePlaceholder:'Write a greeting...',giftBought:'✅ Bought',giftTodo:'⏳ To do',heroUpcoming:'Upcoming Event',heroWelcome:'Welcome to Never Forgot!',heroWelcomeSub:'Tap for a quick guide',heroGuide:'📖 How to start?',heroEmpty:'No upcoming events',filter30:'30 days',filterFuture:'Upcoming',filterAll:'All',filterPast:'Past',sortDate:'Date',sortName:'Name',searchPlaceholder:'Search name, type, group...',noEvents:'No events yet',noEventsRange:'No events in this range',alertNameDate:'Name and date are required',alertDelete:'Delete this event permanently?',alertDeleteAll:'Delete all data permanently?!',alertStoresSaved:'Stores saved ✅',alertNoKey:'Please enter an API key',alertRestoreConfirm:'Restore will replace all data. Continue?',alertImported:'{n} events imported',alertNoNew:'No new events found',langSaved:'Language updated ✅',todayTitle:"There's an event today!",todayTitlePlural:'There are {n} events today!',btnGreat:'Awesome! 🎊',btnGenerate:'✨ Generate Greeting',screenBudget:'💰 Budget Settings',budgetPaid:'Paid',budgetPending:'Pending',budgetTotal:'Total',budgetByGroup:'By Group',budgetNoData:'No budget data',genderMale:'Male',genderFemale:'Female',detailDate:'📅 Date',detailGroup:'🏷️ Group',detailPhone:'📱 Phone',detailEmail:'✉️ Email',detailNotes:'💡 Notes',
 calDays:['Su','Mo','Tu','We','Th','Fr','Sa'],calMonths:['January','February','March','April','May','June','July','August','September','October','November','December'],
 typeLabel:{birthday:'🎉 Birthday',wedding:'💒 Wedding',anniversary:'💍 Anniversary',memorial:'🕯️ Memorial',barmitzvah:'✡️ Bar/Bat Mitzvah',friends:'👥 Meetup',trip:'✈️ Trip',car:'🚗 Car Test',medical:'🏥 Appointment',holiday:'🎊 Holiday',graduation:'🎓 Graduation',custom:'✨ Event'},
@@ -873,7 +1043,7 @@ groups:['Family','Friends','Work','Military','Trip','Studies','Neighbors'],group
 aiStyles:{warm:'warm and personal',funny:'funny',formal:'formal',short:'short and sweet',poetic:'poetic'},
 giftTags:[{e:'⌚',l:'Watch'},{e:'👕',l:'Clothes'},{e:'👟',l:'Shoes'},{e:'🖼️',l:'Picture'},{e:'📱',l:'Phone'},{e:'🎮',l:'Gaming'},{e:'📚',l:'Books'},{e:'💄',l:'Cosmetics'},{e:'🌸',l:'Flowers'},{e:'🍫',l:'Chocolate'},{e:'🍷',l:'Wine'},{e:'☕',l:'Coffee'},{e:'🎒',l:'Bag'},{e:'💍',l:'Jewelry'},{e:'🏠',l:'Home'},{e:'🎵',l:'Earphones'},{e:'📺',l:'TV'},{e:'✈️',l:'Experience'},{e:'💆',l:'Spa'},{e:'🎟️',l:'Tickets'},{e:'💰',l:'Gift Card'},{e:'🧴',l:'Skincare'}],
 dailyTips:['Press "Next ›" on a greeting to see 5 different variants!','Import contacts from your phone directly 📱','Add a photo to a contact for quick recognition 📸','Set a gift budget for each event 💰','Send a greeting on WhatsApp in one tap 📱','Back up your data once a month 💾','Use the "30 days" filter to prioritize upcoming events ⏳'],
-'formNewTitle':'New Event','formEditTitle':'✏️ Edit Event','labelName':'Name / Event *','labelDate':'Date *','labelType':'Event Type','labelGroup':'Group','labelGender':'Gender','labelPhone':'Phone','labelPhone2':'Second Phone','labelEmail':'Email','labelNotes':'Notes','labelBudget':'Budget ($)','labelStatus':'Status','labelGiftIdea':'Gift Idea','recYearly':'🔄 Yearly','recYearlySub':'Birthday, anniversary...','recOnce':'📌 One-time','recOnceSub':'Test, appointment, trip...','genderMaleOpt':'👨 Male','genderFemaleOpt':'👩 Female','genderOtherOpt':'🧑 Not specified','giftPendingOpt':'🛒 Not bought','giftPaidOpt':'✅ Bought','placeholderName':'Person name','placeholderNotes':'Hobbies, preferences...','placeholderGift':'✏️ Another idea','placeholderStore':'＋ Add store','btnShare':'Share','btnAbout':'About','btnClose':'Close','btnGreat':'Awesome! 🎊','modeDark':'Dark','modeLight':'Light','modeAuto':'Auto','sortGroup':'Group','btnSaveGeneric':'💾 Save','sectionMainScreen':'What to show','sectionAppearance':'Appearance','sectionDefaults':'Default Filter & Sort','sectionGreetings':'Greetings','sectionNotifImport':'Notifications','sectionLanguage':'Language','sectionBackup':'Data Backup','sectionReports':'Reports','sectionDisplayMode':'Display Mode','sectionTheme':'Color Theme','togStats':'Statistics','togHero':'Next Event','togBudget':'Gift Budget','togCalendar':'Calendar','togSounds':'Sounds','togConfetti':'Confetti','togLargeFont':'Large Font','togAnimations':'Animations','togNotif':'Notifications On','togNotifSound':'Notification Sounds','togVibrate':'Vibrate','togDayBefore':'Day Before','togWeekBefore':'Week Before','togGiftReminder':'Gift Reminder','menuContacts':'My Contacts','menuContactsSub':'All details in one place','menuUserSettings':'User Settings','menuUserSettingsSub':'Main screen, appearance','menuSystemSettings':'System Settings','menuSystemSettingsSub':'Greetings, notifications','menuBudget':'Budget','menuBudgetSub':'Edit, calculate, print','menuBackup':'Backup & Print','menuBackupSub':'Export, restore, reports','menuStores':'Favorite Stores','menuGuide':'User Guide','menuGreetings':'Preset Greetings','menuMyGreetings':'Personal Greetings','menuNotifications':'Notifications','menuImport':'Import Calendar','menuLanguage':'Language','screenSettings':'Settings','screenUserSettings':'User Settings','screenSystemSettings':'System Settings','screenContacts':'Contacts','screenNotifications':'Notifications','screenImport':'Import','screenBackup':'Backup','screenStores':'🛒 Stores','screenGreetings':'💬 Greetings','screenMyGreetings':'📝 My Greetings','screenAppearance':'🌓 Appearance','screenGuide':'📖 Guide','reportAll':'All','reportUpcoming':'Upcoming','reportGroup':'Group','reportBudget':'Budget','vcfPhone':'Phone','vcfEmail':'Email','vcfBirthday':'Birthday','printColName':'Name','printColDate':'Date','printColType':'Type','printColGroup':'Group','printColBudget':'Budget','printColStatus':'Status','promptEmojiTitle':'Enter emoji:','promptFontSize':'Font size (14-24):','promptFontSizeErr':'Enter a number between 14-24','promptGiftDays':'How many days before the event?','promptQuietStart':'Start time (HH:MM):','promptQuietEnd':'End time (HH:MM):','promptEditGreeting':'Edit greeting','alertGreetingsSaved':'Greetings saved ✅','alertRestoredOK':'Restored successfully ✅','alertRestoreErr':'Error reading backup file','alertFBErr':'Error reading JSON file','alertNoContacts':'No contacts found in file','alertNoSelected':'No new contacts selected','alertVCFImported':'{n} contacts imported!','alertNoGreeting':'No greeting. Tap ✏️ to write','alertNoGreetingShort':'No greeting','alertNotifEnabled':'✅ Notifications enabled!','alertNotifDenied':'Not allowed. Check browser settings.','alertAIError':'Check the API key','vcfFoundContacts':'Found {n} contacts — select who to import:','vcfExistsLabel':'exists','guideStart':'🚀 Quick Start','guideStartSub':'Adding your first event','guideStartTip':'Tap "Save & Edit" to immediately add phone, gift and reminders!','guideEventsSub':'Types, groups, reminders','guideGiftsSub':'Tracking, ideas, stores','guideGreetingsSub':'Send via WhatsApp in one tap','guideNotifSub':'Setting up reminders in advance','guideBackupSub':'Import from Google, Facebook','guideSecrets':'⭐ Hidden Features','guideSecretsSub':'Things most users never discover!','reportAndMore':'and {n} more...','daysBeforeLabel':' days before','greetingLabel':'Greeting ','writePersonalGreeting':'Write a personal greeting...','myGreetingsPlaceholder':'Write personal greeting...','notifEnabledAlert':'✅ Notifications enabled!','copied':'Copied!','aiGetKeyLink':'Get API key','aiChangeKey':'Change','before':'before','allGroups':'All groups','optional':'Optional','groupNone':'— Select group —','groupCustom':'Other group','sectionExtra':'＋ More details','sectionGift':'🎁 Gift & Budget','labelSound':'Custom sound','soundDefault':'Default','soundPlay':'Play','soundPick':'Pick','soundTrimTitle':'Trim (max 15 seconds)','soundTrimStart':'Start (seconds)','soundTrimEnd':'End (seconds)','soundTrimBtn':'Trim & Save','btnAdd2':'Add','storesDesc':'Select stores for gift search','greetingsDesc':'5 variants per event type. Tap ✏️ to edit.','myGreetingsDesc':'Write up to 5 personal greetings','dailyTipLabel':'Daily Tip','labelFrom':'From date','labelTo':'To date','notifEnableTitle':'Enable Notifications','notifEnableSub':'Get notified even when the app is closed','togNotifSub':'Enable or disable all','togDayBeforeSub':'At 09:00','quietHoursTitle':'Quiet Hours','importChoose':'Choose import source','icsHowTitle':'How to export from Google Calendar?','icsStep1':'Go to calendar.google.com on desktop','icsStep2':'Settings → Export','icsStep3':'Open the ZIP file','icsStep4':'Upload the .ics file here','icsDropZone':'Drag ICS file here','icsDropSub':'or click to select file','fbWarning':'Facebook doesn\'t allow direct access. Download manually and upload here.','fbHowTitle':'How to download from Facebook?','fbStep1':'Open Facebook → Settings → Your info','fbStep2':'Click "Download a copy of your data"','fbStep3':'Select: Friends + Birthdays only','fbStep4':'Download JSON and upload here','fbDropZone':'Drag JSON file here','gcalWarning':'⚠️ Direct Google connection requires a server.<br>Easier: export ICS from Google.','backupExportSub':'JSON — for full restore','backupRestoreSub':'Upload JSON file','backupCSVSub':'For Excel or Google Sheets','backupPrintSub':'By type, date, group','importGoogleSub':'Import ICS from Google','importPhoneSub':'Direct import — Android Chrome','importCSVSub':'Excel, Google Sheets','importFBSub':'Friends and birthdays','vcfTitle':'Select Contacts','vcfImportBtn':'Import ✓','vcfFieldsTitle':'Which fields to import?','purple_name':'Purple','blue_name':'Blue','green_name':'Green','amber_name':'Amber','red_name':'Red','pink_name':'Pink','teal_name':'Teal','gold_name':'Gold','violet_name':'Violet','navy_name':'Navy','lime_name':'Neon','custom_name':'Custom','sentDaysAgo':'Sent {n} days ago','sentYesterday':'Sent yesterday','sentToday':'Sent today ✓',greetings:{birthday_male:['Happy Birthday {name}! Health, happiness and success 🎂','Congratulations {name}! Another year of achievements 🎉','Dear {name}, Happy Birthday! May your dreams come true ✨','A happy year {name}! 🥳','Happy Birthday! Many more years {name} 🎈'],birthday_female:['Happy Birthday {name}! Health and joy 🎂','Congratulations {name}! A wonderful year ahead 🎉','Dear {name}, Happy Birthday! ✨','A happy year {name}! 🥳','Happy Birthday! 🎈'],birthday:['{name} Happy Birthday! 🎂','Congratulations {name}! 🎉','{name} may all your dreams come true ✨','A happy year {name}! 🥳','Happy Birthday! 🎈'],memorial:['Thinking of you today 🕯️','May their memory be blessed 🕯️','In loving memory 🕯️','In sadness and honor 🕯️','Forever in our hearts 🕯️'],anniversary:['Happy Anniversary {name}! 💍','Another year of love! 💍','Love and happiness {name}! 💑','Happy Anniversary! 💍','Warm congratulations! 💞'],wedding:['Congratulations {name}! Love and happiness 💒','Congratulations on the wedding! 💒','Congratulations to the couple! 🥂','A wonderful wedding! 🎊','Heartfelt congratulations! 💒'],barmitzvah:['Congratulations on the Bar/Bat Mitzvah! ✡️','Congratulations on this milestone! ✡️','Congratulations! ✨','Warm congratulations! ✡️','Continue on a good path! ✡️'],friends:['Looking forward to seeing you! 😊',"Can't wait! 🤗",'Looking forward! 👋',"Let's meet! 😄",'So excited! 🎉'],trip:['Great flight {name}! ✈️','Safe travels! 🌍','Amazing holiday! ✈️','Come back safe! 🧳','Wonderful trip! 🏖️'],car:['Good luck! 🚗','It\'ll go smoothly! 🔧','Good luck! 🚙','All will be fine! 🔑','You\'ll pass! ✅'],medical:['Good luck! 🏥','Hope all goes well! 💊','Health first! 🏥','Feel better! 💙','Good luck! 🌿'],holiday:['Happy Holiday! 🎊','Joyful holiday! 🕎','Happy holiday! ✨','Holiday greetings! 🎉','Wonderful holiday {name}! 🌟'],graduation:['Congratulations {name}! 🎓','Congratulations! 🎓','Well done! 🎓','Congratulations on graduating! 📚','Good luck! 🌟'],custom:['Congratulations! 🎉','Best wishes! ✨','Well done! 👏','Good luck! 🌟','Warm regards! 💙']}},
+'formNewTitle':'New Event','formEditTitle':'✏️ Edit Event','labelName':'Name / Event *','labelDate':'Date *','labelType':'Event Type','labelGroup':'Group','labelGender':'Gender','labelPhone':'Phone','labelPhone2':'Second Phone','labelEmail':'Email','labelNotes':'Notes','labelBudget':'Budget ($)','labelStatus':'Status','labelGiftIdea':'Gift Idea','recYearly':'🔄 Yearly','recYearlySub':'Birthday, anniversary...','recOnce':'📌 One-time','recOnceSub':'Test, appointment, trip...','genderMaleOpt':'👨 Male','genderFemaleOpt':'👩 Female','genderOtherOpt':'🧑 Not specified','giftPendingOpt':'🛒 Not bought','giftPaidOpt':'✅ Bought','placeholderName':'Person name','placeholderNotes':'Hobbies, preferences...','placeholderGift':'✏️ Another idea','placeholderStore':'＋ Add store','btnShare':'Share','btnAbout':'About','btnClose':'Close','btnGreat':'Awesome! 🎊','modeDark':'Dark','modeLight':'Light','modeAuto':'Auto','sortGroup':'Group','btnSaveGeneric':'💾 Save','sectionMainScreen':'What to show','sectionAppearance':'Appearance','sectionDefaults':'Default Filter & Sort','sectionGreetings':'Greetings','sectionNotifImport':'Notifications','sectionLanguage':'Language','sectionBackup':'Data Backup','sectionReports':'Reports','sectionDisplayMode':'Display Mode','sectionTheme':'Color Theme','togStats':'Statistics','togHero':'Next Event','togBudget':'Gift Budget','togCalendar':'Calendar','togSounds':'Sounds','togConfetti':'Confetti','togLargeFont':'Large Font','togAnimations':'Animations','togNotif':'Notifications On','togNotifSound':'Notification Sounds','togVibrate':'Vibrate','togDayBefore':'Day Before','togWeekBefore':'Week Before','togGiftReminder':'Gift Reminder','menuContacts':'My Contacts','menuContactsSub':'All details in one place','menuUserSettings':'User Settings','menuUserSettingsSub':'Main screen, appearance','menuSystemSettings':'System Settings','menuSystemSettingsSub':'Greetings, notifications','menuBudget':'Budget','menuBudgetSub':'Edit, calculate, print','menuBackup':'Backup & Print','menuBackupSub':'Export, restore, reports','menuStores':'Favorite Stores','menuGuide':'User Guide','menuGreetings':'Preset Greetings','menuMyGreetings':'Personal Greetings','menuNotifications':'Notifications','menuImport':'Import Calendar','menuLanguage':'Language','screenSettings':'Settings','screenUserSettings':'User Settings','screenSystemSettings':'System Settings','screenContacts':'Contacts','screenNotifications':'Notifications','screenImport':'Import','screenBackup':'Backup','screenStores':'🛒 Stores','screenGreetings':'💬 Greetings','screenMyGreetings':'📝 My Greetings','screenAppearance':'🌓 Appearance','screenGuide':'📖 Guide','reportAll':'All','reportUpcoming':'Upcoming','reportGroup':'Group','reportBudget':'Budget','vcfPhone':'Phone','vcfEmail':'Email','vcfBirthday':'Birthday','printColName':'Name','printColDate':'Date','printColType':'Type','printColGroup':'Group','printColBudget':'Budget','printColStatus':'Status','promptEmojiTitle':'Enter emoji:','promptFontSize':'Font size (14-24):','promptFontSizeErr':'Enter a number between 14-24','promptGiftDays':'How many days before the event?','promptQuietStart':'Start time (HH:MM):','promptQuietEnd':'End time (HH:MM):','promptEditGreeting':'Edit greeting','alertGreetingsSaved':'Greetings saved ✅','alertRestoredOK':'Restored successfully ✅','alertRestoreErr':'Error reading backup file','alertFBErr':'Error reading JSON file','alertNoContacts':'No contacts found in file','alertNoSelected':'No new contacts selected','alertVCFImported':'{n} contacts imported!','alertNoGreeting':'No greeting. Tap ✏️ to write','alertNoGreetingShort':'No greeting','alertNotifEnabled':'✅ Notifications enabled!','alertNotifDenied':'Not allowed. Check browser settings.','alertAIError':'Check the API key','vcfFoundContacts':'Found {n} contacts — select who to import:','vcfExistsLabel':'exists','guideStart':'🚀 Quick Start','guideStartSub':'Adding your first event','guideStartTip':'Tap "Save & Edit" to immediately add phone, gift and reminders!','guideEventsSub':'Types, groups, reminders','guideGiftsSub':'Tracking, ideas, stores','guideGreetingsSub':'Send via WhatsApp in one tap','guideNotifSub':'Setting up reminders in advance','guideBackupSub':'Import from Google, Facebook','guideSecrets':'⭐ Hidden Features','guideSecretsSub':'Things most users never discover!','reportAndMore':'and {n} more...','daysBeforeLabel':' days before','greetingLabel':'Greeting ','writePersonalGreeting':'Write a personal greeting...','myGreetingsPlaceholder':'Write personal greeting...','notifEnabledAlert':'✅ Notifications enabled!','copied':'Copied!','aiGetKeyLink':'Get API key','aiChangeKey':'Change','before':'before','allGroups':'All groups','optional':'Optional','groupNone':'— Select group —','groupCustom':'Other group','sectionExtra':'＋ More details','sectionGift':'🎁 Gift & Budget','labelSound':'Custom sound','soundDefault':'Default','soundPlay':'Play','soundPick':'Pick','soundTrimTitle':'Trim (max 15 seconds)','soundTrimStart':'Start (seconds)','soundTrimEnd':'End (seconds)','soundTrimBtn':'Trim & Save','btnAdd2':'Add','storesDesc':'Select stores for gift search','greetingsDesc':'5 variants per event type. Tap ✏️ to edit.','myGreetingsDesc':'Write up to 5 personal greetings','dailyTipLabel':'Daily Tip','labelFrom':'From date','labelTo':'To date','notifEnableTitle':'Enable Notifications','notifEnableSub':'Get notified even when the app is closed','togNotifSub':'Enable or disable all','togDayBeforeSub':'At 09:00','quietHoursTitle':'Quiet Hours','importChoose':'Choose import source','icsHowTitle':'How to export from Google Calendar?','icsStep1':'Go to calendar.google.com on desktop','icsStep2':'Settings → Export','icsStep3':'Open the ZIP file','icsStep4':'Upload the .ics file here','icsDropZone':'Drag ICS file here','icsDropSub':'or click to select file','fbWarning':'Facebook doesn\'t allow direct access. Download manually and upload here.','fbHowTitle':'How to download from Facebook?','fbStep1':'Open Facebook → Settings → Your info','fbStep2':'Click "Download a copy of your data"','fbStep3':'Select: Friends + Birthdays only','fbStep4':'Download JSON and upload here','fbDropZone':'Drag JSON file here','gcalWarning':'⚠️ Direct Google connection requires a server.<br>Easier: export ICS from Google.','backupExportSub':'JSON — for full restore','backupRestoreSub':'Upload JSON file','backupCSVSub':'For Excel or Google Sheets','backupPrintSub':'By type, date, group','importGoogleSub':'Import ICS from Google','importPhoneSub':'Direct import — Android Chrome','importCSVSub':'Excel, Google Sheets','importFBSub':'Friends and birthdays','vcfTitle':'Select Contacts','vcfImportBtn':'Import ✓','vcfFieldsTitle':'Which fields to import?','purple_name':'Purple','blue_name':'Blue','green_name':'Green','amber_name':'Amber','red_name':'Red','pink_name':'Pink','teal_name':'Teal','gold_name':'Gold','violet_name':'Violet','navy_name':'Navy','lime_name':'Neon','custom_name':'Custom','sentDaysAgo':'Sent {n} days ago','sentYesterday':'Sent yesterday','sentToday':'Sent today ✓','gcalTitle':'Google Calendar Sync','gcalDesc':'Connect Google Calendar for two-way sync','gcalConnect':'Connect with Google','gcalConnected':'Connected to Google Calendar','gcalSync':'Sync Now','gcalSyncing':'Syncing...','gcalSyncDone':'Sync Complete!','gcalDisconnect':'Disconnect Google','gcalDisconnectConfirm':'Disconnect from Google Calendar?','gcalAdded':'Added to app','gcalSkipped':'Already exist','gcalTotal':'Total in Google','gcalExported':'Added to Google Calendar!','gcalGroupName':'Google Calendar','gcalEnterClientId':'Enter Google Client ID','menuGcalSync':'Google Calendar Sync','menuGcalSyncSub':'Import + Export',greetings:{birthday_male:['Happy Birthday {name}! Health, happiness and success 🎂','Congratulations {name}! Another year of achievements 🎉','Dear {name}, Happy Birthday! May your dreams come true ✨','A happy year {name}! 🥳','Happy Birthday! Many more years {name} 🎈'],birthday_female:['Happy Birthday {name}! Health and joy 🎂','Congratulations {name}! A wonderful year ahead 🎉','Dear {name}, Happy Birthday! ✨','A happy year {name}! 🥳','Happy Birthday! 🎈'],birthday:['{name} Happy Birthday! 🎂','Congratulations {name}! 🎉','{name} may all your dreams come true ✨','A happy year {name}! 🥳','Happy Birthday! 🎈'],memorial:['Thinking of you today 🕯️','May their memory be blessed 🕯️','In loving memory 🕯️','In sadness and honor 🕯️','Forever in our hearts 🕯️'],anniversary:['Happy Anniversary {name}! 💍','Another year of love! 💍','Love and happiness {name}! 💑','Happy Anniversary! 💍','Warm congratulations! 💞'],wedding:['Congratulations {name}! Love and happiness 💒','Congratulations on the wedding! 💒','Congratulations to the couple! 🥂','A wonderful wedding! 🎊','Heartfelt congratulations! 💒'],barmitzvah:['Congratulations on the Bar/Bat Mitzvah! ✡️','Congratulations on this milestone! ✡️','Congratulations! ✨','Warm congratulations! ✡️','Continue on a good path! ✡️'],friends:['Looking forward to seeing you! 😊',"Can't wait! 🤗",'Looking forward! 👋',"Let's meet! 😄",'So excited! 🎉'],trip:['Great flight {name}! ✈️','Safe travels! 🌍','Amazing holiday! ✈️','Come back safe! 🧳','Wonderful trip! 🏖️'],car:['Good luck! 🚗','It\'ll go smoothly! 🔧','Good luck! 🚙','All will be fine! 🔑','You\'ll pass! ✅'],medical:['Good luck! 🏥','Hope all goes well! 💊','Health first! 🏥','Feel better! 💙','Good luck! 🌿'],holiday:['Happy Holiday! 🎊','Joyful holiday! 🕎','Happy holiday! ✨','Holiday greetings! 🎉','Wonderful holiday {name}! 🌟'],graduation:['Congratulations {name}! 🎓','Congratulations! 🎓','Well done! 🎓','Congratulations on graduating! 📚','Good luck! 🌟'],custom:['Congratulations! 🎉','Best wishes! ✨','Well done! 👏','Good luck! 🌟','Warm regards! 💙']}},
 ru:{dir:'ltr',lang:'ru',name:'Русский',appName:'Не Забуду',appSub:'Приложение, которое напомнит о каждом важном событии',today:'Сегодня!',tomorrow:'Завтра',daysLeft:'дней',passed:'Прошло',inDays:'Через {n} дней',btnAdd:'➕ Добавить событие',btnSave:'💾 Сохранить',btnSaveEdit:'💾 Сохранить и редактировать',btnCancel:'← Отмена',btnBack:'← Назад',btnEdit:'✏️ Редактировать',btnDelete:'🗑️ Удалить',screenSettings:'Настройки',formNewTitle:'Новое событие',formEditTitle:'✏️ Редактировать',labelName:'Имя *',labelDate:'Дата *',labelType:'Тип события',labelGroup:'Группа',labelGender:'Пол',labelPhone:'Телефон',labelPhone2:'Второй телефон',labelEmail:'Email',labelNotes:'Заметки',labelBudget:'Бюджет',labelStatus:'Статус',greetLabel:'💬 Поздравление',greetNext:'Следующее ›',greetAI:'✨ AI',greetWhatsapp:'📱 WhatsApp',greetCopy:'📋 Копировать',greetPersonal:'📝 Личное',greetFree:'Нажмите ✏️ для написания',greetFreePlaceholder:'Напишите поздравление...',giftBought:'✅ Куплен',giftTodo:'⏳ К выполнению',heroUpcoming:'Ближайшее событие',heroWelcome:'Добро пожаловать!',heroWelcomeSub:'Нажмите для руководства',heroGuide:'📖 Как начать?',heroEmpty:'Нет предстоящих событий',filter30:'30 дней',filterFuture:'Предстоящие',filterAll:'Все',filterPast:'Прошедшие',sortDate:'Дата',sortName:'Имя',searchPlaceholder:'Поиск...',noEvents:'Событий пока нет',noEventsRange:'Событий не найдено',alertNameDate:'Имя и дата обязательны',alertDelete:'Удалить навсегда?',alertDeleteAll:'Удалить все данные?!',alertStoresSaved:'Магазины сохранены ✅',alertNoKey:'Введите API ключ',alertRestoreConfirm:'Заменить все данные?',alertImported:'Импортировано {n}',alertNoNew:'Новых нет',langSaved:'Язык обновлён ✅',todayTitle:'Сегодня событие!',todayTitlePlural:'Сегодня {n} событий!',btnGreat:'Отлично! 🎊',btnGenerate:'✨ Создать',screenBudget:'💰 Бюджет',budgetPaid:'Оплачено',budgetPending:'Ожидает',budgetTotal:'Итого',budgetByGroup:'По группе',budgetNoData:'Нет данных',genderMale:'Мужской',genderFemale:'Женский',
 calDays:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],calMonths:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
 typeLabel:{birthday:'🎉 День рождения',wedding:'💒 Свадьба',anniversary:'💍 Годовщина',memorial:'🕯️ Поминовение',barmitzvah:'✡️ Бар/Бат-мицва',friends:'👥 Встреча',trip:'✈️ Поездка',car:'🚗 Техосмотр',medical:'🏥 Визит к врачу',holiday:'🎊 Праздник',graduation:'🎓 Выпуск',custom:'✨ Событие'},
@@ -1404,6 +1574,9 @@ const SCREEN_RENDERERS = {
       ${MI('🖨️', lang.menuBackup||'גיבוי והדפסה', lang.menuBackupSub||'ייצוא, שחזור, דוחות', "openScreen('screen-backup')")}
       ${MI('🛒', lang.menuStores||'חנויות מועדפות', 'Amazon, KSP...', "openScreen('screen-stores')")}
       ${MI('📖', lang.menuGuide||'מדריך למשתמש', lang.menuGuideSub||"פרקים, טיפים, פיצ'רים", "openScreen('screen-guide')")}
+      <div id="btn-install-pwa" onclick="installApp()" style="display:none;align-items:center;justify-content:center;gap:8px;background:var(--acc-dim);border:1px solid var(--acc-border);border-radius:var(--rs);padding:12px;margin-top:10px;cursor:pointer;font-size:13px;font-weight:500;color:var(--acc-light);">
+        📲 ${lang.btnInstall||'התקן אפליקציה'}
+      </div>
       <div style="display:flex;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
         <div class="settings-bottom-btn" onclick="shareApp()">📤 ${lang.btnShare||'שתף'}</div>
         <div class="settings-bottom-btn" onclick="openModal('modal-about')">ℹ️ ${lang.btnAbout||'אודות'}</div>
@@ -1551,14 +1724,44 @@ const SCREEN_RENDERERS = {
 
   'screen-google-cal': () => {
     const lang = LANGUAGES[currentLang] || LANGUAGES['he'];
-    return TB('🗓️ ' + (lang.screenGoogleCal||'גוגל קלנדר'), 'screen-import') + `
-    <div style="padding:12px 0;">
-      <div class="card" style="text-align:center;">
-        <div style="font-size:32px;margin-bottom:10px;">🗓️</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px;">${lang.gcalWarning||'⚠️ חיבור ישיר לגוגל דורש שרת.<br>הדרך הקלה: ייצא ICS מגוגל.'}</div>
-        <button class="btn-primary" onclick="openScreen('screen-import-ics')">📅 ${lang.btnUseICS||'ייבוא ICS במקום'}</button>
-      </div>
-    </div>`;
+    const token = localStorage.getItem('gcal_access_token');
+    const expiry = parseInt(localStorage.getItem('gcal_token_expiry')||'0');
+    const isValid = !!token && expiry > Date.now();
+    const email = localStorage.getItem('gcal_email')||'';
+    const tb = TB('\u{1F5D3}\uFE0F ' + (lang.screenGoogleCal||'\u05d2\u05d5\u05d2\u05dc \u05e7\u05dc\u05e0\u05d3\u05e8'), 'screen-import');
+    if(isValid){
+      return tb + `<div style="padding:12px 0;">
+        <div class="card" style="margin-bottom:12px;background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.3);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#10b981;flex-shrink:0;"></div>
+            <div style="font-size:13px;font-weight:500;color:#34d399;">${lang.gcalConnected||'\u05de\u05d7\u05d5\u05d1\u05e8 \u05dc\u05d2\u05d5\u05d2\u05dc \u05e7\u05dc\u05e0\u05d3\u05e8'} \u2713</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">${email}</div>
+          <button class="btn-primary" onclick="syncGoogleCalendar()" id="btn-gcal-sync" style="margin-bottom:8px;">
+            \u{1F504} ${lang.gcalSync||'\u05e1\u05e0\u05db\u05e8\u05df \u05e2\u05db\u05e9\u05d9\u05d5'}
+          </button>
+          <button class="btn-ghost" onclick="disconnectGoogle()" style="font-size:11px;">
+            ${lang.gcalDisconnect||'\u05d4\u05ea\u05e0\u05ea\u05e7 \u05de\u05d2\u05d5\u05d2\u05dc'}
+          </button>
+        </div>
+        <div id="gcal-sync-result" style="display:none;"></div>
+      </div>`;
+    } else {
+      return tb + `<div style="padding:12px 0;">
+        <div class="card" style="text-align:center;margin-bottom:12px;">
+          <div style="font-size:36px;margin-bottom:10px;">\u{1F5D3}\uFE0F</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${lang.gcalTitle||'\u05e1\u05e0\u05db\u05e8\u05d5\u05df \u05e2\u05dd \u05d2\u05d5\u05d2\u05dc \u05e7\u05dc\u05e0\u05d3\u05e8'}</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">${lang.gcalDesc||'\u05d7\u05d1\u05e8 \u05d0\u05ea \u05d2\u05d5\u05d2\u05dc \u05e7\u05dc\u05e0\u05d3\u05e8 \u05dc\u05e1\u05e0\u05db\u05e8\u05d5\u05df \u05d3\u05d5-\u05db\u05d9\u05d5\u05d5\u05e0\u05d9 \u05d0\u05d5\u05d8\u05d5\u05de\u05d8\u05d9'}</div>
+          <button class="btn-primary" onclick="connectGoogle()" style="max-width:240px;margin:0 auto;">
+            \u{1F50F} ${lang.gcalConnect||'\u05d4\u05ea\u05d7\u05d1\u05e8 \u05e2\u05dd \u05d2\u05d5\u05d2\u05dc'}
+          </button>
+        </div>
+        <div class="info-box">
+          <div style="font-size:11px;color:var(--acc-light);font-weight:500;margin-bottom:6px;">\u{1F512} ${lang.gcalPrivacy||'\u05e4\u05e8\u05d8\u05d9\u05d5\u05ea \u05d5\u05d0\u05d1\u05d8\u05d7\u05d4'}</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.8;">${lang.gcalPrivacyText||'\u2022 \u05d4\u05e0\u05ea\u05d5\u05e0\u05d9\u05dd \u05e0\u05e9\u05d0\u05e8\u05d9\u05dd \u05d1\u05d8\u05dc\u05e4\u05d5\u05df \u05e9\u05dc\u05da \u05d1\u05dc\u05d1\u05d3<br>\u2022 \u05dc\u05d0 \u05e2\u05d5\u05d1\u05e8\u05d9\u05dd \u05dc\u05e9\u05e8\u05ea<br>\u2022 \u05e0\u05d9\u05ea\u05df \u05dc\u05e0\u05ea\u05e7 \u05d1\u05db\u05dc \u05e2\u05ea'}</div>
+        </div>
+      </div>`;
+    }
   },
 
   'screen-import-fb': () => {
@@ -1729,6 +1932,7 @@ const SCREEN_RENDERERS = {
     <div style="padding:12px 0;">
       <input class="form-input search-input" id="contacts-search" type="text" placeholder="🔍 ${lang.searchPlaceholder||'חיפוש...'}" oninput="renderContacts()" style="margin-bottom:10px;">
       <div id="contacts-filter" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+      <button class="btn-primary" onclick="pickContact()" id="btn-pick-from-contacts" style="margin-bottom:8px;">👤 ${lang.btnPickContact||'בחר מאנשי קשר'}</button>
       <button class="btn-secondary" onclick="document.getElementById('vcf-input').click()">📱 ${lang.btnImportVCF||'ייבא מהטלפון (.vcf)'}</button>
       <input type="file" id="vcf-input" accept=".vcf" style="display:none" onchange="importVCF(this)">
       <button class="btn-ghost" onclick="openAddForm()">➕ ${lang.btnAddManual||'הוסף ידנית'}</button>
@@ -1832,6 +2036,9 @@ Object.assign(SCREEN_RENDERERS, {
           <div class="av-cam">📷</div>
         </div>
       </div>
+      <button type="button" class="btn-secondary" id="btn-pick-contact" onclick="pickContact()" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        👤 ${lang.btnPickContact||'בחר מאנשי קשר בטלפון'}
+      </button>
       <div class="form-group">
         <label class="form-label">${lang.labelName||'שם האדם / האירוע'} *</label>
         <input class="form-input" id="inp-name" type="text" placeholder="${lang.placeholderName||'שם האדם'}" oninput="updateFormAvatar()">
@@ -2059,7 +2266,7 @@ function renderGroupFilters(enriched){
 function setGroupFilter(g){activeGroupFilter=g;const enriched=events.map(ev=>({...ev,...calcDays(ev)}));renderGroupFilters(enriched);renderEventsList(enriched);}
 function renderEventsList(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];let list=[...enriched];if(activeGroupFilter)list=list.filter(e=>e.group===activeGroupFilter);const filter=settings.defaultFilter||'30';if(filter==='30')list=list.filter(e=>e.daysLeft!==null&&e.daysLeft<=30);else if(filter==='future')list=list.filter(e=>!e.isOver&&e.daysLeft!==null);else if(filter==='past')list=list.filter(e=>e.isOver);const sortBy=settings.defaultSort||'date';if(sortBy==='name')list.sort((a,b)=>(a.name||'').localeCompare(b.name||''));else if(sortBy==='group')list.sort((a,b)=>(a.group||'').localeCompare(b.group||''));else list.sort((a,b)=>{if(a.daysLeft===null&&b.daysLeft===null)return 0;if(a.daysLeft===null)return 1;if(b.daysLeft===null)return -1;return a.daysLeft-b.daysLeft;});const el=document.getElementById('main-events-list');if(!list.length){if(!events.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">'+(lang.noEvents||'עדיין אין אירועים')+'</div><button class="btn-secondary" style="max-width:220px;margin:0 auto 8px;" onclick="openModal(\'modal-welcome-guide\')">📖 מדריך</button><button class="btn-primary" style="max-width:220px;margin:0 auto;" onclick="openAddForm()">'+lang.btnAdd+'</button></div>';}else{el.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);">'+(lang.noEventsRange||'לא נמצאו')+'</div>';}return;}el.innerHTML=list.map(ev=>buildCard(ev)).join('');}
 
-function buildCard(ev){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const storeLinks=ev.giftIdea?(settings.activeStores||['Amazon','KSP','זאפ']).map(s=>'<a href="https://www.google.com/search?q='+encodeURIComponent(ev.giftIdea+' '+s)+'" target="_blank" class="store-link">🔍 '+s+'</a>').join(''):'';const giftHtml=(ev.giftIdea||ev.budget)?('<div class="gift-box"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:11px;color:var(--green);">🎁 '+(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+'</span><button onclick="event.stopPropagation();toggleGift('+ev.id+')" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:3px 9px;border-radius:var(--rf);font-size:11px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>'):'';const myGreetText=myGreetings.find(g=>g)?myGreetings.find(g=>g).replace(/{name}/g,ev.name||''):lang.greetFree;return'<div class="event-card new-card" id="card-'+ev.id+'"><div class="event-card-main"><div onclick="openDetail('+ev.id+')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;">'+avatarHTML(ev,'av-sm')+'<div style="flex:1;"><div style="font-weight:600;font-size:16px;">'+ev.name+'</div><div style="font-size:12px;color:var(--accent);">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:4px;">'+countdownHTML(ev.daysLeft,ev.isOver)+'</div></div></div>'+urgencyBadge(ev.daysLeft,ev.isOver)+'</div><div class="event-actions"><button class="card-btn share" onclick="shareEvent('+ev.id+')">📱</button><button class="card-btn" onclick="editEvent('+ev.id+')">✏️</button><button class="card-btn" onclick="toggleDetails('+ev.id+',this)">⚙️ ▼</button></div><div class="details-panel" id="dp-'+ev.id+'">'+(ev.group?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">🏷️</span><span>'+ev.group+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div style="font-size:12px;color:var(--muted);padding:6px 0;">💡 '+ev.notes+'</div>':'')+giftHtml+'<div class="greet-box" style="margin-bottom:8px;"><div class="greet-label"><span>'+lang.greetLabel+'</span><div style="display:flex;gap:5px;"><button class="greet-next-btn" onclick="nextVariant('+ev.id+')">'+lang.greetNext+'</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.2);" onclick="openAiGreet('+ev.id+')">'+lang.greetAI+'</button></div></div><div class="greet-text" id="greet-text-'+ev.id+'">'+buildGreeting(ev)+'</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyGreet('+ev.id+')">'+lang.greetCopy+'</button></div></div><div class="greet-box"><div class="greet-label"><span>'+lang.greetPersonal+'</span>'+(myGreetings.some(g=>g)?'<button class="greet-next-btn" onclick="nextMyGreet('+ev.id+')">'+lang.greetNext+'</button>':'')+'</div><div class="greet-text" id="my-greet-text-'+ev.id+'">'+myGreetText+'</div><textarea id="free-greet-ta-'+ev.id+'" class="form-textarea" style="min-height:55px;margin-bottom:8px;display:none;" placeholder="'+lang.greetFreePlaceholder+'"></textarea><div class="greet-actions"><button class="greet-btn" onclick="sendMyGreetOrFree('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyMyGreetOrFree('+ev.id+')">'+lang.greetCopy+'</button><button class="greet-btn sec" onclick="toggleFreeGreet('+ev.id+')" style="flex:0;padding:8px 10px;">✏️</button></div></div></div></div>';}
+function buildCard(ev){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const storeLinks=ev.giftIdea?(settings.activeStores||['Amazon','KSP','זאפ']).map(s=>'<a href="https://www.google.com/search?q='+encodeURIComponent(ev.giftIdea+' '+s)+'" target="_blank" class="store-link">🔍 '+s+'</a>').join(''):'';const giftHtml=(ev.giftIdea||ev.budget)?('<div class="gift-box"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:11px;color:var(--green);">🎁 '+(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+'</span><button onclick="event.stopPropagation();toggleGift('+ev.id+')" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:3px 9px;border-radius:var(--rf);font-size:11px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>'):'';const myGreetText=myGreetings.find(g=>g)?myGreetings.find(g=>g).replace(/{name}/g,ev.name||''):lang.greetFree;return'<div class="event-card new-card" id="card-'+ev.id+'"><div class="event-card-main"><div onclick="openDetail('+ev.id+')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;">'+avatarHTML(ev,'av-sm')+'<div style="flex:1;"><div style="font-weight:600;font-size:16px;">'+ev.name+'</div><div style="font-size:12px;color:var(--accent);">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:4px;">'+countdownHTML(ev.daysLeft,ev.isOver)+'</div></div></div>'+urgencyBadge(ev.daysLeft,ev.isOver)+'</div><div class="event-actions"><button class="card-btn share" onclick="shareEvent(\'+ev.id+\')">📱</button><button class="card-btn" onclick="addToAndroidCalendar(\'+ev.id+\')">📅</button><button class="card-btn" onclick="editEvent(\'+ev.id+\')">✏️</button><button class="card-btn" onclick="toggleDetails(\'+ev.id+\',this)">⚙️ ▼</button></div><div class="details-panel" id="dp-'+ev.id+'">'+(ev.group?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">🏷️</span><span>'+ev.group+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div style="font-size:12px;color:var(--muted);padding:6px 0;">💡 '+ev.notes+'</div>':'')+giftHtml+'<div class="greet-box" style="margin-bottom:8px;"><div class="greet-label"><span>'+lang.greetLabel+'</span><div style="display:flex;gap:5px;"><button class="greet-next-btn" onclick="nextVariant('+ev.id+')">'+lang.greetNext+'</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.2);" onclick="openAiGreet('+ev.id+')">'+lang.greetAI+'</button></div></div><div class="greet-text" id="greet-text-'+ev.id+'">'+buildGreeting(ev)+'</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyGreet('+ev.id+')">'+lang.greetCopy+'</button></div></div><div class="greet-box"><div class="greet-label"><span>'+lang.greetPersonal+'</span>'+(myGreetings.some(g=>g)?'<button class="greet-next-btn" onclick="nextMyGreet('+ev.id+')">'+lang.greetNext+'</button>':'')+'</div><div class="greet-text" id="my-greet-text-'+ev.id+'">'+myGreetText+'</div><textarea id="free-greet-ta-'+ev.id+'" class="form-textarea" style="min-height:55px;margin-bottom:8px;display:none;" placeholder="'+lang.greetFreePlaceholder+'"></textarea><div class="greet-actions"><button class="greet-btn" onclick="sendMyGreetOrFree('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyMyGreetOrFree('+ev.id+')">'+lang.greetCopy+'</button><button class="greet-btn sec" onclick="toggleFreeGreet('+ev.id+')" style="flex:0;padding:8px 10px;">✏️</button></div></div></div></div>';}
 
 function toggleDetails(id,btn){
   id=parseInt(id)||id;const p=document.getElementById('dp-'+id);p.classList.toggle('open');btn.textContent=p.classList.contains('open')?'▲':'⚙️ ▼';}
@@ -2085,7 +2292,7 @@ function openDetail(id){
     const dc=document.getElementById('detail-content');
     if(dc) dc.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">'+avatarHTML(ev,'av-lg')+'<div><div style="font-size:20px;font-weight:600;">'+ev.name+'</div><div style="font-size:13px;color:var(--accent);margin-top:2px;">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:5px;">'+countdownHTML(calc.daysLeft,calc.isOver)+'</div></div></div><div class="card" style="margin-bottom:12px;"><div class="detail-row"><span class="detail-label">📅 '+(lang.detailDate||'תאריך')+'</span><span>'+(ev.date||'')+'</span></div>'+(ev.group?'<div class="detail-row"><span class="detail-label">🏷️</span><span>'+ev.group+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span class="detail-label">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span class="detail-label">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span class="detail-label">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div class="detail-row"><span class="detail-label">💡</span><span style="color:var(--muted);">'+ev.notes+'</span></div>':'')+'</div>'+((ev.giftIdea||ev.budget)?'<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 '+(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+' </span><button onclick="toggleGift('+ev.id+');openDetail('+ev.id+');" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>':'')+
 '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>'+lang.greetLabel+'</span><div style="display:flex;gap:5px;"><button class="greet-next-btn" onclick="nextVariant('+ev.id+');updateDetailGreet('+ev.id+')">'+lang.greetNext+'</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.2);" onclick="openAiGreet('+ev.id+')">'+lang.greetAI+'</button></div></div><div class="greet-text" id="greet-text-'+ev.id+'">'+buildGreeting(ev)+'</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyGreet('+ev.id+')">'+lang.greetCopy+'</button></div></div>'+
-'<div style="display:flex;gap:8px;">'+(ev.phone?'<button class="card-btn" style="flex:1;" onclick="window.location.href=\'tel:'+ev.phone+'\'">📱</button>':'')+'<button class="card-btn" style="flex:1;" onclick="shareEvent('+ev.id+')">📤</button><button class="card-btn" style="flex:1;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);" onclick="deleteEventDirect('+ev.id+')">🗑️</button></div>';
+'<div style="display:flex;gap:8px;flex-wrap:wrap;">'+(ev.phone?'<button class="card-btn" style="flex:1;" onclick="window.location.href=\'tel:'+ev.phone+'\'">📱</button>':'')+'<button class="card-btn" style="flex:1;" onclick="exportEventToGoogle('+ev.id+')">📅</button><button class="card-btn" style="flex:1;" onclick="shareEvent('+ev.id+')">📤</button><button class="card-btn" style="flex:1;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);" onclick="deleteEventDirect('+ev.id+')">🗑️</button></div>';
     // עדכן topbar
     const backBtn=document.querySelector('#screen-detail .back-btn:first-child');
     if(backBtn)backBtn.textContent=lang.btnBack||'← חזרה';
@@ -2330,6 +2537,81 @@ function shareEvent(id){
   if(navigator.share)navigator.share({text}).catch(()=>{});
   else navigator.clipboard.writeText(text).then(()=>alert('📋'));
 }
+function installApp(){
+  if(window._pwaInstallPrompt){
+    window._pwaInstallPrompt.prompt();
+    window._pwaInstallPrompt.userChoice.then(r=>{
+      if(r.outcome==='accepted'){
+        document.getElementById('btn-install-pwa').style.display='none';
+      }
+    });
+  }
+}
+function addToAndroidCalendar(id){
+  id=parseInt(id)||id;
+  const ev=events.find(e=>e.id===id);
+  if(!ev||!ev.date) return;
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+
+  // פרס תאריך
+  const parts=ev.date.split('-');
+  const year=parseInt(parts[0]),month=parseInt(parts[1])-1,day=parseInt(parts[2]);
+  const startDate=new Date(year,month,day,9,0,0);
+  const endDate=new Date(year,month,day,10,0,0);
+
+  // פורמט ISO ל-Android Calendar Intent
+  const fmt=d=>{
+    const pad=n=>String(n).padStart(2,'0');
+    return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+
+           pad(d.getHours())+pad(d.getMinutes())+'00';
+  };
+
+  const title=encodeURIComponent(ev.name+' — '+getLabel(ev.type,ev.customType));
+  const desc=encodeURIComponent(
+    (ev.notes||'')+
+    (ev.phone?'\n📱 '+ev.phone:'')+
+    (ev.giftIdea?'\n🎁 '+ev.giftIdea:'')+
+    '\n\nלא שכחתי 🔔'
+  );
+
+  // נסה Android Intent קודם
+  const intentUrl='intent://edit?action=android.intent.action.INSERT'+
+    '&type=vnd.android.cursor.dir%2Fevent'+
+    '&title='+title+
+    '&description='+desc+
+    '&beginTime='+startDate.getTime()+
+    '&endTime='+endDate.getTime()+
+    '#Intent;scheme=content;package=com.google.android.calendar;end';
+
+  // Fallback: Google Calendar web
+  const gcalUrl='https://calendar.google.com/calendar/render?action=TEMPLATE'+
+    '&text='+title+
+    '&details='+desc+
+    '&dates='+fmt(startDate)+'/'+fmt(endDate);
+
+  // נסה לפתוח Android app, אם נכשל — גוגל web
+  const iframe=document.createElement('iframe');
+  iframe.style.display='none';
+  document.body.appendChild(iframe);
+
+  let opened=false;
+  const timeout=setTimeout(()=>{
+    if(!opened){
+      window.open(gcalUrl,'_blank');
+    }
+    document.body.removeChild(iframe);
+  },600);
+
+  iframe.onload=()=>{ opened=true; clearTimeout(timeout); };
+  try {
+    iframe.src=intentUrl;
+  } catch(e){
+    clearTimeout(timeout);
+    window.open(gcalUrl,'_blank');
+    document.body.removeChild(iframe);
+  }
+}
+
 function shareApp(){
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
   const text='🔔 "'+lang.appName+'" — '+lang.appSub+'!\nhttps://barakaflalo.github.io/lo-shachachti';
@@ -3308,6 +3590,241 @@ function copyAiGreeting(){
 // ================================================================
 // ===== INIT =====
 // ================================================================
+
+// ================================================================
+// ===== GOOGLE CALENDAR API =====
+// ================================================================
+const GCAL_CLIENT_ID_KEY = 'gcal_client_id';
+const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events';
+
+
+function promptAndConnect(){
+  const lang = LANGUAGES[currentLang]||LANGUAGES['he'];
+  const clientId = prompt(lang.gcalEnterClientId||'הזן את ה-Client ID שקיבלת מגוגל:', localStorage.getItem(GCAL_CLIENT_ID_KEY)||'');
+  if(!clientId || !clientId.trim()) return;
+  localStorage.setItem(GCAL_CLIENT_ID_KEY, clientId.trim());
+  connectGoogle();
+}
+
+function connectGoogle(){
+  const lang = LANGUAGES[currentLang]||LANGUAGES['he'];
+  let clientId = localStorage.getItem(GCAL_CLIENT_ID_KEY)||'';
+  if(!clientId){
+    clientId = prompt(lang.gcalEnterClientId||'Google Client ID:', '');
+    if(!clientId) return;
+    localStorage.setItem(GCAL_CLIENT_ID_KEY, clientId.trim());
+  }
+  localStorage.setItem('gcal_return_screen','screen-google-cal');
+  const redirectUri = window.location.origin + window.location.pathname;
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
+    'client_id='+encodeURIComponent(clientId)+
+    '&redirect_uri='+encodeURIComponent(redirectUri)+
+    '&response_type=token'+
+    '&scope='+encodeURIComponent(GCAL_SCOPES)+
+    '&prompt=consent';
+}
+
+function disconnectGoogle(){
+  const lang = LANGUAGES[currentLang]||LANGUAGES['he'];
+  if(!confirm(lang.gcalDisconnectConfirm||'להתנתק מגוגל קלנדר?')) return;
+  ['gcal_access_token','gcal_token_expiry','gcal_email'].forEach(k=>localStorage.removeItem(k));
+  renderScreen('screen-google-cal');
+  openScreen('screen-google-cal');
+}
+
+function handleGCalOAuthReturn(){
+  const hash = window.location.hash;
+  if(!hash.includes('access_token=')) return;
+  const params = new URLSearchParams(hash.slice(1));
+  const token = params.get('access_token');
+  const expiresIn = parseInt(params.get('expires_in')||'3600');
+  if(!token) return;
+  localStorage.setItem('gcal_access_token', token);
+  localStorage.setItem('gcal_token_expiry', String(Date.now()+expiresIn*1000));
+  history.replaceState(null,'',window.location.pathname);
+  fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+    {headers:{'Authorization':'Bearer '+token}})
+    .then(r=>r.json()).then(u=>{
+      if(u.email) localStorage.setItem('gcal_email',u.email);
+    }).catch(()=>{}).finally(()=>{
+      renderScreen('screen-google-cal');
+      openScreen('screen-google-cal');
+    });
+}
+
+async function syncGoogleCalendar(){
+  const lang = LANGUAGES[currentLang]||LANGUAGES['he'];
+  const token = localStorage.getItem('gcal_access_token');
+  if(!token){ connectGoogle(); return; }
+  const btn = document.getElementById('btn-gcal-sync');
+  const resultEl = document.getElementById('gcal-sync-result');
+  if(btn){btn.disabled=true;btn.textContent='\u23F3 '+(lang.gcalSyncing||'מסנכרן...');}
+  if(resultEl) resultEl.style.display='none';
+  try{
+    const now = new Date();
+    const tMin = new Date(now.getFullYear()-1,now.getMonth(),now.getDate()).toISOString();
+    const tMax = new Date(now.getFullYear(),now.getMonth()+6,now.getDate()).toISOString();
+    const r = await fetch(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events?'+
+      'timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+
+      '&maxResults=500&singleEvents=true&orderBy=startTime',
+      {headers:{'Authorization':'Bearer '+token}});
+    if(!r.ok){
+      if(r.status===401){
+        localStorage.removeItem('gcal_access_token');
+        localStorage.removeItem('gcal_token_expiry');
+        renderScreen('screen-google-cal');openScreen('screen-google-cal');return;
+      }
+      throw new Error('Error '+r.status);
+    }
+    const data = await r.json();
+    const result = mergeWithGoogleEvents(data.items||[], lang);
+    if(resultEl){
+      resultEl.style.display='block';
+      resultEl.innerHTML = '<div class="card" style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.3);">'+
+        '<div style="font-size:13px;font-weight:600;color:#34d399;margin-bottom:10px;">\u2705 '+(lang.gcalSyncDone||'סנכרון הושלם!')+'</div>'+
+        '<div class="detail-row"><span>'+(lang.gcalAdded||'נוספו')+'</span><span style="color:#34d399;font-weight:600;">'+result.added+'</span></div>'+
+        '<div class="detail-row"><span>'+(lang.gcalSkipped||'כבר קיימים')+'</span><span style="color:var(--muted);">'+result.skipped+'</span></div>'+
+        '<div class="detail-row"><span>'+(lang.gcalTotal||"סה\"כ")+'</span><span>'+result.total+'</span></div>'+
+        '</div>';
+    }
+    renderMain();
+  }catch(err){
+    if(resultEl){
+      resultEl.style.display='block';
+      resultEl.innerHTML='<div class="card" style="background:rgba(239,68,68,0.08);">\u274C '+err.message+'</div>';
+    }
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='\u{1F504} '+(lang.gcalSync||'סנכרן עכשיו');}
+  }
+}
+
+function mergeWithGoogleEvents(googleEvents, lang){
+  let added=0,skipped=0;
+  googleEvents.forEach(gEv=>{
+    const dateStr = gEv.start&&(gEv.start.date||gEv.start.dateTime&&gEv.start.dateTime.slice(0,10));
+    if(!dateStr) return;
+    const name=(gEv.summary||'').trim();
+    if(!name) return;
+    if(events.some(e=>e.name===name&&e.date===dateStr)){skipped++;return;}
+    const low=name.toLowerCase();
+    let type='custom';
+    if(/birthday|\u05d9\u05d5\u05dd \u05d4\u05d5\u05dc\u05d3\u05ea|\u05d9\u05d5\"\u05d4/.test(low)) type='birthday';
+    else if(/anniversary|\u05e0\u05d9\u05e9\u05d5\u05d0\u05d9\u05df|\u05d7\u05ea\u05d5\u05e0\u05d4/.test(low)) type='anniversary';
+    else if(/memorial|\u05d0\u05d6\u05db\u05e8\u05d4|\u05d9\u05d0\u05e8\u05e6\u05d9\u05d9\u05d8/.test(low)) type='memorial';
+    else if(/doctor|\u05e8\u05d5\u05e4\u05d0|\u05ea\u05d5\u05e8/.test(low)) type='medical';
+    else if(/trip|\u05d8\u05d9\u05d5\u05dc|\u05d7\u05d5\u05e4\u05e9\u05d4/.test(low)) type='trip';
+    events.push({
+      id:Date.now()+added,
+      name:name.replace(/birthday of |יום הולדת של |'s birthday/gi,'').trim()||name,
+      date:dateStr,type,gender:'male',
+      group:lang.gcalGroupName||'\u05d2\u05d5\u05d2\u05dc \u05e7\u05dc\u05e0\u05d3\u05e8',
+      notes:gEv.description||'',phone:'',giftStatus:'pending',
+      notifications:[],fromGoogle:true,googleEventId:gEv.id
+    });
+    added++;
+  });
+  if(added>0) saveEvents();
+  return {added,skipped,total:googleEvents.length};
+}
+
+async function exportEventToGoogle(id){
+  id=parseInt(id)||id;
+  const ev=events.find(e=>e.id===id);if(!ev)return;
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const token=localStorage.getItem('gcal_access_token');
+  if(!token){addToAndroidCalendar(id);return;}
+  const expiry=parseInt(localStorage.getItem('gcal_token_expiry')||'0');
+  if(expiry<Date.now()){addToAndroidCalendar(id);return;}
+  try{
+    const body={
+      summary:ev.name+' \u2014 '+getLabel(ev.type,ev.customType),
+      description:[ev.notes||'',ev.phone?'\u{1F4F1} '+ev.phone:'',ev.giftIdea?'\u{1F381} '+ev.giftIdea:'','\n\u05dc\u05d0 \u05e9\u05db\u05d7\u05ea\u05d9 \u{1F514}'].filter(Boolean).join('\n'),
+      start:{date:ev.date},end:{date:ev.date},
+      reminders:{useDefault:false,overrides:[{method:'popup',minutes:1440}]}
+    };
+    const res=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{
+      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(res.ok){
+      const created=await res.json();
+      const idx=events.findIndex(e=>e.id===id);
+      if(idx>-1){events[idx].googleEventId=created.id;saveEvents();}
+      alert('\u2705 '+(lang.gcalExported||'\u05e0\u05d5\u05e1\u05e3 \u05dc\u05d2\u05d5\u05d2\u05dc \u05e7\u05dc\u05e0\u05d3\u05e8!'));
+    }else{addToAndroidCalendar(id);}
+  }catch(e){addToAndroidCalendar(id);}
+}
+
+
+// ================================================================
+// ===== CONTACT PICKER API =====
+// ================================================================
+async function pickContact(){
+  const lang = LANGUAGES[currentLang]||LANGUAGES['he'];
+
+  // בדוק תמיכה
+  if(!('contacts' in navigator) || !('ContactsManager' in window)){
+    // Fallback: הצע ייבוא VCF
+    const msg = lang.contactPickerNotSupported ||
+      'Contact Picker אינו נתמך בדפדפן זה.\nנסה Chrome 80+ על אנדרואיד, או ייבא קובץ VCF.';
+    if(confirm(msg + '\n\nלייבוא קובץ VCF?')){
+      document.getElementById('vcf-input') && document.getElementById('vcf-input').click();
+    }
+    return;
+  }
+
+  try {
+    // בדוק אילו שדות נתמכים
+    const supported = await navigator.contacts.getProperties();
+    const props = [];
+    if(supported.includes('name')) props.push('name');
+    if(supported.includes('tel')) props.push('tel');
+    if(supported.includes('email')) props.push('email');
+
+    // פתח Contact Picker
+    const contacts = await navigator.contacts.select(props, { multiple: false });
+    if(!contacts || contacts.length === 0) return;
+
+    const contact = contacts[0];
+
+    // חלץ שדות
+    const name = (contact.name && contact.name[0]) || '';
+    const phone = (contact.tel && contact.tel[0]) || '';
+    const email = (contact.email && contact.email[0]) || '';
+
+    if(!name) {
+      alert(lang.contactNoName || 'לא נמצא שם. נסה לבחור איש קשר אחר.');
+      return;
+    }
+
+    // מלא טופס
+    const setVal = (id, val) => { const el=document.getElementById(id); if(el && val) el.value=val; };
+    setVal('inp-name', name);
+    setVal('inp-phone', phone);
+    setVal('inp-email', email);
+
+    // עדכן avatar
+    updateFormAvatar();
+
+    // אנימציה קצרה
+    const nameEl = document.getElementById('inp-name');
+    if(nameEl) {
+      nameEl.style.background = 'rgba(var(--acc-rgb),0.1)';
+      nameEl.style.transition = 'background 0.5s';
+      setTimeout(() => { nameEl.style.background = ''; }, 800);
+    }
+
+    playSound('save');
+
+  } catch(err) {
+    // המשתמש ביטל — לא שגיאה
+    if(err.name !== 'AbortError') {
+      console.error('Contact Picker error:', err);
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   // 1. apply theme & mode
   applyTheme(settings.theme||'purple');
@@ -3325,6 +3842,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   // reload greetings for saved language
   greetings=Object.assign({},lang.greetings||LANGUAGES['he'].greetings,JSON.parse(localStorage.getItem('ls2_greetings')||'{}'));
 
+  // 2.5. Handle Google OAuth return
+  handleGCalOAuthReturn();
+
   // 3. render all screens first (DOM must exist before referencing elements)
   renderAllScreens();
 
@@ -3341,7 +3861,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     setTimeout(()=>s.style.display='none',500);
   },1200);
 
-  // 7. service worker (simple - only for notifications, no caching of JS)
+  // 7. PWA install button
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window._pwaInstallPrompt = e;
+    const btn = document.getElementById('btn-install-pwa');
+    if(btn) btn.style.display = 'flex';
+  });
+  window.addEventListener('appinstalled', () => {
+    const btn = document.getElementById('btn-install-pwa');
+    if(btn) btn.style.display = 'none';
+  });
+
+  // 8. service worker (simple - only for notifications, no caching of JS)
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').then(reg=>{
       reg.update();
