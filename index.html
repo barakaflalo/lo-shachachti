@@ -3863,22 +3863,31 @@ async function debugGoogleCalendar(){
     let msg = '👤 מחובר: ' + (uData.email||'לא ידוע') + '\n\n';
     msg += '📅 לוחות שנה (' + (cData.items||[]).length + '):\n';
     (cData.items||[]).forEach(c => {
-      msg += '  ' + (c.summary||c.id) + ' (' + c.accessRole + ')\n';
+      msg += '  ' + (c.summary||c.id) + ' | role:' + c.accessRole + ' | selected:' + (c.selected?'yes':'no') + '\n';
     });
+    if(cData.error) msg += '\nCAL ERROR: '+JSON.stringify(cData.error)+'\n';
     const now = new Date();
     const tMin = new Date(now.getFullYear()-1,0,1).toISOString();
     const tMax = new Date(now.getFullYear()+1,0,1).toISOString();
-    const eRes = await fetch(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events?'+
-      'timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+
-      '&maxResults=10&singleEvents=true',
-      {headers:{'Authorization':'Bearer '+token}});
-    const eData = await eRes.json();
-    msg += '\n📋 אירועים ב-primary (' + (eData.items||[]).length + '):\n';
-    (eData.items||[]).slice(0,5).forEach(e => {
-      msg += '  ' + (e.summary||'ללא שם') + ' — ' + (e.start&&(e.start.date||e.start.dateTime&&e.start.dateTime.slice(0,10))||'?') + '\n';
-    });
-    if(cData.error) msg += '\nשגיאה: ' + JSON.stringify(cData.error);
+    // בדוק כל calendar
+    let totalEvs = 0;
+    for(const cal of (cData.items||[]).slice(0,3)){
+      const eRes = await fetch(
+        'https://www.googleapis.com/calendar/v3/calendars/'+
+        encodeURIComponent(cal.id)+'/events?'+
+        'timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+
+        '&maxResults=5&singleEvents=true',
+        {headers:{'Authorization':'Bearer '+token}});
+      const eData = await eRes.json();
+      const evCount = (eData.items||[]).length;
+      totalEvs += evCount;
+      msg += '\n📋 ' + (cal.summary||cal.id) + ' (' + evCount + '):\n';
+      (eData.items||[]).slice(0,3).forEach(e => {
+        msg += '  ' + (e.summary||'ללא שם') + ' — ' + (e.start&&(e.start.date||e.start.dateTime&&e.start.dateTime.slice(0,10))||'?') + '\n';
+      });
+      if(eData.error) msg += '  ERROR: '+JSON.stringify(eData.error)+'\n';
+    }
+    msg += '\nסה"כ אירועים: ' + totalEvs;
     alert(msg);
   }catch(err){ alert('שגיאה: ' + err.message); }
 }
