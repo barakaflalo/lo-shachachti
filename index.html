@@ -3606,13 +3606,9 @@ function promptAndConnect(){
 }
 
 function connectGoogle(){
-  const lang = LANGUAGES[currentLang]||LANGUAGES['he'];
-  let clientId = localStorage.getItem(GCAL_CLIENT_ID_KEY)||'';
-  if(!clientId){
-    clientId = prompt(lang.gcalEnterClientId||'Google Client ID:', '');
-    if(!clientId) return;
-    localStorage.setItem(GCAL_CLIENT_ID_KEY, clientId.trim());
-  }
+  // Client ID מוגדר אוטומטית
+  const clientId = GCAL_DEFAULT_CLIENT_ID;
+  localStorage.setItem(GCAL_CLIENT_ID_KEY, clientId);
   localStorage.setItem('gcal_return_screen','screen-google-cal');
   const redirectUri = window.location.origin + window.location.pathname;
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
