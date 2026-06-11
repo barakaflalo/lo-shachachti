@@ -2607,13 +2607,46 @@ function renderCalendar(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['
       const _chdots=_chs.length>0?'<div style="display:flex;gap:2px;justify-content:center;margin-top:1px;">'+_chs.slice(0,3).map(h=>'<div style="width:5px;height:5px;border-radius:50%;background:'+h.color+';" title="'+h.name+'"></div>').join('')+'</div>':'';
       grid+='<div class="'+cls+'" onclick="onCalDay('+d+','+calMonth+','+calYear+')">'+d+_chdots+'</div>';}document.getElementById('main-calendar').innerHTML='<div class="cal-wrap"><div class="cal-header"><span class="cal-nav" onclick="changeMonth(1)">›</span><span>'+months[calMonth]+' '+calYear+'</span><span class="cal-nav" onclick="changeMonth(-1)">‹</span></div><div class="cal-days-header">'+dayNames.map(d=>'<div class="cal-day-name">'+d+'</div>').join('')+'</div><div class="cal-grid">'+grid+'</div></div>';}
 function changeMonth(delta){calMonth+=delta;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar(events.map(ev=>({...ev,...calcDays(ev)})));}
-function onCalDay(d,m,y){const today=new Date();if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear()&&events.length===0){openModal('modal-welcome-guide');return;}const dayEvents=events.filter(ev=>{if(!ev.date)return false;const ed=new Date(ev.date);const ey=getRecurrence(ev)==='yearly'?y:ed.getFullYear();return ey===y&&ed.getMonth()===m&&ed.getDate()===d;});if(!dayEvents.length)return;const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const cpTitle=document.getElementById('cal-popup-title');
+function onCalDay(d,m,y){
+  const today=new Date();
+  if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear()&&events.length===0){openModal('modal-welcome-guide');return;}
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  const dayEvents=events.filter(ev=>{if(!ev.date)return false;const ed=new Date(ev.date);const ey=getRecurrence(ev)==='yearly'?y:ed.getFullYear();return ey===y&&ed.getMonth()===m&&ed.getDate()===d;});
+  const dayHols=isHolidayDate(dateStr);
+  // פתח popup אם יש אירועים או חגים
+  if(!dayEvents.length && !dayHols.length) return;
+  // כותרת
+  const cpTitle=document.getElementById('cal-popup-title');
   if(cpTitle){
-    const dateStr3=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const dayHols=isHolidayDate(dateStr3);
     const holStr=dayHols.length>0?' • '+dayHols.map(h=>h.name).join(' • '):'';
-    cpTitle.textContent='📅 '+d+' '+(lang.calMonths[m])+holStr;
-  }const cpList=document.getElementById('cal-popup-list');if(cpList)cpList.innerHTML=dayEvents.map(ev=>{const calc=calcDays(ev);return'<div style="margin-bottom:8px;"><div style="display:flex;align-items:center;gap:8px;">'+avatarHTML(ev,'av-sm')+'<div><div style="font-size:13px;font-weight:500;">'+ev.name+'</div><div style="font-size:11px;color:var(--acc-light);">'+getLabel(ev.type,ev.customType)+'</div></div></div>'+countdownHTML(calc.daysLeft,calc.isOver)+'</div>';}).join('');openModal('modal-cal-popup');}
+    cpTitle.textContent='📅 '+d+' '+lang.calMonths[m]+holStr;
+  }
+  // תוכן
+  const cpList=document.getElementById('cal-popup-list');
+  if(cpList){
+    // חגים בראש
+    const holsHTML=dayHols.map(h=>
+      '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">'+
+        '<div style="width:10px;height:10px;border-radius:50%;background:'+h.color+';flex-shrink:0;"></div>'+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:600;">'+h.name+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);">'+
+            (h.religion==='jewish'?'✡️ יהודי':h.religion==='christian'?'✝️ נוצרי':h.religion==='muslim'?'☪️ מוסלמי':'🇮🇱 ישראלי')+
+          '</div>'+
+        '</div>'+
+      '</div>'
+    ).join('');
+    // אירועים
+    const eventsHTML=dayEvents.map(ev=>{const calc=calcDays(ev);return'<div style="margin-bottom:8px;padding-top:8px;">'+
+      '<div style="display:flex;align-items:center;gap:8px;">'+avatarHTML(ev,'av-sm')+
+      '<div><div style="font-size:13px;font-weight:500;">'+ev.name+'</div>'+
+      '<div style="font-size:11px;color:var(--acc-light);">'+getLabel(ev.type,ev.customType)+'</div></div></div>'+
+      countdownHTML(calc.daysLeft,calc.isOver)+'</div>';}).join('');
+    cpList.innerHTML=holsHTML+eventsHTML;
+  }
+  openModal('modal-cal-popup');
+}
 function closeCalPopup(){closeModal('modal-cal-popup');}
 function showTodayModal(todayEvents){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const title=todayEvents.length===1?'🎉 '+(lang.todayTitle||'היום יש אירוע!'):'🎉 '+(lang.todayTitlePlural||'היום יש {n} אירועים!').replace('{n}',todayEvents.length);document.getElementById('today-modal-title').textContent=title;document.getElementById('today-modal-events').innerHTML=todayEvents.map(ev=>'<div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:10px;">'+avatarHTML(ev,'av-sm')+'<div><div style="font-size:14px;font-weight:600;">'+ev.name+'</div><div style="font-size:12px;color:var(--acc-light);">'+getLabel(ev.type,ev.customType)+'</div></div></div>').join('');const bg=document.getElementById('btn-great');if(bg)bg.textContent=(lang.btnGreat||'אחלה! 🎊');openModal('modal-today');}
 function renderHero(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const upcoming=enriched.filter(e=>e.daysLeft!==null).sort((a,b)=>a.daysLeft-b.daysLeft);const heroEl=document.getElementById('main-hero');if(!upcoming.length&&events.length===0&&settings.isFirstTime){heroEl.innerHTML='<div class="hero-welcome" onclick="openModal(\'modal-welcome-guide\')"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><div style="font-size:28px;">🎉</div><div><div style="font-size:14px;font-weight:600;">'+lang.heroWelcome+'</div><div style="font-size:11px;color:var(--muted);">'+lang.heroWelcomeSub+'</div></div></div><span style="background:var(--acc-dim);color:var(--acc-light);font-size:10px;padding:3px 10px;border-radius:var(--rf);display:inline-block;">📖 '+(lang.heroGuide||'איך מתחילים?')+'</span></div>';return;}if(!upcoming.length){heroEl.innerHTML='';return;}const ev=upcoming[0];heroEl.innerHTML='<div class="hero-card" onclick="openDetail('+ev.id+')"><div class="hero-label">'+lang.heroUpcoming+'</div><div style="display:flex;align-items:center;gap:12px;margin-top:5px;">'+avatarHTML(ev,'av-sm')+'<div><div class="hero-name">'+ev.name+'</div><div style="font-size:11px;margin-top:2px;opacity:0.8;">'+getLabel(ev.type,ev.customType)+'</div></div></div><span class="hero-badge">'+(ev.daysLeft===0?'🎉 '+lang.today:ev.daysLeft===1?'🔥 '+lang.tomorrow:'📅 '+lang.inDays.replace('{n}',ev.daysLeft))+'</span></div>';}
