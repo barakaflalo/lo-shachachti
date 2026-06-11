@@ -622,6 +622,10 @@ body.dark-mode #splash { background: #12121f; }
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <!-- ===== MODALS ===== -->
+
+<!-- ========== SCREEN — HOLIDAYS ========== -->
+<div class="screen" id="screen-holidays"></div>
+
 <div class="modal-overlay center" id="modal-cal-popup">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -2264,39 +2268,36 @@ const SCREEN_RENDERERS = {
   'screen-holidays': () => {
     const lang = LANGUAGES[currentLang] || LANGUAGES['he'];
     const selected = JSON.parse(localStorage.getItem('ls2_holidays_selected')||'["jewish","israeli"]');
-    const religions = [
-      {key:'jewish',   icon:'\u2721\uFE0F', name_he:'\u05d9\u05d4\u05d5\u05d3\u05d9',          name_en:'Jewish',           color:'#3b82f6'},
-      {key:'christian',icon:'\u271D\uFE0F', name_he:'\u05e0\u05d5\u05e6\u05e8\u05d9',          name_en:'Christian',        color:'#10b981'},
-      {key:'muslim',   icon:'\u262A\uFE0F', name_he:'\u05de\u05d5\u05e1\u05dc\u05de\u05d9',    name_en:'Muslim',           color:'#f59e0b'},
-      {key:'israeli',  icon:'\U0001F1EE\U0001F1F1', name_he:'\u05d9\u05e9\u05e8\u05d0\u05dc\u05d9 \u05dc\u05d0\u05d5\u05de\u05d9', name_en:'Israeli National', color:'#6366f1'},
-    ];
     const isRtl = lang.dir === 'rtl';
+    const religions = [
+      {key:'jewish',   icon:'✡️', nameHe:'יהודי',           nameEn:'Jewish',           color:'#3b82f6'},
+      {key:'christian',icon:'✝️', nameHe:'נוצרי',           nameEn:'Christian',        color:'#10b981'},
+      {key:'muslim',   icon:'☪️', nameHe:'מוסלמי',     nameEn:'Muslim',           color:'#f59e0b'},
+      {key:'israeli',  icon:'🇮🇱', nameHe:'ישראלי לאומי',nameEn:'Israeli National',color:'#6366f1'},
+    ];
     let rows = '';
     religions.forEach(function(r){
       const isOn = selected.includes(r.key);
       const db = HOLIDAYS_DB[r.key];
       const count = db ? db.events.filter(function(e){return e.date>='2026'&&e.date<='2028';}).length : 0;
-      const name = isRtl ? r.name_he : r.name_en;
+      const name = isRtl ? r.nameHe : r.nameEn;
       rows += '<div class="toggle-row" style="padding:14px 0;border-bottom:1px solid var(--border);">' +
         '<div style="display:flex;align-items:center;gap:12px;">' +
-          '<div style="width:14px;height:14px;border-radius:50%;background:'+r.color+';flex-shrink:0;"></div>' +
+          '<div style="width:14px;height:14px;border-radius:50%;background:' + r.color + ';flex-shrink:0;"></div>' +
           '<div>' +
-            '<div style="font-size:14px;font-weight:500;">'+r.icon+' '+name+'</div>' +
-            '<div style="font-size:11px;color:var(--muted);">'+count+' '+(lang.holidayDates||'\u05ea\u05d0\u05e8\u05d9\u05db\u05d9\u05dd')+'</div>' +
+            '<div style="font-size:14px;font-weight:500;">' + r.icon + ' ' + name + '</div>' +
+            '<div style="font-size:11px;color:var(--muted);">' + count + ' ' + (lang.holidayDates||'תאריכים') + '</div>' +
           '</div>' +
         '</div>' +
-        '<div class="toggle'+(isOn?' on':'')+'" data-religion="'+r.key+'" onclick="toggleHolidayReligion(this)"></div>' +
+        '<div class="toggle' + (isOn ? ' on' : '') + '" data-religion="' + r.key + '" onclick="toggleHolidayReligion(this)"></div>' +
       '</div>';
     });
-    const desc = lang.holidaysDesc || '\u05d1\u05d7\u05e8 \u05d0\u05d9\u05dc\u05d5 \u05d7\u05d2\u05d9\u05dd \u05d9\u05e1\u05d5\u05de\u05e0\u05d5 \u05d1\u05dc\u05d5\u05d7 \u05d4\u05e9\u05e0\u05d4 \u05d1\u05e0\u05e7\u05d5\u05d3\u05d5\u05ea \u05e6\u05d1\u05e2\u05d5\u05e0\u05d9\u05d5\u05ea.';
-    const info = lang.holidaysInfo || '\u05d4\u05d7\u05d2\u05d9\u05dd \u05de\u05e1\u05d5\u05de\u05e0\u05d9\u05dd \u05d1\u05e0\u05e7\u05d5\u05d3\u05d4 \u05e6\u05d1\u05e2\u05d5\u05e0\u05d9\u05ea \u05d1\u05dc\u05d5\u05d7 \u05d5\u05dc\u05d0 \u05de\u05d5\u05e4\u05d9\u05e2\u05d9\u05dd \u05db\u05d0\u05d9\u05e8\u05d5\u05e2\u05d9\u05dd \u05d1\u05e8\u05e9\u05d9\u05de\u05d4';
-    const title = lang.menuHolidays || '\u05d7\u05d2\u05d9\u05dd \u05d1\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4';
-    return TB('\U0001F5D3\uFE0F ' + title, 'screen-system-settings') +
+    return TB('🗓️ ' + (lang.menuHolidays||'חגים בלוח שנה'), 'screen-system-settings') +
       '<div style="padding:12px 0;">' +
-        '<div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7;">'+desc+'</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7;">' + (lang.holidaysDesc||'בחר אילו חגים יסומנו בלוח') + '</div>' +
         rows +
         '<div style="margin-top:16px;padding:12px;background:var(--acc-dim);border-radius:var(--rs);">' +
-          '<div style="font-size:11px;color:var(--muted);line-height:1.8;">\U0001F4A1 '+info+'</div>' +
+          '<div style="font-size:11px;color:var(--muted);line-height:1.8;">💡 ' + (lang.holidaysInfo||'החגים מסומנים בנקודה צבעונית') + '</div>' +
         '</div>' +
       '</div>';
   },
@@ -2571,7 +2572,7 @@ function openScreen(id, animDir){
     setTimeout(()=>el.classList.remove('slide-in','slide-back','fade-in'), 300);
   }
   window.scrollTo(0,0);const map={'screen-main':renderMain,'screen-contacts':()=>{renderScreen('screen-contacts');renderContacts();},'screen-search':initSearch,
-    'screen-greetings':()=>{renderScreen('screen-greetings');renderGreetings();},'screen-my-greetings':()=>{renderScreen('screen-my-greetings');renderMyGreetings();},'screen-stores':()=>{renderScreen('screen-stores');renderStores();},'screen-budget-settings':()=>{renderScreen('screen-budget-settings');renderBudgetSettings();},'screen-print':()=>{renderScreen('screen-print');initPrint();},'screen-guide':()=>{renderScreen('screen-guide');},'screen-appearance':()=>{renderScreen('screen-appearance');renderAppearance();},'screen-language':()=>{renderScreen('screen-language');renderLanguageScreen();},'screen-add':()=>renderScreen('screen-add'),'screen-search':()=>{renderScreen('screen-search');initSearch();},'screen-guide-chapter':()=>renderScreen('screen-guide-chapter'),'screen-user-settings':()=>{renderScreen('screen-user-settings');initUserSettings();},'screen-notifications':()=>{renderScreen('screen-notifications');initNotifications();},'screen-settings':()=>renderScreen('screen-settings'),'screen-detail':()=>{/* rendered by openDetail */},'screen-holidays':()=>{renderScreen('screen-holidays');setTimeout(renderHolidaysSettings,30);},'screen-system-settings':()=>renderScreen('screen-system-settings'),'screen-import':()=>renderScreen('screen-import'),'screen-import-ics':()=>renderScreen('screen-import-ics'),'screen-google-cal':()=>renderScreen('screen-google-cal'),'screen-import-fb':()=>renderScreen('screen-import-fb'),'screen-backup':()=>renderScreen('screen-backup'),'screen-vcf-preview':()=>renderScreen('screen-vcf-preview')};if(map[id])map[id]();}
+    'screen-greetings':()=>{renderScreen('screen-greetings');renderGreetings();},'screen-my-greetings':()=>{renderScreen('screen-my-greetings');renderMyGreetings();},'screen-stores':()=>{renderScreen('screen-stores');renderStores();},'screen-budget-settings':()=>{renderScreen('screen-budget-settings');renderBudgetSettings();},'screen-print':()=>{renderScreen('screen-print');initPrint();},'screen-guide':()=>{renderScreen('screen-guide');},'screen-appearance':()=>{renderScreen('screen-appearance');renderAppearance();},'screen-language':()=>{renderScreen('screen-language');renderLanguageScreen();},'screen-add':()=>renderScreen('screen-add'),'screen-search':()=>{renderScreen('screen-search');initSearch();},'screen-guide-chapter':()=>renderScreen('screen-guide-chapter'),'screen-user-settings':()=>{renderScreen('screen-user-settings');initUserSettings();},'screen-notifications':()=>{renderScreen('screen-notifications');initNotifications();},'screen-settings':()=>renderScreen('screen-settings'),'screen-detail':()=>{/* rendered by openDetail */},'screen-holidays':()=>renderScreen('screen-holidays'),'screen-system-settings':()=>renderScreen('screen-system-settings'),'screen-import':()=>renderScreen('screen-import'),'screen-import-ics':()=>renderScreen('screen-import-ics'),'screen-google-cal':()=>renderScreen('screen-google-cal'),'screen-import-fb':()=>renderScreen('screen-import-fb'),'screen-backup':()=>renderScreen('screen-backup'),'screen-vcf-preview':()=>renderScreen('screen-vcf-preview')};if(map[id])map[id]();}
 function openModal(id){const el=document.getElementById(id);if(el)el.classList.add('open');}
 function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('open');}
 
