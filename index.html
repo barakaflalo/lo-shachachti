@@ -2265,39 +2265,40 @@ const SCREEN_RENDERERS = {
     const lang = LANGUAGES[currentLang] || LANGUAGES['he'];
     const selected = JSON.parse(localStorage.getItem('ls2_holidays_selected')||'["jewish","israeli"]');
     const religions = [
-      {key:'jewish',  icon:'✡️', name_he:'יהודי',         name_en:'Jewish',          color:'#3b82f6'},
-      {key:'christian',icon:'✝️', name_he:'נוצרי',        name_en:'Christian',       color:'#10b981'},
-      {key:'muslim',  icon:'☪️', name_he:'מוסלמי',        name_en:'Muslim',          color:'#f59e0b'},
-      {key:'israeli', icon:'🇮🇱', name_he:'ישראלי לאומי', name_en:'Israeli National', color:'#6366f1'},
+      {key:'jewish',   icon:'\u2721\uFE0F', name_he:'\u05d9\u05d4\u05d5\u05d3\u05d9',          name_en:'Jewish',           color:'#3b82f6'},
+      {key:'christian',icon:'\u271D\uFE0F', name_he:'\u05e0\u05d5\u05e6\u05e8\u05d9',          name_en:'Christian',        color:'#10b981'},
+      {key:'muslim',   icon:'\u262A\uFE0F', name_he:'\u05de\u05d5\u05e1\u05dc\u05de\u05d9',    name_en:'Muslim',           color:'#f59e0b'},
+      {key:'israeli',  icon:'\U0001F1EE\U0001F1F1', name_he:'\u05d9\u05e9\u05e8\u05d0\u05dc\u05d9 \u05dc\u05d0\u05d5\u05de\u05d9', name_en:'Israeli National', color:'#6366f1'},
     ];
-    const rows = religions.map(r => {
+    const isRtl = lang.dir === 'rtl';
+    let rows = '';
+    religions.forEach(function(r){
       const isOn = selected.includes(r.key);
       const db = HOLIDAYS_DB[r.key];
-      const count = db ? db.events.filter(e=>e.date>='2026'&&e.date<='2028').length : 0;
-      const name = lang.dir==='rtl' ? r.name_he : r.name_en;
-      return `<div class="toggle-row" style="padding:14px 0;border-bottom:1px solid var(--border);">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:14px;height:14px;border-radius:50%;background:${r.color};flex-shrink:0;"></div>
-          <div>
-            <div style="font-size:14px;font-weight:500;">${r.icon} ${name}</div>
-            <div style="font-size:11px;color:var(--muted);">${count} ${lang.holidayDates||'תאריכים'}</div>
-          </div>
-        </div>
-        <div class="toggle${isOn?' on':''}" data-religion="${r.key}" onclick="toggleHolidayReligion(this)"></div>
-      </div>`;
-    }).join('');
-    return TB('🗓️ ' + (lang.menuHolidays||'חגים בלוח שנה'), 'screen-system-settings') +
-    `<div style="padding:12px 0;">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7;">
-        ${lang.holidaysDesc||'בחר אילו חגים יסומנו בלוח השנה בנקודות צבעוניות.'}
-      </div>
-      ${rows}
-      <div style="margin-top:16px;padding:12px;background:var(--acc-dim);border-radius:var(--rs);">
-        <div style="font-size:11px;color:var(--muted);line-height:1.8;">
-          💡 ${lang.holidaysInfo||'החגים מסומנים בנקודה צבעונית בלוח ולא מופיעים כאירועים ברשימה'}
-        </div>
-      </div>
-    </div>`;
+      const count = db ? db.events.filter(function(e){return e.date>='2026'&&e.date<='2028';}).length : 0;
+      const name = isRtl ? r.name_he : r.name_en;
+      rows += '<div class="toggle-row" style="padding:14px 0;border-bottom:1px solid var(--border);">' +
+        '<div style="display:flex;align-items:center;gap:12px;">' +
+          '<div style="width:14px;height:14px;border-radius:50%;background:'+r.color+';flex-shrink:0;"></div>' +
+          '<div>' +
+            '<div style="font-size:14px;font-weight:500;">'+r.icon+' '+name+'</div>' +
+            '<div style="font-size:11px;color:var(--muted);">'+count+' '+(lang.holidayDates||'\u05ea\u05d0\u05e8\u05d9\u05db\u05d9\u05dd')+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="toggle'+(isOn?' on':'')+'" data-religion="'+r.key+'" onclick="toggleHolidayReligion(this)"></div>' +
+      '</div>';
+    });
+    const desc = lang.holidaysDesc || '\u05d1\u05d7\u05e8 \u05d0\u05d9\u05dc\u05d5 \u05d7\u05d2\u05d9\u05dd \u05d9\u05e1\u05d5\u05de\u05e0\u05d5 \u05d1\u05dc\u05d5\u05d7 \u05d4\u05e9\u05e0\u05d4 \u05d1\u05e0\u05e7\u05d5\u05d3\u05d5\u05ea \u05e6\u05d1\u05e2\u05d5\u05e0\u05d9\u05d5\u05ea.';
+    const info = lang.holidaysInfo || '\u05d4\u05d7\u05d2\u05d9\u05dd \u05de\u05e1\u05d5\u05de\u05e0\u05d9\u05dd \u05d1\u05e0\u05e7\u05d5\u05d3\u05d4 \u05e6\u05d1\u05e2\u05d5\u05e0\u05d9\u05ea \u05d1\u05dc\u05d5\u05d7 \u05d5\u05dc\u05d0 \u05de\u05d5\u05e4\u05d9\u05e2\u05d9\u05dd \u05db\u05d0\u05d9\u05e8\u05d5\u05e2\u05d9\u05dd \u05d1\u05e8\u05e9\u05d9\u05de\u05d4';
+    const title = lang.menuHolidays || '\u05d7\u05d2\u05d9\u05dd \u05d1\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4';
+    return TB('\U0001F5D3\uFE0F ' + title, 'screen-system-settings') +
+      '<div style="padding:12px 0;">' +
+        '<div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7;">'+desc+'</div>' +
+        rows +
+        '<div style="margin-top:16px;padding:12px;background:var(--acc-dim);border-radius:var(--rs);">' +
+          '<div style="font-size:11px;color:var(--muted);line-height:1.8;">\U0001F4A1 '+info+'</div>' +
+        '</div>' +
+      '</div>';
   },
 
   'screen-vcf-preview': () => {
