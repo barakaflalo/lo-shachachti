@@ -1,59 +1,60 @@
-// v25 — כולל i18n.js, network-first לקבצי JS
-const CACHE = 'lo-shachachti-v25';
-const FILES = [
-  './',
-  './index.html',
-  './style.css',
-  './app.js',
-  './i18n.js',
-  './manifest.json',
+// לא שכחתי v3 — Service Worker
+// cache: רק אייקונים ו-manifest. לא JS/HTML כדי שעדכונים יגיעו מיד
+
+const CACHE = 'lo-shachachti-v30';
+const STATIC = [
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './manifest.json',
+  './OneSignalSDKWorker.js',
 ];
 
+// install — cache רק קבצים סטטיים
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => {
-      // נסה להוסיף כל קובץ בנפרד — אם אחד נכשל, המשך
-      return Promise.allSettled(FILES.map(f => c.add(f)));
-    })
+    caches.open(CACHE).then(c => c.addAll(STATIC))
   );
   self.skipWaiting();
 });
 
+// activate — מחק כל cache ישן
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => {
-        console.log('[SW] Deleting old cache:', k);
-        return caches.delete(k);
-      }))
-    ).then(() => self.clients.claim())
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
   );
+  self.clients.claim();
 });
 
+// fetch — network first לכל קובץ JS/HTML, cache first רק לאייקונים
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  
-  // קבצי JS — network-first (תמיד קח מהרשת קודם)
-  if (url.pathname.endsWith('.js')) {
+  const isStatic = STATIC.some(f => url.pathname.endsWith(f.replace('./', '/')));
+
+  if (isStatic) {
+    // אייקונים: cache first
     e.respondWith(
-      fetch(e.request).then(response => {
-        // שמור בcache החדש
-        const clone = response.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-        return response;
-      }).catch(() => caches.match(e.request))
+      caches.match(e.request).then(cached => cached || fetch(e.request))
     );
-    return;
+  } else {
+    // index.html + כל השאר: network first (תמיד עדכני)
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          // cache אייקונים שמגיעים מ-network
+          if (isStatic) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
   }
-  
-  // שאר הקבצים — cache-first
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
 });
 
+// notification click
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(clients.openWindow('./'));
