@@ -2073,8 +2073,7 @@ function openDetail(id){
   _detailId=id;
   const ev=events.find(e=>e.id===id);
   if(!ev)return;
-  // פתח מסך קודם
-  openScreen('screen-detail');
+
   // מלא תוכן אחרי render
   setTimeout(()=>{
     const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
@@ -2089,7 +2088,12 @@ function openDetail(id){
     if(backBtn)backBtn.textContent=lang.btnBack||'← חזרה';
     const editBtn=document.getElementById('detail-edit-btn');
     if(editBtn)editBtn.textContent=lang.btnEdit||'✏️ ערוך';
-  }, 20);
+  // הצג מסך
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const detailScreen=document.getElementById('screen-detail');
+  if(detailScreen) detailScreen.classList.add('active');
+  }, 0);
+  window.scrollTo(0,0);
 }
 function updateDetailGreet(id){const ev=events.find(e=>e.id===id);if(!ev)return;const el=document.getElementById('greet-text-'+id);if(el)el.textContent=buildGreeting(ev);}
 function editCurrentDetail(){if(_detailId)editEvent(_detailId);}
