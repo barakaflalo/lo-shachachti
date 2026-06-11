@@ -2110,49 +2110,76 @@ function updateGiftDisplay(){const custom=document.getElementById('inp-gift-idea
 function getGiftIdea(){const custom=document.getElementById('inp-gift-idea').value;return[...selectedGiftTags,...(custom?[custom]:[])].join(', ');}
 function saveEvent(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const name=(document.getElementById('inp-name').value||'').trim();const date=document.getElementById('inp-date').value;if(!name||!date){alert(lang.alertNameDate||'שם ותאריך הם שדות חובה');return;}const gSel=document.getElementById('inp-group-select').value;const groupCustomEl=document.getElementById('inp-group-custom');const group=gSel==='custom'?(groupCustomEl?groupCustomEl.value.trim():''):gSel;const getVal=id=>{const el=document.getElementById(id);return el?el.value.trim():''};const getSelVal=id=>{const el=document.getElementById(id);return el?el.value:''};const data={name,date,type:getSelVal('inp-type'),customType:getVal('inp-custom-type'),recurrence:(document.getElementById('inp-recurrence')?document.getElementById('inp-recurrence').value:null)||null,gender:getSelVal('inp-gender')||'male',phone:getVal('inp-phone'),phone2:getVal('inp-phone2'),email:getVal('inp-email'),group,notes:getVal('inp-notes'),budget:getVal('inp-budget'),giftIdea:getGiftIdea(),giftStatus:getSelVal('inp-gift-status')||'pending',photo:_formPhoto||null,emoji:_formEmoji||null,customSound:_soundBlob||null};const editId=document.getElementById('editing-id').value;if(editId){const i=events.findIndex(e=>e.id===parseInt(editId));if(i!==-1)events[i]={...events[i],...data};}else{data.id=Date.now();data.notifications=[];events.unshift(data);if(settings.isFirstTime){settings.isFirstTime=false;saveSettings();}scheduleNotif(data);}saveEvents();playEventSound(data);clearForm();setTimeout(()=>openScreen('screen-main'),50);return false;}
 function saveAndEdit(){saveEvent();if(events.length){editEvent(events[0].id);document.getElementById('collapse-extra').classList.add('open');document.getElementById('btn-extra').classList.add('open');}}
-function editEvent(id){const ev=events.find(e=>e.id===id);if(!ev)return;const lang=LANGUAGES[currentLang]||LANGUAGES['he'];document.getElementById('form-title').textContent=lang.formEditTitle||'✏️ עריכת אירוע';document.getElementById('editing-id').value=id;document.getElementById('btn-delete-form').style.display='block';document.getElementById('inp-name').value=ev.name||'';document.getElementById('inp-date').value=ev.date||'';document.getElementById('inp-type').value=ev.type||'birthday';document.getElementById('inp-custom-type').value=ev.customType||'';document.getElementById('inp-custom-type').style.display=ev.type==='custom'?'block':'none';document.getElementById('inp-gender').value=ev.gender||'male';document.getElementById('inp-phone').value=ev.phone||'';document.getElementById('inp-phone2').value=ev.phone2||'';document.getElementById('inp-email').value=ev.email||'';document.getElementById('inp-notes').value=ev.notes||'';document.getElementById('inp-budget').value=ev.budget||'';document.getElementById('inp-gift-status').value=ev.giftStatus||'pending';const knownHe=['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'];const knownAll=[...new Set([...knownHe,...(lang.groups||[])])];if(knownAll.includes(ev.group)){document.getElementById('inp-group-select').value=ev.group;}else if(ev.group){document.getElementById('inp-group-select').value='custom';document.getElementById('inp-group-custom').value=ev.group;document.getElementById('inp-group-custom').style.display='block';}_formPhoto=ev.photo||null;_formEmoji=ev.emoji||null;_soundBlob=ev.customSound||null;if(_soundBlob&&document.getElementById('sound-label'))document.getElementById('sound-label').textContent='צליל שמור ✅';const rec=ev.recurrence||(YEARLY.includes(ev.type)?'yearly':'once');setTimeout(()=>setRecurrence(rec),50);updateFormAvatar();if(ev.giftIdea||ev.budget){document.getElementById('collapse-gift').classList.add('open');document.getElementById('btn-gift').classList.add('open');}if(ev.phone||ev.notes||ev.email){document.getElementById('collapse-extra').classList.add('open');document.getElementById('btn-extra').classList.add('open');}
-  // renderScreen('screen-add') already ran — now open it
+function editEvent(id){
+  const ev = events.find(e=>e.id===id);
+  if(!ev) return;
+  // 1. פתח מסך (renderScreen דרך openScreen map)
   openScreen('screen-add', 'back');
-  // re-fill after render (openScreen re-renders the screen)
+  // 2. מלא שדות אחרי שה-DOM מוכן
   setTimeout(()=>{
-    if(document.getElementById('inp-name')) document.getElementById('inp-name').value=ev.name||'';
-    if(document.getElementById('inp-date')) document.getElementById('inp-date').value=ev.date||'';
-    if(document.getElementById('inp-type')) document.getElementById('inp-type').value=ev.type||'birthday';
-    if(document.getElementById('inp-custom-type')){
-      document.getElementById('inp-custom-type').value=ev.customType||'';
-      document.getElementById('inp-custom-type').style.display=ev.type==='custom'?'block':'none';
+    const lang = LANGUAGES[currentLang]||LANGUAGES['he'];
+    // חיוני: editing-id
+    const ei = document.getElementById('editing-id');
+    if(ei) ei.value = id;
+    // כותרת וכפתור מחיקה
+    const ft = document.getElementById('form-title');
+    if(ft) ft.textContent = lang.formEditTitle||'✏️ עריכת אירוע';
+    const bd = document.getElementById('btn-delete-form');
+    if(bd) bd.style.display = 'block';
+    // שדות בסיסיים
+    const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+    set('inp-name', ev.name);
+    set('inp-date', ev.date);
+    set('inp-custom-type', ev.customType);
+    set('inp-gender', ev.gender||'male');
+    set('inp-phone', ev.phone);
+    set('inp-phone2', ev.phone2);
+    set('inp-email', ev.email);
+    set('inp-notes', ev.notes);
+    set('inp-budget', ev.budget);
+    // סוג אירוע
+    const typeEl = document.getElementById('inp-type');
+    if(typeEl) typeEl.value = ev.type||'birthday';
+    const ctEl = document.getElementById('inp-custom-type');
+    if(ctEl) ctEl.style.display = ev.type==='custom' ? 'block' : 'none';
+    // סטטוס מתנה
+    const gsEl = document.getElementById('inp-gift-status');
+    if(gsEl) gsEl.value = ev.giftStatus||'pending';
+    // קבוצה
+    const knownAll = [...new Set(['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים',...(lang.groups||[])])];
+    const groupSel = document.getElementById('inp-group-select');
+    const groupCustom = document.getElementById('inp-group-custom');
+    if(groupSel) {
+      if(knownAll.includes(ev.group)) {
+        groupSel.value = ev.group;
+      } else if(ev.group) {
+        groupSel.value = 'custom';
+        if(groupCustom) { groupCustom.value = ev.group; groupCustom.style.display = 'block'; }
+      }
     }
-    if(document.getElementById('inp-gender')) document.getElementById('inp-gender').value=ev.gender||'male';
-    if(document.getElementById('inp-phone')) document.getElementById('inp-phone').value=ev.phone||'';
-    if(document.getElementById('inp-phone2')) document.getElementById('inp-phone2').value=ev.phone2||'';
-    if(document.getElementById('inp-email')) document.getElementById('inp-email').value=ev.email||'';
-    if(document.getElementById('inp-notes')) document.getElementById('inp-notes').value=ev.notes||'';
-    if(document.getElementById('inp-budget')) document.getElementById('inp-budget').value=ev.budget||'';
-    if(document.getElementById('inp-gift-status')) document.getElementById('inp-gift-status').value=ev.giftStatus||'pending';
-    const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
-    const knownAll=[...new Set(['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים',...(lang.groups||[])])];
-    if(ev.group && knownAll.includes(ev.group)){
-      if(document.getElementById('inp-group-select')) document.getElementById('inp-group-select').value=ev.group;
-    } else if(ev.group){
-      if(document.getElementById('inp-group-select')) document.getElementById('inp-group-select').value='custom';
-      if(document.getElementById('inp-group-custom')){document.getElementById('inp-group-custom').value=ev.group;document.getElementById('inp-group-custom').style.display='block';}
-    }
-    if(ev.giftIdea||ev.budget){
+    // צליל/תמונה
+    _formPhoto = ev.photo||null;
+    _formEmoji = ev.emoji||null;
+    _soundBlob = ev.customSound||null;
+    const sl = document.getElementById('sound-label');
+    if(sl && _soundBlob) sl.textContent = lang.soundSaved||'צליל שמור ✅';
+    // חזרה (yearly/once)
+    const rec = ev.recurrence||(YEARLY.includes(ev.type)?'yearly':'once');
+    setRecurrence(rec);
+    // avatar
+    updateFormAvatar();
+    // collapse sections
+    if(ev.giftIdea||ev.budget) {
       const cg=document.getElementById('collapse-gift');const bg=document.getElementById('btn-gift');
       if(cg)cg.classList.add('open');if(bg)bg.classList.add('open');
     }
-    if(ev.phone||ev.notes||ev.email){
+    if(ev.phone||ev.notes||ev.email||ev.phone2) {
       const ce=document.getElementById('collapse-extra');const be=document.getElementById('btn-extra');
       if(ce)ce.classList.add('open');if(be)be.classList.add('open');
     }
-    const rec=ev.recurrence||(YEARLY.includes(ev.type)?'yearly':'once');
-    setRecurrence(rec);
-    updateFormAvatar();
-    // set form title and delete btn
-    const ft=document.getElementById('form-title');if(ft)ft.textContent=(LANGUAGES[currentLang]||LANGUAGES['he']).formEditTitle||'✏️ עריכת אירוע';
-    const bd=document.getElementById('btn-delete-form');if(bd)bd.style.display='block';
+    // gift tags
     initGiftTags();
-  }, 50);
+  }, 60);
 }
 function deleteCurrentEvent(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const id=parseInt(document.getElementById('editing-id').value);if(!id||!confirm(lang.alertDelete||'מחק?'))return;events=events.filter(e=>e.id!==id);saveEvents();playSound('delete');clearForm();openScreen('screen-main');}
 
