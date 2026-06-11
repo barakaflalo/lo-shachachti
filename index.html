@@ -3673,9 +3673,9 @@ async function syncGoogleCalendar(){
       throw new Error('Error '+calsRes.status);
     }
     const calsData = await calsRes.json();
-    const calendars = (calsData.items||[]).filter(c=>
-      c.accessRole==='owner' || c.accessRole==='writer' || c.primary
-    );
+    // קבל את כל הלוחות שנה כולל reader
+    const calendars = (calsData.items||[]);
+    console.log('All calendars:', calendars.map(c=>c.summary+'('+c.accessRole+')').join(', '));
 
     // שלוף אירועים מכל לוח שנה
     let allEvents = [];
@@ -3728,8 +3728,7 @@ function mergeWithGoogleEvents(googleEvents, lang){
   googleEvents.forEach(gEv=>{
     const dateStr = gEv.start&&(gEv.start.date||gEv.start.dateTime&&gEv.start.dateTime.slice(0,10));
     if(!dateStr) return;
-    const name=(gEv.summary||'').trim();
-    if(!name) return;
+    const name=(gEv.summary||'אירוע ללא שם').trim();
     if(events.some(e=>e.name===name&&e.date===dateStr)){skipped++;return;}
     const low=name.toLowerCase();
     let type='custom';
