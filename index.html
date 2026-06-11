@@ -1970,7 +1970,8 @@ function calcDays(ev){if(!ev.date)return{daysLeft:null,isOver:false};const today
 function countdownHTML(daysLeft,isOver){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];if(isOver||daysLeft===null)return'<span class="cd-far">'+lang.passed+'</span>';if(daysLeft===0)return'<span class="cd-today">🎉 '+lang.today+'</span>';if(daysLeft===1)return'<span class="cd-today">🔥 '+lang.tomorrow+'</span>';const txt=lang.inDays.replace('{n}',daysLeft);if(daysLeft<=7)return'<span class="cd-soon">⚡ '+txt+'</span>';if(daysLeft<=30)return'<span class="cd-normal">📅 '+txt+'</span>';return'<span class="cd-far">📅 '+txt+'</span>';}
 function urgencyBadge(daysLeft,isOver){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];if(isOver||daysLeft===null)return'<span class="badge badge-gray">'+lang.passed+'</span>';if(daysLeft===0)return'<span class="badge badge-red badge-urgent">'+lang.today+'</span>';if(daysLeft===1)return'<span class="badge badge-red badge-urgent">'+lang.tomorrow+'</span>';if(daysLeft<=7)return'<span class="badge badge-amber">'+daysLeft+' '+lang.daysLeft+'</span>';if(daysLeft<=30)return'<span class="badge badge-purple">'+daysLeft+' '+lang.daysLeft+'</span>';return'<span class="badge badge-gray">'+daysLeft+' '+lang.daysLeft+'</span>';}
 function buildGreeting(ev){const type=ev.type||'custom';let variants;if(type==='birthday'){const gender=ev.gender||'male';variants=gender==='female'?(greetings['birthday_female']||greetings['birthday']):(greetings['birthday_male']||greetings['birthday']);}else{variants=greetings[type]||greetings.custom;}if(!variants||!variants.length){const fb=LANGUAGES['he'].greetings;variants=fb[type]||fb.custom||['מזל טוב! 🎉'];}const idx=greetVariants[ev.id]||0;const text=variants[idx%variants.length]||variants[0]||'🎉';return text.replace(/{name}/g,ev.name||'');}
-function nextVariant(id){const ev=events.find(e=>e.id===id);if(!ev)return;let variants;if(ev.type==='birthday'){variants=ev.gender==='female'?(greetings['birthday_female']||greetings['birthday']):(greetings['birthday_male']||greetings['birthday']);}else{variants=greetings[ev.type]||greetings.custom;}if(!variants||!variants.length)variants=LANGUAGES['he'].greetings[ev.type]||LANGUAGES['he'].greetings.custom;greetVariants[id]=((greetVariants[id]||0)+1)%variants.length;const el=document.getElementById('greet-text-'+id);if(el)el.textContent=buildGreeting(ev);playSound('greet');}
+function nextVariant(id){
+  id=parseInt(id)||id;const ev=events.find(e=>e.id===id);if(!ev)return;let variants;if(ev.type==='birthday'){variants=ev.gender==='female'?(greetings['birthday_female']||greetings['birthday']):(greetings['birthday_male']||greetings['birthday']);}else{variants=greetings[ev.type]||greetings.custom;}if(!variants||!variants.length)variants=LANGUAGES['he'].greetings[ev.type]||LANGUAGES['he'].greetings.custom;greetVariants[id]=((greetVariants[id]||0)+1)%variants.length;const el=document.getElementById('greet-text-'+id);if(el)el.textContent=buildGreeting(ev);playSound('greet');}
 
 // ================================================================
 // ===== SCREEN NAV =====
@@ -2060,7 +2061,8 @@ function renderEventsList(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES
 
 function buildCard(ev){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const storeLinks=ev.giftIdea?(settings.activeStores||['Amazon','KSP','זאפ']).map(s=>'<a href="https://www.google.com/search?q='+encodeURIComponent(ev.giftIdea+' '+s)+'" target="_blank" class="store-link">🔍 '+s+'</a>').join(''):'';const giftHtml=(ev.giftIdea||ev.budget)?('<div class="gift-box"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:11px;color:var(--green);">🎁 '+(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+'</span><button onclick="event.stopPropagation();toggleGift('+ev.id+')" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:3px 9px;border-radius:var(--rf);font-size:11px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>'):'';const myGreetText=myGreetings.find(g=>g)?myGreetings.find(g=>g).replace(/{name}/g,ev.name||''):lang.greetFree;return'<div class="event-card new-card" id="card-'+ev.id+'"><div class="event-card-main"><div onclick="openDetail('+ev.id+')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;">'+avatarHTML(ev,'av-sm')+'<div style="flex:1;"><div style="font-weight:600;font-size:16px;">'+ev.name+'</div><div style="font-size:12px;color:var(--accent);">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:4px;">'+countdownHTML(ev.daysLeft,ev.isOver)+'</div></div></div>'+urgencyBadge(ev.daysLeft,ev.isOver)+'</div><div class="event-actions"><button class="card-btn share" onclick="shareEvent('+ev.id+')">📱</button><button class="card-btn" onclick="editEvent('+ev.id+')">✏️</button><button class="card-btn" onclick="toggleDetails('+ev.id+',this)">⚙️ ▼</button></div><div class="details-panel" id="dp-'+ev.id+'">'+(ev.group?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">🏷️</span><span>'+ev.group+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div style="font-size:12px;color:var(--muted);padding:6px 0;">💡 '+ev.notes+'</div>':'')+giftHtml+'<div class="greet-box" style="margin-bottom:8px;"><div class="greet-label"><span>'+lang.greetLabel+'</span><div style="display:flex;gap:5px;"><button class="greet-next-btn" onclick="nextVariant('+ev.id+')">'+lang.greetNext+'</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.2);" onclick="openAiGreet('+ev.id+')">'+lang.greetAI+'</button></div></div><div class="greet-text" id="greet-text-'+ev.id+'">'+buildGreeting(ev)+'</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyGreet('+ev.id+')">'+lang.greetCopy+'</button></div></div><div class="greet-box"><div class="greet-label"><span>'+lang.greetPersonal+'</span>'+(myGreetings.some(g=>g)?'<button class="greet-next-btn" onclick="nextMyGreet('+ev.id+')">'+lang.greetNext+'</button>':'')+'</div><div class="greet-text" id="my-greet-text-'+ev.id+'">'+myGreetText+'</div><textarea id="free-greet-ta-'+ev.id+'" class="form-textarea" style="min-height:55px;margin-bottom:8px;display:none;" placeholder="'+lang.greetFreePlaceholder+'"></textarea><div class="greet-actions"><button class="greet-btn" onclick="sendMyGreetOrFree('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyMyGreetOrFree('+ev.id+')">'+lang.greetCopy+'</button><button class="greet-btn sec" onclick="toggleFreeGreet('+ev.id+')" style="flex:0;padding:8px 10px;">✏️</button></div></div></div></div>';}
 
-function toggleDetails(id,btn){const p=document.getElementById('dp-'+id);p.classList.toggle('open');btn.textContent=p.classList.contains('open')?'▲':'⚙️ ▼';}
+function toggleDetails(id,btn){
+  id=parseInt(id)||id;const p=document.getElementById('dp-'+id);p.classList.toggle('open');btn.textContent=p.classList.contains('open')?'▲':'⚙️ ▼';}
 function renderFilterBar(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const el=document.getElementById('main-filter-bar');if(!el)return;const filter=settings.defaultFilter||'30';const sort=settings.defaultSort||'date';el.innerHTML='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;"><div class="chip'+(filter==='30'?' active':'')+'" onclick="setQuickFilter(\'30\')">⏳ '+lang.filter30+'</div><div class="chip'+(filter==='future'?' active':'')+'" onclick="setQuickFilter(\'future\')">📅 '+lang.filterFuture+'</div><div class="chip'+(filter==='all'?' active':'')+'" onclick="setQuickFilter(\'all\')">♾️ '+lang.filterAll+'</div><div class="chip'+(filter==='past'?' active':'')+'" onclick="setQuickFilter(\'past\')">📂 '+lang.filterPast+'</div><div class="chip'+(sort==='date'?' active':'')+'" onclick="setQuickSort(\'date\')">📅 '+lang.sortDate+'</div><div class="chip'+(sort==='name'?' active':'')+'" onclick="setQuickSort(\'name\')">🔤 '+lang.sortName+'</div></div>';}
 function setQuickFilter(f){settings.defaultFilter=f;saveSettings();const e=events.map(ev=>({...ev,...calcDays(ev)}));renderFilterBar();renderEventsList(e);}
 function setQuickSort(s){settings.defaultSort=s;saveSettings();const e=events.map(ev=>({...ev,...calcDays(ev)}));renderFilterBar();renderEventsList(e);}
@@ -2070,6 +2072,7 @@ function setQuickSort(s){settings.defaultSort=s;saveSettings();const e=events.ma
 // ================================================================
 let _detailId=null;
 function openDetail(id){
+  id=parseInt(id)||id; // handle string id from onclick
   _detailId=id;
   const ev=events.find(e=>e.id===id);
   if(!ev)return;
@@ -2097,7 +2100,8 @@ function openDetail(id){
 }
 function updateDetailGreet(id){const ev=events.find(e=>e.id===id);if(!ev)return;const el=document.getElementById('greet-text-'+id);if(el)el.textContent=buildGreeting(ev);}
 function editCurrentDetail(){if(_detailId)editEvent(_detailId);}
-function deleteEventDirect(id){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];if(!confirm(lang.alertDelete||'מחק?'))return;events=events.filter(e=>e.id!==id);saveEvents();playSound('delete');openScreen('screen-main');}
+function deleteEventDirect(id){
+  id=parseInt(id)||id;const lang=LANGUAGES[currentLang]||LANGUAGES['he'];if(!confirm(lang.alertDelete||'מחק?'))return;events=events.filter(e=>e.id!==id);saveEvents();playSound('delete');openScreen('screen-main');}
 
 // ================================================================
 // ===== FORM =====
@@ -2133,6 +2137,7 @@ function getGiftIdea(){const custom=document.getElementById('inp-gift-idea').val
 function saveEvent(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const name=(document.getElementById('inp-name').value||'').trim();const date=document.getElementById('inp-date').value;if(!name||!date){alert(lang.alertNameDate||'שם ותאריך הם שדות חובה');return;}const gSel=document.getElementById('inp-group-select').value;const groupCustomEl=document.getElementById('inp-group-custom');const group=gSel==='custom'?(groupCustomEl?groupCustomEl.value.trim():''):gSel;const getVal=id=>{const el=document.getElementById(id);return el?el.value.trim():''};const getSelVal=id=>{const el=document.getElementById(id);return el?el.value:''};const data={name,date,type:getSelVal('inp-type'),customType:getVal('inp-custom-type'),recurrence:(document.getElementById('inp-recurrence')?document.getElementById('inp-recurrence').value:null)||null,gender:getSelVal('inp-gender')||'male',phone:getVal('inp-phone'),phone2:getVal('inp-phone2'),email:getVal('inp-email'),group,notes:getVal('inp-notes'),budget:getVal('inp-budget'),giftIdea:getGiftIdea(),giftStatus:getSelVal('inp-gift-status')||'pending',photo:_formPhoto||null,emoji:_formEmoji||null,customSound:_soundBlob||null};const editId=document.getElementById('editing-id').value;if(editId){const i=events.findIndex(e=>e.id===parseInt(editId));if(i!==-1)events[i]={...events[i],...data};}else{data.id=Date.now();data.notifications=[];events.unshift(data);if(settings.isFirstTime){settings.isFirstTime=false;saveSettings();}scheduleNotif(data);}saveEvents();playEventSound(data);clearForm();setTimeout(()=>openScreen('screen-main'),50);return false;}
 function saveAndEdit(){saveEvent();if(events.length){editEvent(events[0].id);document.getElementById('collapse-extra').classList.add('open');document.getElementById('btn-extra').classList.add('open');}}
 function editEvent(id){
+  id=parseInt(id)||id;
   const ev = events.find(e=>e.id===id);
   if(!ev) return;
   // 1. פתח מסך (renderScreen דרך openScreen map)
@@ -2245,6 +2250,7 @@ function playEventSound(ev){
 // ===== GIFT =====
 // ================================================================
 function toggleGift(id){
+  id=parseInt(id)||id;
   const ev=events.find(e=>e.id===id);if(!ev)return;
   const wasPending = ev.giftStatus !== 'paid';
   ev.giftStatus=ev.giftStatus==='paid'?'pending':'paid';
@@ -2284,6 +2290,7 @@ function playGiftBought(){
 // ===== SHARE =====
 // ================================================================
 function sendWhatsApp(id){
+  id=parseInt(id)||id;
   const ev=events.find(e=>e.id===id);if(!ev)return;
   playSound('greet');
   // שמור זמן שליחה אחרון
@@ -2305,6 +2312,7 @@ function lastSentLabel(ts){
   return '';
 }
 function copyGreet(id){
+  id=parseInt(id)||id;
   const ev=events.find(e=>e.id===id);if(!ev)return;
   playSound('greet');
   navigator.clipboard.writeText(buildGreeting(ev)).then(()=>{
@@ -2312,6 +2320,7 @@ function copyGreet(id){
   });
 }
 function shareEvent(id){
+  id=parseInt(id)||id;
   const ev=events.find(e=>e.id===id);if(!ev)return;
   const calc=calcDays(ev);
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
@@ -3135,6 +3144,7 @@ function confirmVCFImport(){
 // ================================================================
 const myGreetCardIdx={};
 function nextMyGreet(id){
+  id=parseInt(id)||id;
   const filtered=myGreetings.filter(g=>g);if(!filtered.length)return;
   myGreetCardIdx[id]=((myGreetCardIdx[id]||0)+1)%filtered.length;
   const ev=events.find(e=>e.id===id);if(!ev)return;
@@ -3168,6 +3178,7 @@ function getMyGreetText(id){
   return '';
 }
 function sendMyGreetOrFree(id){
+  id=parseInt(id)||id;
   const ev=events.find(e=>e.id===id);if(!ev)return;
   const text=getMyGreetText(id);
   if(!text){alert((LANGUAGES[currentLang]||LANGUAGES['he']).alertNoGreeting||'אין ברכה');return;}
@@ -3177,6 +3188,7 @@ function sendMyGreetOrFree(id){
   window.open(url,'_blank');
 }
 function copyMyGreetOrFree(id){
+  id=parseInt(id)||id;
   const text=getMyGreetText(id);
   if(!text){alert((LANGUAGES[currentLang]||LANGUAGES['he']).alertNoGreetingShort||'אין ברכה');return;}
   playSound('greet');
@@ -3188,6 +3200,7 @@ function copyMyGreetOrFree(id){
 // ================================================================
 let _aiEventId=null,_aiResult='';
 function openAiGreet(id){
+  id=parseInt(id)||id;
   _aiEventId=id;_aiResult='';
   document.getElementById('ai-result-box').style.display='none';
   document.getElementById('ai-result-text').textContent='';
