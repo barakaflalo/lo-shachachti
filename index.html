@@ -1018,9 +1018,7 @@ body.dark-mode #splash { background: #12121f; }
       </div>
     </div>
 
-    <button class="btn-primary" onclick="closeModal('modal-gcal-guide');promptAndConnect()">
-      ✅ מוכן — התחבר עם גוגל
-    </button>
+    <button class="btn-primary" onclick="connectGoogle()" style="max-width:260px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:8px;"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px;">${lang.gcalConnect||'התחבר עם גוגל'}</button>
     <button class="btn-ghost" onclick="closeModal('modal-gcal-guide')" style="margin-top:6px;">
       אחר כך
     </button>
@@ -3595,14 +3593,12 @@ function copyAiGreeting(){
 // ===== GOOGLE CALENDAR API =====
 // ================================================================
 const GCAL_CLIENT_ID_KEY = 'gcal_client_id';
+const GCAL_DEFAULT_CLIENT_ID = '851085476702-p276fhlm9dnksc6dnp5njsgddjakfern.apps.googleusercontent.com';
 const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events';
 
 
 function promptAndConnect(){
-  const lang = LANGUAGES[currentLang]||LANGUAGES['he'];
-  const clientId = prompt(lang.gcalEnterClientId||'הזן את ה-Client ID שקיבלת מגוגל:', localStorage.getItem(GCAL_CLIENT_ID_KEY)||'');
-  if(!clientId || !clientId.trim()) return;
-  localStorage.setItem(GCAL_CLIENT_ID_KEY, clientId.trim());
+  // Client ID מוגדר אוטומטית - פשוט התחבר
   connectGoogle();
 }
 
