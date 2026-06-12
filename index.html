@@ -646,9 +646,9 @@ body.dark-mode #splash { background: #12121f; }
 <div class="modal-overlay center" id="modal-about">
   <div class="modal-box" style="text-align:center;">
     <div style="font-size:48px;margin-bottom:8px;">🔔</div>
-    <div style="font-size:18px;font-weight:700;margin-bottom:4px;">לא שכחתי</div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px;" id="about-app-name">לא שכחתי</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">v3.0 · AppNest · ברק אפללו</div>
-    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;">
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;" id="about-desc">
       האפליקציה שתזכיר לך כל אירוע חשוב.<br>
       5 שפות · AI ברכות · PWA · ייבוא/ייצוא
     </div>
@@ -656,17 +656,17 @@ body.dark-mode #splash { background: #12121f; }
       <a href="https://barakaflalo.github.io/lo-shachachti" target="_blank"
          style="font-size:11px;color:var(--acc-light);">🌐 barakaflalo.github.io/lo-shachachti</a>
     </div>
-    <button class="btn-primary" onclick="closeModal('modal-about')">סגור</button>
+    <button class="btn-primary" onclick="closeModal('modal-about')" id="about-close-btn">סגור</button>
   </div>
 </div>
 
 <div class="modal-overlay center" id="modal-rights">
   <div class="modal-box" style="text-align:center;">
     <div class="modal-icon">©</div>
-    <div class="modal-title">זכויות יוצרים</div>
-    <div class="modal-sub">כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "לא שכחתי" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span></div>
+    <div class="modal-title" id="rights-title">זכויות יוצרים</div>
+    <div class="modal-sub" id="rights-text">כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "לא שכחתי" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span></div>
     <a href="mailto:loshachachti.app@gmail.com" style="display:block;padding:10px;background:var(--acc-dim);border:1px solid var(--acc-border);color:var(--acc-light);border-radius:var(--rs);font-size:12px;text-decoration:none;margin-bottom:10px;">✉️ loshachachti.app@gmail.com</a>
-    <button class="btn-ghost" onclick="closeModal('modal-rights')">סגור</button>
+    <button class="btn-ghost" onclick="closeModal('modal-rights')" id="rights-close-btn">סגור</button>
   </div>
 </div>
 
@@ -674,35 +674,35 @@ body.dark-mode #splash { background: #12121f; }
   <div class="modal-box">
     <div style="text-align:center;margin-bottom:14px;">
       <div style="font-size:32px;margin-bottom:8px;">🔔</div>
-      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">איך עובדים עם האפליקציה?</div>
-      <div style="font-size:11px;color:var(--muted);">מדריך קצר ב-5 שלבים</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;" id="welcome-title">איך עובדים עם האפליקציה?</div>
+      <div style="font-size:11px;color:var(--muted);" id="welcome-sub">מדריך קצר ב-5 שלבים</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <div class="step-num">1</div>
-        <div><div style="font-size:12px;font-weight:500;">➕ לחץ "הוסף אירוע"</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">הכפתור הכחול במסך הראשי</div></div>
+        <div><div style="font-size:12px;font-weight:500;" id="welcome-step1-title">➕ לחץ "הוסף אירוע"</div><div style="font-size:11px;color:var(--muted);margin-top:2px;" id="welcome-step1-sub">הכפתור הכחול במסך הראשי</div></div>
       </div>
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <div class="step-num">2</div>
-        <div><div style="font-size:12px;font-weight:500;">📝 הכנס שם ותאריך</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">שם האדם + תאריך האירוע</div></div>
+        <div><div style="font-size:12px;font-weight:500;" id="welcome-step2-title">📝 הכנס שם ותאריך</div><div style="font-size:11px;color:var(--muted);margin-top:2px;" id="welcome-step2-sub">שם האדם + תאריך האירוע</div></div>
       </div>
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <div class="step-num">3</div>
-        <div><div style="font-size:12px;font-weight:500;">🎉 בחר סוג אירוע</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">יום הולדת, אזכרה, חתונה ועוד 9 סוגים</div></div>
+        <div><div style="font-size:12px;font-weight:500;" id="welcome-step3-title">🎉 בחר סוג אירוע</div><div style="font-size:11px;color:var(--muted);margin-top:2px;" id="welcome-step3-sub">יום הולדת, אזכרה, חתונה ועוד 9 סוגים</div></div>
       </div>
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <div class="step-num">4</div>
-        <div><div style="font-size:12px;font-weight:500;">👥 בחר קבוצה</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">משפחה / חברים / עבודה...</div></div>
+        <div><div style="font-size:12px;font-weight:500;" id="welcome-step4-title">👥 בחר קבוצה</div><div style="font-size:11px;color:var(--muted);margin-top:2px;" id="welcome-step4-sub">משפחה / חברים / עבודה...</div></div>
       </div>
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <div class="step-num">5</div>
-        <div><div style="font-size:12px;font-weight:500;">💾 שמור ותקבל תזכורות!</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">האפליקציה תזכיר לך לפני כל אירוע</div></div>
+        <div><div style="font-size:12px;font-weight:500;" id="welcome-step5-title">💾 שמור ותקבל תזכורות!</div><div style="font-size:11px;color:var(--muted);margin-top:2px;" id="welcome-step5-sub">האפליקציה תזכיר לך לפני כל אירוע</div></div>
       </div>
     </div>
-    <div class="tip-card"><div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;">⭐ טיפ חכם</div><div style="font-size:11px;color:var(--muted);">לחץ "שמור וערוך פרטים" כדי להוסיף מיד טלפון, מתנה ותזכורות!</div></div>
-    <button class="btn-primary" onclick="closeModal('modal-welcome-guide');openAddForm()">➕ הוסף אירוע ראשון עכשיו!</button>
-    <button class="btn-secondary" onclick="closeModal('modal-welcome-guide');openScreen('screen-guide')">📖 מדריך מלא</button>
-    <button class="btn-ghost" onclick="closeModal('modal-welcome-guide')">אחר כך</button>
+    <div class="tip-card"><div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;" id="welcome-tip-label">⭐ טיפ חכם</div><div style="font-size:11px;color:var(--muted);" id="welcome-tip-text">לחץ "שמור וערוך פרטים" כדי להוסיף מיד טלפון, מתנה ותזכורות!</div></div>
+    <button class="btn-primary" onclick="closeModal('modal-welcome-guide');openAddForm()" id="welcome-btn-add">➕ הוסף אירוע ראשון עכשיו!</button>
+    <button class="btn-secondary" onclick="closeModal('modal-welcome-guide');openScreen('screen-guide')" id="welcome-btn-guide">📖 מדריך מלא</button>
+    <button class="btn-ghost" onclick="closeModal('modal-welcome-guide')" id="welcome-btn-later">אחר כך</button>
   </div>
 </div>
 
@@ -719,24 +719,13 @@ body.dark-mode #splash { background: #12121f; }
 
 <div class="modal-overlay" id="modal-photo">
   <div class="bottom-sheet">
-    <div style="text-align:center;font-size:13px;font-weight:500;color:var(--acc-light);margin-bottom:14px;">הוסף תמונה לאיש קשר</div>
-    <div class="sheet-option" onclick="triggerCamera()"><span style="font-size:22px;">📷</span><div><div style="font-size:13px;font-weight:500;">צלם עכשיו</div><div style="font-size:11px;color:var(--muted);">פתח מצלמה</div></div></div>
-    <div class="sheet-option" onclick="triggerGallery()"><span style="font-size:22px;">🖼️</span><div><div style="font-size:13px;font-weight:500;">בחר מהגלריה</div><div style="font-size:11px;color:var(--muted);">העלה תמונה קיימת</div></div></div>
-    <div class="sheet-option" onclick="openEmojiPicker()"><span style="font-size:22px;">😊</span><div><div style="font-size:13px;font-weight:500;">בחר אמוג'י</div><div style="font-size:11px;color:var(--muted);">במקום תמונה</div></div></div>
-    <div class="sheet-option" style="border-color:rgba(239,68,68,0.3);" onclick="removePhoto()"><span style="font-size:22px;">🗑️</span><div><div style="font-size:13px;font-weight:500;color:#f87171;">הסר תמונה</div><div style="font-size:11px;color:var(--muted);">חזור לאות ראשית</div></div></div>
+    <div style="text-align:center;font-size:13px;font-weight:500;color:var(--acc-light);margin-bottom:14px;" id="photo-title">הוסף תמונה לאיש קשר</div>
+    <div class="sheet-option" onclick="triggerCamera()"><span style="font-size:22px;">📷</span><div><div style="font-size:13px;font-weight:500;" id="photo-take-now">צלם עכשיו</div><div style="font-size:11px;color:var(--muted);" id="photo-open-camera">פתח מצלמה</div></div></div>
+    <div class="sheet-option" onclick="triggerGallery()"><span style="font-size:22px;">🖼️</span><div><div style="font-size:13px;font-weight:500;" id="photo-choose-gallery">בחר מהגלריה</div><div style="font-size:11px;color:var(--muted);" id="photo-upload-existing">העלה תמונה קיימת</div></div></div>
+    <div class="sheet-option" onclick="openEmojiPicker()"><span style="font-size:22px;">😊</span><div><div style="font-size:13px;font-weight:500;" id="photo-choose-emoji">בחר אמוג'י</div><div style="font-size:11px;color:var(--muted);" id="photo-instead-image">במקום תמונה</div></div></div>
+    <div class="sheet-option" style="border-color:rgba(239,68,68,0.3);" onclick="removePhoto()"><span style="font-size:22px;">🗑️</span><div><div style="font-size:13px;font-weight:500;color:#f87171;" id="photo-remove">הסר תמונה</div><div style="font-size:11px;color:var(--muted);" id="photo-back-initial">חזור לאות ראשית</div></div></div>
     <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="onPhotoSelected(this)">
-    <button class="btn-ghost" onclick="closeModal('modal-photo')">ביטול</button>
-  </div>
-</div>
-
-<div class="modal-overlay center" id="modal-deleted-google">
-  <div class="modal-box danger">
-    <div class="modal-icon">🗓️</div>
-    <div class="modal-title">אירוע נמחק מגוגל</div>
-    <div class="modal-sub">לא נמצא בלוח השנה שלך בגוגל.<br>אולי נמחק בטעות?</div>
-    <div id="deleted-google-content"></div>
-    <button class="btn-ghost" onclick="closeModal('modal-deleted-google')">✅ שמור באפליקציה</button>
-    <button class="btn-danger" onclick="confirmDeleteGoogle()">🗑️ הסר גם מהאפליקציה</button>
+    <button class="btn-ghost" onclick="closeModal('modal-photo')" id="photo-cancel-btn">ביטול</button>
   </div>
 </div>
 
@@ -873,24 +862,24 @@ body.dark-mode #splash { background: #12121f; }
 <div class="modal-overlay center" id="modal-ai-greet">
   <div class="modal-box" style="max-height:85vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="font-size:15px;font-weight:600;">✨ ברכה עם AI</div>
+      <div style="font-size:15px;font-weight:600;" id="ai-greet-title">✨ ברכה עם AI</div>
       <span onclick="closeModal('modal-ai-greet')" style="cursor:pointer;color:var(--muted);font-size:20px;">✕</span>
     </div>
 
     <!-- שלב 1: הגדרת מפתח -->
     <div id="ai-setup-step">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;" id="ai-greet-desc">
         כדי לייצר ברכה אישית עם AI, צריך מפתח API חינמי מ-OpenAI או Google Gemini.
       </div>
       <div class="form-group">
-        <label class="form-label">🔑 ספק AI</label>
+        <label class="form-label" id="ai-provider-label">🔑 ספק AI</label>
         <select class="form-select" id="ai-provider-select" onchange="onAiProviderChange()">
           <option value="openai">OpenAI (GPT)</option>
           <option value="gemini">Google Gemini</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">🔑 מפתח API</label>
+        <label class="form-label" id="ai-key-label">🔑 מפתח API</label>
         <div style="display:flex;gap:8px;">
           <input class="form-input" type="password" id="ai-key-input" placeholder="sk-..." style="flex:1;">
           <button class="back-btn" onclick="toggleAiKeyVisibility()" id="ai-key-eye" style="padding:8px 12px;">👁️</button>
@@ -898,17 +887,17 @@ body.dark-mode #splash { background: #12121f; }
         <a id="ai-get-key-link" href="https://platform.openai.com/api-keys" target="_blank"
            style="font-size:11px;color:var(--acc-light);display:block;margin-top:5px;">קבל מפתח OpenAI ›</a>
       </div>
-      <button class="btn-primary" onclick="saveAiKey()">💾 שמור מפתח</button>
+      <button class="btn-primary" onclick="saveAiKey()" id="ai-save-key-btn">💾 שמור מפתח</button>
     </div>
 
     <!-- שלב 2: יצירת ברכה -->
     <div id="ai-generate-step" style="display:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <div style="font-size:11px;color:var(--muted);" id="ai-key-preview"></div>
-        <button class="back-btn" onclick="showAiSetup()" style="font-size:11px;padding:4px 8px;">✏️ החלף</button>
+        <button class="back-btn" onclick="showAiSetup()" style="font-size:11px;padding:4px 8px;" id="ai-change-key-btn">✏️ החלף</button>
       </div>
       <div class="form-group">
-        <label class="form-label">🎨 סגנון</label>
+        <label class="form-label" id="ai-style-label">🎨 סגנון</label>
         <select class="form-select" id="ai-style-select">
           <option value="warm" id="ai-style-warm">חמה ואישית</option>
           <option value="funny" id="ai-style-funny">הומוריסטית</option>
@@ -918,7 +907,7 @@ body.dark-mode #splash { background: #12121f; }
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">💡 פרטים נוספים (אופציונלי)</label>
+        <label class="form-label" id="ai-extra-label">💡 פרטים נוספים (אופציונלי)</label>
         <input class="form-input" type="text" id="ai-extra-input" placeholder="גיל, תחביבים, מאפיינים...">
       </div>
       <button class="btn-primary" id="ai-generate-btn" onclick="generateAiGreeting()">✨ צור ברכה</button>
@@ -934,105 +923,6 @@ body.dark-mode #splash { background: #12121f; }
         <button class="greet-btn sec" onclick="generateAiGreeting()" style="flex:0;padding:0 10px">🔄</button>
       </div>
     </div>
-  </div>
-</div>
-
-
-<!-- ========== MODAL: GOOGLE CALENDAR SETUP ========== -->
-<div class="modal-overlay center" id="modal-gcal-guide">
-  <div class="modal-box" style="max-height:85vh;overflow-y:auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="font-size:15px;font-weight:600;">🔧 הגדרת גוגל קלנדר</div>
-      <span onclick="closeModal('modal-gcal-guide')" style="cursor:pointer;color:var(--muted);font-size:20px;">✕</span>
-    </div>
-
-    <div class="tip-card" style="margin-bottom:14px;">
-      <div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;">⏱️ זמן הגדרה: ~5 דקות</div>
-      <div style="font-size:11px;color:var(--muted);">צריך לעשות פעם אחת בלבד</div>
-    </div>
-
-    <!-- שלב 1 -->
-    <div style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <div class="step-num">1</div>
-        <div style="font-size:13px;font-weight:500;">צור Google Cloud Project</div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
-        כנס ל-<a href="https://console.cloud.google.com" target="_blank" style="color:var(--acc-light);">console.cloud.google.com</a><br>
-        ← Select a project ← New Project<br>
-        שם: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">lo-shachachti</code>
-      </div>
-    </div>
-
-    <!-- שלב 2 -->
-    <div style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <div class="step-num">2</div>
-        <div style="font-size:13px;font-weight:500;">הפעל Google Calendar API</div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
-        APIs &amp; Services → Library<br>
-        חפש: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">Google Calendar API</code> → Enable
-      </div>
-    </div>
-
-    <!-- שלב 3 -->
-    <div style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <div class="step-num">3</div>
-        <div style="font-size:13px;font-weight:500;">OAuth Consent Screen</div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
-        APIs &amp; Services → OAuth consent screen<br>
-        בחר: External → Create<br>
-        App name: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">לא שכחתי</code><br>
-        הוסף את האימייל שלך ב-Test Users
-      </div>
-    </div>
-
-    <!-- שלב 4 -->
-    <div style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <div class="step-num">4</div>
-        <div style="font-size:13px;font-weight:500;">צור OAuth Client ID</div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
-        Credentials → + Create Credentials → OAuth client ID<br>
-        Type: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">Web application</code><br>
-        Authorized JavaScript origins:
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:6px;margin-top:4px;font-size:11px;font-family:monospace;direction:ltr;text-align:left;">
-          https://barakaflalo.github.io
-        </div>
-        Authorized redirect URIs:
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:6px;margin-top:4px;font-size:11px;font-family:monospace;direction:ltr;text-align:left;">
-          https://barakaflalo.github.io/lo-shachachti/
-        </div>
-      </div>
-    </div>
-
-    <!-- שלב 5 -->
-    <div style="margin-bottom:16px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <div class="step-num">5</div>
-        <div style="font-size:13px;font-weight:500;">העתק Client ID</div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);padding-right:30px;line-height:1.7;">
-        יופיע: <code style="background:var(--acc-dim);padding:1px 5px;border-radius:4px;">123456789-abc...apps.googleusercontent.com</code><br>
-        העתק אותו — תצטרך אותו בשלב הבא
-      </div>
-    </div>
-
-    <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px;">
-      <div style="font-size:11px;color:var(--muted);line-height:1.8;">
-        🔒 <b>פרטיות:</b> הנתונים עוברים ישירות בין הטלפון לגוגל.<br>
-        לא עוברים לשרת. ניתן לנתק בכל עת.
-      </div>
-    </div>
-
-    <button class="btn-primary" onclick="connectGoogle()" style="max-width:260px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:8px;"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px;">${lang.gcalConnect||'התחבר עם גוגל'}</button>
-    <button class="btn-ghost" onclick="closeModal('modal-gcal-guide')" style="margin-top:6px;">
-      אחר כך
-    </button>
   </div>
 </div>
 
@@ -1395,6 +1285,240 @@ dailyTips:['اضغط "التالي ›" لـ 5 خيارات!','استورد جه
 'formNewTitle':'مناسبة جديدة','formEditTitle':'✏️ تعديل','labelName':'الاسم *','labelDate':'التاريخ *','labelType':'نوع المناسبة','labelGroup':'المجموعة','labelGender':'الجنس','labelPhone':'الهاتف','labelPhone2':'هاتف ثانٍ','labelEmail':'البريد','labelNotes':'ملاحظات','labelBudget':'الميزانية','labelStatus':'الحالة','labelGiftIdea':'فكرة الهدية','recYearly':'🔄 سنوياً','recYearlySub':'عيد ميلاد...','recOnce':'📌 مرة واحدة','recOnceSub':'موعد، رحلة...','genderMaleOpt':'👨 ذكر','genderFemaleOpt':'👩 أنثى','genderOtherOpt':'🧑 غير محدد','giftPendingOpt':'🛒 لم يُشترَ','giftPaidOpt':'✅ تم الشراء','placeholderName':'اسم الشخص','placeholderNotes':'هوايات...','placeholderGift':'✏️ فكرة أخرى','btnShare':'مشاركة','btnAbout':'حول','btnClose':'إغلاق','btnGreat':'رائع! 🎊','modeDark':'داكن','modeLight':'فاتح','modeAuto':'تلقائي','sortGroup':'المجموعة','btnSaveGeneric':'💾 حفظ','screenSettings':'الإعدادات','menuContacts':'جهات اتصالي','menuUserSettings':'إعدادات المستخدم','menuSystemSettings':'إعدادات النظام','menuBudget':'الميزانية','menuBackup':'نسخ احتياطي','menuStores':'المتاجر','menuGuide':'الدليل','menuGreetings':'التهاني','menuMyGreetings':'تهانئي الشخصية','menuNotifications':'التنبيهات','menuImport':'استيراد','menuLanguage':'اللغة','togStats':'الإحصائيات','togHero':'المناسبة القادمة','togCalendar':'التقويم','togSounds':'الأصوات','togNotif':'التنبيهات','togDayBefore':'قبل يوم','printColName':'الاسم','printColDate':'التاريخ','printColType':'النوع','printColGroup':'المجموعة','printColBudget':'الميزانية','printColStatus':'الحالة','promptEmojiTitle':'أدخل إيموجي:','promptFontSize':'حجم الخط (14-24):','promptFontSizeErr':'أدخل رقماً بين 14-24','promptGiftDays':'كم يوماً قبل المناسبة؟','promptQuietStart':'وقت البداية (HH:MM):','promptQuietEnd':'وقت النهاية (HH:MM):','promptEditGreeting':'تعديل التهنئة','alertGreetingsSaved':'تم حفظ التهاني ✅','alertRestoredOK':'تم الاستعادة بنجاح ✅','alertRestoreErr':'خطأ في قراءة ملف النسخ الاحتياطي','alertFBErr':'خطأ في قراءة ملف JSON','alertNoContacts':'لم يتم العثور على جهات اتصال','alertNoSelected':'لم يتم اختيار جهات اتصال جديدة','alertVCFImported':'تم استيراد {n} جهات اتصال!','alertNoGreeting':'لا توجد تهنئة. اضغط ✏️','alertNoGreetingShort':'لا توجد تهنئة','alertNotifEnabled':'✅ تم تفعيل التنبيهات!','alertNotifDenied':'غير مسموح. تحقق من إعدادات المتصفح.','alertAIError':'تحقق من المفتاح','vcfFoundContacts':'تم العثور على {n} جهة اتصال — اختر:','vcfExistsLabel':'موجود','guideStart':'🚀 البداية السريعة','guideStartSub':'إضافة أول مناسبة','guideStartTip':'اضغط "حفظ وتعديل" لإضافة الهاتف والهدية والتذكيرات!','guideEventsSub':'الأنواع والمجموعات والتذكيرات','guideGiftsSub':'التتبع والأفكار والمتاجر','guideGreetingsSub':'الإرسال عبر واتساب','guideNotifSub':'إعداد التذكيرات مسبقاً','guideBackupSub':'الاستيراد من جوجل وفيسبوك','guideSecrets':'⭐ الميزات الخفية','guideSecretsSub':'أشياء لا يكتشفها معظم المستخدمين!','reportAndMore':'و{n} آخرون...','daysBeforeLabel':' أيام قبل','greetingLabel':'تهنئة ','writePersonalGreeting':'اكتب تهنئة شخصية...','myGreetingsPlaceholder':'اكتب تهنئة...','notifEnabledAlert':'✅ التنبيهات مفعّلة!','copied':'تم النسخ!','aiGetKeyLink':'الحصول على المفتاح','aiChangeKey':'تغيير','before':'قبل','allGroups':'كل المجموعات','optional':'اختياري','groupNone':'— اختر مجموعة —','groupCustom':'مجموعة أخرى','sectionExtra':'＋ تفاصيل إضافية','sectionGift':'🎁 الهدية والميزانية','labelSound':'صوت مخصص','soundDefault':'الافتراضي','soundPlay':'تشغيل','soundPick':'اختر','soundTrimTitle':'قص (حد أقصى 15 ثانية)','soundTrimStart':'البداية (ثوانٍ)','soundTrimEnd':'النهاية (ثوانٍ)','soundTrimBtn':'قص وحفظ','btnAdd2':'إضافة','storesDesc':'اختر المتاجر للبحث عن الهدايا','greetingsDesc':'5 خيارات لكل نوع مناسبة. اضغط ✏️.','myGreetingsDesc':'اكتب ما يصل إلى 5 تهاني شخصية','dailyTipLabel':'نصيحة يومية','labelFrom':'من تاريخ','labelTo':'حتى تاريخ','notifEnableTitle':'تفعيل التنبيهات','notifEnableSub':'احصل على التنبيهات حتى عند إغلاق التطبيق','togNotifSub':'تفعيل أو تعطيل الكل','togDayBeforeSub':'في 09:00','quietHoursTitle':'ساعات الهدوء','importChoose':'اختر مصدر الاستيراد','icsHowTitle':'كيف تصدّر من تقويم جوجل؟','icsStep1':'اذهب إلى calendar.google.com','icsStep2':'الإعدادات ← تصدير','icsStep3':'افتح ملف ZIP','icsStep4':'ارفع ملف .ics هنا','icsDropZone':'اسحب ملف ICS هنا','icsDropSub':'أو انقر لتحديد ملف','fbWarning':'فيسبوك لا يسمح بالوصول المباشر. قم بالتنزيل يدوياً.','fbHowTitle':'كيف تحمّل من فيسبوك؟','fbStep1':'افتح فيسبوك ← الإعدادات ← معلوماتك','fbStep2':'انقر "تنزيل نسخة من بياناتك"','fbStep3':'اختر: الأصدقاء + أعياد الميلاد فقط','fbStep4':'حمّل JSON وارفعه هنا','fbDropZone':'اسحب ملف JSON هنا','gcalWarning':'⚠️ الاتصال المباشر بجوجل يتطلب خادماً.<br>الأسهل: صدّر ICS من جوجل.','backupExportSub':'JSON — للاستعادة الكاملة','backupRestoreSub':'ارفع ملف JSON','backupCSVSub':'لـ Excel أو Google Sheets','backupPrintSub':'حسب النوع والتاريخ والمجموعة','importGoogleSub':'استيراد ICS من جوجل','importPhoneSub':'استيراد مباشر — أندرويد كروم','importCSVSub':'Excel أو Google Sheets','importFBSub':'الأصدقاء وأعياد الميلاد','vcfTitle':'اختر جهات الاتصال','vcfImportBtn':'استيراد ✓','vcfFieldsTitle':'أي حقول للاستيراد؟','purple_name':'بنفسجي','blue_name':'أزرق','green_name':'أخضر','amber_name':'كهرماني','red_name':'أحمر','pink_name':'وردي','teal_name':'فيروزي','gold_name':'ذهبي','violet_name':'بنفسجي','navy_name':'كحلي','lime_name':'نيون','custom_name':'مخصص','sentDaysAgo':'أُرسل منذ {n} أيام','sentYesterday':'أُرسل أمس','sentToday':'أُرسل اليوم ✓',greetings:{birthday_male:['عيد ميلاد سعيد {name}! 🎂','مبروك {name}! 🎉','عزيزي {name}! ✨','عاماً سعيداً {name}! 🥳','عيد ميلاد سعيد! 🎈'],birthday_female:['عيد ميلاد سعيد {name}! 🎂','مبروك {name}! 🎉','عزيزتي {name}! ✨','عاماً سعيداً! 🥳','عيد ميلاد سعيد! 🎈'],birthday:['{name} عيد ميلاد سعيد! 🎂','مبروك! 🎉','أتمنى أن تتحقق أحلامك ✨','عاماً سعيداً! 🥳','عيد ميلاد سعيد! 🎈'],memorial:['أفكر فيكم 🕯️','ذكرى مباركة 🕯️','ذكرى طيبة 🕯️','بحزن واحترام 🕯️','في قلوبنا 🕯️'],anniversary:['عيد زواج سعيد {name}! 💍','عام آخر من الحب! 💍','الحب والسعادة! 💑','عيد زواج سعيد! 💍','تهانٍ! 💞'],wedding:['مبروك {name}! 💒','مبروك للزفاف! 💒','مبروك للعروسين! 🥂','زفاف سعيد! 🎊','تهانٍ! 💒'],barmitzvah:['مبروك! ✡️','بهذه المحطة! ✡️','مبروك! ✨','تهانٍ حارة! ✡️','استمر! ✡️'],friends:['أتطلع للقائك! 😊','لا أصبر! 🤗','أنتظر! 👋','نتراءى! 😄','متحمس! 🎉'],trip:['رحلة سعيدة {name}! ✈️','سفر آمن! 🌍','إجازة ممتعة! ✈️','عودة سالمة! 🧳','رحلة رائعة! 🏖️'],car:['بالتوفيق! 🚗','سيمر! 🔧','بالتوفيق! 🚙','كل شيء بخير! 🔑','ستنجح! ✅'],medical:['بالتوفيق! 🏥','أتمنى أن يسير بخير! 💊','الصحة أولاً! 🏥','الشفاء العاجل! 💙','بالتوفيق! 🌿'],holiday:['عيد سعيد! 🎊','عطلة بهيجة! 🕎','عيد مبارك! ✨','تهانٍ! 🎉','عيد رائع! 🌟'],graduation:['مبروك {name}! 🎓','مبروك! 🎓','إنجاز رائع! 🎓','مبروك! 📚','بالتوفيق! 🌟'],custom:['مبروك! 🎉','أفضل التمنيات! ✨','أحسنت! 👏','بالتوفيق! 🌟','تهانٍ! 💙']}}};
 
 let currentLang=localStorage.getItem('ls2_lang')||'he';
+
+// ================================================================
+// I18N_EXTRA — מפתחות נוספים למודלים (about/rights/welcome/photo/ai-greet)
+// ================================================================
+const I18N_EXTRA = {
+  he:{
+    aboutFeatures:'5 שפות · AI ברכות · PWA · ייבוא/ייצוא',
+    rightsTitle:'זכויות יוצרים',
+    rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
+    welcomeTitle:'איך עובדים עם האפליקציה?',
+    welcomeSub:'מדריך קצר ב-5 שלבים',
+    welcomeStep1Title:'➕ לחץ "הוסף אירוע"',
+    welcomeStep1Sub:'הכפתור הכחול במסך הראשי',
+    welcomeStep2Title:'📝 הכנס שם ותאריך',
+    welcomeStep2Sub:'שם האדם + תאריך האירוע',
+    welcomeStep3Title:'🎉 בחר סוג אירוע',
+    welcomeStep3Sub:'יום הולדת, אזכרה, חתונה ועוד 9 סוגים',
+    welcomeStep4Title:'👥 בחר קבוצה',
+    welcomeStep4Sub:'משפחה / חברים / עבודה...',
+    welcomeStep5Title:'💾 שמור ותקבל תזכורות!',
+    welcomeStep5Sub:'האפליקציה תזכיר לך לפני כל אירוע',
+    welcomeTipLabel:'⭐ טיפ חכם',
+    welcomeBtnAdd:'➕ הוסף אירוע ראשון עכשיו!',
+    welcomeBtnGuide:'📖 מדריך מלא',
+    btnLater:'אחר כך',
+    photoTitle:'הוסף תמונה לאיש קשר',
+    photoTakeNow:'צלם עכשיו',
+    photoOpenCamera:'פתח מצלמה',
+    photoChooseGallery:'בחר מהגלריה',
+    photoUploadExisting:'העלה תמונה קיימת',
+    photoChooseEmoji:"בחר אמוג'י",
+    photoInsteadOfImage:'במקום תמונה',
+    photoRemove:'הסר תמונה',
+    photoBackToInitial:'חזור לאות ראשית',
+    photoCancel:'ביטול',
+    aiGreetTitle:'✨ ברכה עם AI',
+    aiGreetDesc:'כדי לייצר ברכה אישית עם AI, צריך מפתח API חינמי מ-OpenAI או Google Gemini.',
+    aiProviderLabel:'🔑 ספק AI',
+    aiKeyLabel:'🔑 מפתח API',
+    aiSaveKey:'💾 שמור מפתח',
+    aiStyleLabel:'🎨 סגנון',
+    aiStyleWarm:'חמה ואישית',
+    aiStyleFunny:'הומוריסטית',
+    aiStyleFormal:'רשמית',
+    aiStyleShort:'קצרה ומדויקת',
+    aiStylePoetic:'שירית',
+    aiExtraLabel:'💡 פרטים נוספים (אופציונלי)',
+    aiExtraPlaceholder:'גיל, תחביבים, מאפיינים...',
+  },
+  en:{
+    aboutFeatures:'5 languages · AI greetings · PWA · Import/Export',
+    rightsTitle:'Copyright',
+    rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version 3.0<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
+    welcomeTitle:'How does the app work?',
+    welcomeSub:'Quick 5-step guide',
+    welcomeStep1Title:'➕ Tap "Add Event"',
+    welcomeStep1Sub:'The blue button on the main screen',
+    welcomeStep2Title:'📝 Enter name and date',
+    welcomeStep2Sub:"Person's name + event date",
+    welcomeStep3Title:'🎉 Choose event type',
+    welcomeStep3Sub:'Birthday, memorial, wedding, and 9 more types',
+    welcomeStep4Title:'👥 Choose a group',
+    welcomeStep4Sub:'Family / Friends / Work...',
+    welcomeStep5Title:'💾 Save and get reminders!',
+    welcomeStep5Sub:'The app will remind you before every event',
+    welcomeTipLabel:'⭐ Smart Tip',
+    welcomeBtnAdd:'➕ Add your first event now!',
+    welcomeBtnGuide:'📖 Full guide',
+    btnLater:'Later',
+    photoTitle:'Add a contact photo',
+    photoTakeNow:'Take a photo now',
+    photoOpenCamera:'Open camera',
+    photoChooseGallery:'Choose from gallery',
+    photoUploadExisting:'Upload an existing photo',
+    photoChooseEmoji:'Choose an emoji',
+    photoInsteadOfImage:'Instead of a photo',
+    photoRemove:'Remove photo',
+    photoBackToInitial:'Back to initial letter',
+    photoCancel:'Cancel',
+    aiGreetTitle:'✨ AI Greeting',
+    aiGreetDesc:'To generate a personal AI greeting, you need a free API key from OpenAI or Google Gemini.',
+    aiProviderLabel:'🔑 AI Provider',
+    aiKeyLabel:'🔑 API Key',
+    aiSaveKey:'💾 Save Key',
+    aiStyleLabel:'🎨 Style',
+    aiStyleWarm:'Warm & personal',
+    aiStyleFunny:'Humorous',
+    aiStyleFormal:'Formal',
+    aiStyleShort:'Short & precise',
+    aiStylePoetic:'Poetic',
+    aiExtraLabel:'💡 Extra details (optional)',
+    aiExtraPlaceholder:'Age, hobbies, traits...',
+  },
+  ru:{
+    aboutFeatures:'5 языков · AI поздравления · PWA · Импорт/Экспорт',
+    rightsTitle:'Авторские права',
+    rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия 3.0<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
+    welcomeTitle:'Как работает приложение?',
+    welcomeSub:'Краткое руководство из 5 шагов',
+    welcomeStep1Title:'➕ Нажмите "Добавить событие"',
+    welcomeStep1Sub:'Синяя кнопка на главном экране',
+    welcomeStep2Title:'📝 Введите имя и дату',
+    welcomeStep2Sub:'Имя человека + дата события',
+    welcomeStep3Title:'🎉 Выберите тип события',
+    welcomeStep3Sub:'День рождения, годовщина, свадьба и ещё 9 типов',
+    welcomeStep4Title:'👥 Выберите группу',
+    welcomeStep4Sub:'Семья / Друзья / Работа...',
+    welcomeStep5Title:'💾 Сохраните и получайте напоминания!',
+    welcomeStep5Sub:'Приложение напомнит вам перед каждым событием',
+    welcomeTipLabel:'⭐ Полезный совет',
+    welcomeBtnAdd:'➕ Добавить первое событие сейчас!',
+    welcomeBtnGuide:'📖 Полное руководство',
+    btnLater:'Позже',
+    photoTitle:'Добавить фото контакта',
+    photoTakeNow:'Сделать фото',
+    photoOpenCamera:'Открыть камеру',
+    photoChooseGallery:'Выбрать из галереи',
+    photoUploadExisting:'Загрузить существующее фото',
+    photoChooseEmoji:'Выбрать эмодзи',
+    photoInsteadOfImage:'Вместо фото',
+    photoRemove:'Удалить фото',
+    photoBackToInitial:'Вернуться к букве',
+    photoCancel:'Отмена',
+    aiGreetTitle:'✨ Поздравление с AI',
+    aiGreetDesc:'Чтобы создать персональное поздравление с AI, нужен бесплатный API-ключ от OpenAI или Google Gemini.',
+    aiProviderLabel:'🔑 AI провайдер',
+    aiKeyLabel:'🔑 API ключ',
+    aiSaveKey:'💾 Сохранить ключ',
+    aiStyleLabel:'🎨 Стиль',
+    aiStyleWarm:'Тёплый и личный',
+    aiStyleFunny:'Юмористический',
+    aiStyleFormal:'Официальный',
+    aiStyleShort:'Короткий и точный',
+    aiStylePoetic:'Поэтический',
+    aiExtraLabel:'💡 Дополнительно (необязательно)',
+    aiExtraPlaceholder:'Возраст, хобби, черты...',
+  },
+  es:{
+    btnLater:'Más tarde',
+    btnClose:'Cerrar',
+    aiChangeKey:'Cambiar',
+    aiGetKeyLink:'Obtener clave API',
+    guideStartTip:'¡Toca "Guardar y editar" para añadir teléfono, regalo y recordatorios al instante!',
+    aboutFeatures:'5 idiomas · Felicitaciones con IA · PWA · Importar/Exportar',
+    rightsTitle:'Derechos de autor',
+    rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión 3.0<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
+    welcomeTitle:'¿Cómo funciona la app?',
+    welcomeSub:'Guía rápida de 5 pasos',
+    welcomeStep1Title:'➕ Toca "Agregar evento"',
+    welcomeStep1Sub:'El botón azul en la pantalla principal',
+    welcomeStep2Title:'📝 Ingresa nombre y fecha',
+    welcomeStep2Sub:'Nombre de la persona + fecha del evento',
+    welcomeStep3Title:'🎉 Elige el tipo de evento',
+    welcomeStep3Sub:'Cumpleaños, aniversario, boda y 9 tipos más',
+    welcomeStep4Title:'👥 Elige un grupo',
+    welcomeStep4Sub:'Familia / Amigos / Trabajo...',
+    welcomeStep5Title:'💾 ¡Guarda y recibe recordatorios!',
+    welcomeStep5Sub:'La app te avisará antes de cada evento',
+    welcomeTipLabel:'⭐ Consejo útil',
+    welcomeBtnAdd:'➕ ¡Agrega tu primer evento ahora!',
+    welcomeBtnGuide:'📖 Guía completa',
+    photoTitle:'Agregar foto de contacto',
+    photoTakeNow:'Tomar foto ahora',
+    photoOpenCamera:'Abrir cámara',
+    photoChooseGallery:'Elegir de la galería',
+    photoUploadExisting:'Subir foto existente',
+    photoChooseEmoji:'Elegir emoji',
+    photoInsteadOfImage:'En lugar de una foto',
+    photoRemove:'Quitar foto',
+    photoBackToInitial:'Volver a la inicial',
+    photoCancel:'Cancelar',
+    aiGreetTitle:'✨ Felicitación con IA',
+    aiGreetDesc:'Para generar una felicitación personal con IA, necesitas una clave API gratuita de OpenAI o Google Gemini.',
+    aiProviderLabel:'🔑 Proveedor de IA',
+    aiKeyLabel:'🔑 Clave API',
+    aiSaveKey:'💾 Guardar clave',
+    aiStyleLabel:'🎨 Estilo',
+    aiStyleWarm:'Cálido y personal',
+    aiStyleFunny:'Humorístico',
+    aiStyleFormal:'Formal',
+    aiStyleShort:'Corto y preciso',
+    aiStylePoetic:'Poético',
+    aiExtraLabel:'💡 Detalles adicionales (opcional)',
+    aiExtraPlaceholder:'Edad, pasatiempos, rasgos...',
+  },
+  ar:{
+    btnLater:'لاحقاً',
+    aboutFeatures:'5 لغات · تهانٍ بالذكاء الاصطناعي · PWA · استيراد/تصدير',
+    rightsTitle:'حقوق النشر',
+    rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار 3.0<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
+    welcomeTitle:'كيف يعمل التطبيق؟',
+    welcomeSub:'دليل سريع من 5 خطوات',
+    welcomeStep1Title:'➕ اضغط "إضافة مناسبة"',
+    welcomeStep1Sub:'الزر الأزرق في الشاشة الرئيسية',
+    welcomeStep2Title:'📝 أدخل الاسم والتاريخ',
+    welcomeStep2Sub:'اسم الشخص + تاريخ المناسبة',
+    welcomeStep3Title:'🎉 اختر نوع المناسبة',
+    welcomeStep3Sub:'عيد ميلاد، ذكرى، زفاف و9 أنواع أخرى',
+    welcomeStep4Title:'👥 اختر مجموعة',
+    welcomeStep4Sub:'العائلة / الأصدقاء / العمل...',
+    welcomeStep5Title:'💾 احفظ واحصل على التذكيرات!',
+    welcomeStep5Sub:'سيذكّرك التطبيق قبل كل مناسبة',
+    welcomeTipLabel:'⭐ نصيحة ذكية',
+    welcomeBtnAdd:'➕ أضف مناسبتك الأولى الآن!',
+    welcomeBtnGuide:'📖 الدليل الكامل',
+    photoTitle:'إضافة صورة لجهة الاتصال',
+    photoTakeNow:'التقط صورة الآن',
+    photoOpenCamera:'افتح الكاميرا',
+    photoChooseGallery:'اختر من المعرض',
+    photoUploadExisting:'رفع صورة موجودة',
+    photoChooseEmoji:'اختر رمزاً تعبيرياً',
+    photoInsteadOfImage:'بدلاً من الصورة',
+    photoRemove:'إزالة الصورة',
+    photoBackToInitial:'الرجوع إلى الحرف الأول',
+    photoCancel:'إلغاء',
+    aiGreetTitle:'✨ تهنئة بالذكاء الاصطناعي',
+    aiGreetDesc:'لإنشاء تهنئة شخصية بالذكاء الاصطناعي، تحتاج إلى مفتاح API مجاني من OpenAI أو Google Gemini.',
+    aiProviderLabel:'🔑 مزود الذكاء الاصطناعي',
+    aiKeyLabel:'🔑 مفتاح API',
+    aiSaveKey:'💾 حفظ المفتاح',
+    aiStyleLabel:'🎨 النمط',
+    aiStyleWarm:'دافئة وشخصية',
+    aiStyleFunny:'فكاهية',
+    aiStyleFormal:'رسمية',
+    aiStyleShort:'قصيرة ودقيقة',
+    aiStylePoetic:'شعرية',
+    aiExtraLabel:'💡 تفاصيل إضافية (اختياري)',
+    aiExtraPlaceholder:'العمر، الهوايات، الصفات...',
+  },
+};
+Object.keys(I18N_EXTRA).forEach(function(code){
+  if(LANGUAGES[code]) Object.assign(LANGUAGES[code], I18N_EXTRA[code]);
+});
+
 function L(key,params){const d=LANGUAGES[currentLang]||LANGUAGES['he'];let val=d[key];if(val===undefined)val=(LANGUAGES['he']||{})[key];if(val===undefined)return key;if(params&&typeof val==='string'){Object.entries(params).forEach(([k,v])=>{val=val.replace(new RegExp('{'+k+'}','g'),v);});}return val;}
 
 function changeLang(code){
@@ -1800,6 +1924,67 @@ function applyLangToUI() {
 
   // gift tags - re-render
   initGiftTags();
+
+  // ===== MODAL: ABOUT =====
+  setText('about-app-name', lang.appName);
+  setHTML('about-desc', (lang.appSub||'') + '<br>' + (lang.aboutFeatures||''));
+  setText('about-close-btn', lang.btnClose);
+
+  // ===== MODAL: RIGHTS =====
+  setText('rights-title', lang.rightsTitle);
+  setHTML('rights-text', L('rightsText',{app:lang.appName}));
+  setText('rights-close-btn', lang.btnClose);
+
+  // ===== MODAL: WELCOME GUIDE =====
+  setText('welcome-title', lang.welcomeTitle);
+  setText('welcome-sub', lang.welcomeSub);
+  setText('welcome-step1-title', lang.welcomeStep1Title);
+  setText('welcome-step1-sub', lang.welcomeStep1Sub);
+  setText('welcome-step2-title', lang.welcomeStep2Title);
+  setText('welcome-step2-sub', lang.welcomeStep2Sub);
+  setText('welcome-step3-title', lang.welcomeStep3Title);
+  setText('welcome-step3-sub', lang.welcomeStep3Sub);
+  setText('welcome-step4-title', lang.welcomeStep4Title);
+  setText('welcome-step4-sub', lang.welcomeStep4Sub);
+  setText('welcome-step5-title', lang.welcomeStep5Title);
+  setText('welcome-step5-sub', lang.welcomeStep5Sub);
+  setText('welcome-tip-label', lang.welcomeTipLabel);
+  setText('welcome-tip-text', lang.guideStartTip);
+  setText('welcome-btn-add', lang.welcomeBtnAdd);
+  setText('welcome-btn-guide', lang.welcomeBtnGuide);
+  setText('welcome-btn-later', lang.btnLater);
+
+  // ===== MODAL: PHOTO =====
+  setText('photo-title', lang.photoTitle);
+  setText('photo-take-now', lang.photoTakeNow);
+  setText('photo-open-camera', lang.photoOpenCamera);
+  setText('photo-choose-gallery', lang.photoChooseGallery);
+  setText('photo-upload-existing', lang.photoUploadExisting);
+  setText('photo-choose-emoji', lang.photoChooseEmoji);
+  setText('photo-instead-image', lang.photoInsteadOfImage);
+  setText('photo-remove', lang.photoRemove);
+  setText('photo-back-initial', lang.photoBackToInitial);
+  setText('photo-cancel-btn', lang.photoCancel);
+
+  // ===== MODAL: AI GREETING =====
+  setText('ai-greet-title', lang.aiGreetTitle);
+  setText('ai-greet-desc', lang.aiGreetDesc);
+  setText('ai-provider-label', lang.aiProviderLabel);
+  setText('ai-key-label', lang.aiKeyLabel);
+  setText('ai-save-key-btn', lang.aiSaveKey);
+  setText('ai-change-key-btn', '✏️ ' + (lang.aiChangeKey||''));
+  setText('ai-style-label', lang.aiStyleLabel);
+  setText('ai-style-warm', lang.aiStyleWarm);
+  setText('ai-style-funny', lang.aiStyleFunny);
+  setText('ai-style-formal', lang.aiStyleFormal);
+  setText('ai-style-short', lang.aiStyleShort);
+  setText('ai-style-poetic', lang.aiStylePoetic);
+  setText('ai-extra-label', lang.aiExtraLabel);
+  setPH('ai-extra-input', lang.aiExtraPlaceholder);
+  setText('ai-generate-btn', lang.btnGenerate);
+  setText('btn-ai-send', lang.greetWhatsapp);
+  setText('btn-ai-copy', lang.greetCopy);
+  if(typeof onAiProviderChange==='function') onAiProviderChange();
 }
 
 
