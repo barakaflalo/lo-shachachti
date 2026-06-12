@@ -58,6 +58,12 @@ body.large-font { font-size: 18px; }
 /* ===== SCREENS ===== */
 .screen { display:none; padding:0 16px; }
 .screen.active { display:block; }
+.screen.active.slide-in { animation: scrEnterFwd .22s ease; }
+.screen.active.slide-back { animation: scrEnterBack .22s ease; }
+.screen.active.fade-in { animation: scrFade .18s ease; }
+@keyframes scrEnterFwd { from{opacity:0;transform:translateX(18px)} to{opacity:1;transform:translateX(0)} }
+@keyframes scrEnterBack { from{opacity:0;transform:translateX(-18px)} to{opacity:1;transform:translateX(0)} }
+@keyframes scrFade { from{opacity:0} to{opacity:1} }
 
 /* ===== TOPBAR ===== */
 .topbar {
@@ -127,6 +133,7 @@ body.large-font { font-size: 18px; }
   background:rgba(255,255,255,0.03); border:1px solid var(--border);
   border-radius:var(--r); padding:12px; margin-bottom:12px;
 }
+.cal-wrap.cal-fade { animation: scrFade .2s ease; }
 .cal-header {
   display:flex; justify-content:space-between; align-items:center;
   margin-bottom:10px; font-size:13px; font-weight:500; color:var(--acc-light);
@@ -2557,6 +2564,7 @@ function openScreen(id, animDir){
     let anim = 'slide-in';
     if(animDir === 'back') anim = 'slide-back';
     else if(animDir === 'fade') anim = 'fade-in';
+    else if(animDir === 'fwd') anim = 'slide-in';
     else {
       // היוריסטיקה: חזרה למסכים ראשיים = slide-back
       const mainScreens = ['screen-main','screen-settings','screen-system-settings'];
@@ -2606,7 +2614,42 @@ function renderCalendar(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['
       const _chs=isHolidayDate(_cds);
       const _chdots=_chs.length>0?'<div style="display:flex;gap:2px;justify-content:center;margin-top:1px;">'+_chs.slice(0,3).map(h=>'<div style="width:5px;height:5px;border-radius:50%;background:'+h.color+';" title="'+h.name+'"></div>').join('')+'</div>':'';
       grid+='<div class="'+cls+'" onclick="onCalDay('+d+','+calMonth+','+calYear+')">'+d+_chdots+'</div>';}document.getElementById('main-calendar').innerHTML='<div class="cal-wrap"><div class="cal-header"><span class="cal-nav" onclick="changeMonth(1)">›</span><span>'+months[calMonth]+' '+calYear+'</span><span class="cal-nav" onclick="changeMonth(-1)">‹</span></div><div class="cal-days-header">'+dayNames.map(d=>'<div class="cal-day-name">'+d+'</div>').join('')+'</div><div class="cal-grid">'+grid+'</div></div>';}
-function changeMonth(delta){calMonth+=delta;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar(events.map(ev=>({...ev,...calcDays(ev)})));}
+function changeMonth(delta){calMonth+=delta;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar(events.map(ev=>({...ev,...calcDays(ev)})));const wrap=document.querySelector('#main-calendar .cal-wrap');if(wrap){wrap.classList.remove('cal-fade');requestAnimationFrame(()=>wrap.classList.add('cal-fade'));}}
+
+// ================================================================
+// ===== SWIPE NAVIGATION (calendar months + settings carousel) =====
+// ================================================================
+const SETTINGS_CAROUSEL=['screen-contacts','screen-user-settings','screen-system-settings','screen-budget-settings','screen-backup','screen-stores','screen-guide','screen-appearance'];
+function initSwipeNavigation(){
+  let sx=0,sy=0,st=0,active=false;
+  document.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1)return;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();active=true;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!active)return;active=false;
+    const t=e.changedTouches[0];
+    const dx=t.clientX-sx,dy=t.clientY-sy,dt=Date.now()-st;
+    if(dt>700||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.4)return;
+
+    // לוח שנה — swipe ימינה/שמאלה מחליף חודש
+    const calEl=document.getElementById('main-calendar');
+    if(calEl&&calEl.contains(e.target)){
+      changeMonth(dx<0?1:-1);
+      return;
+    }
+
+    // קרוסלת מסכי הגדרות
+    const activeScreen=document.querySelector('.screen.active');
+    if(!activeScreen)return;
+    const idx=SETTINGS_CAROUSEL.indexOf(activeScreen.id);
+    if(idx===-1)return;
+    const len=SETTINGS_CAROUSEL.length;
+    const nextIdx=dx<0?(idx+1)%len:(idx-1+len)%len;
+    openScreen(SETTINGS_CAROUSEL[nextIdx],dx<0?'fwd':'back');
+  },{passive:true});
+}
+
 function onCalDay(d,m,y){
   const today=new Date();
   if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear()&&events.length===0){openModal('modal-welcome-guide');return;}
@@ -4488,6 +4531,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(settings.isFirstTime&&events.length===0){
     setTimeout(()=>openModal('modal-welcome-guide'),2000);
   }
+
+  // 11. swipe navigation (calendar months + settings carousel)
+  initSwipeNavigation();
 });
 </script>
 </body>
