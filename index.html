@@ -3679,9 +3679,13 @@ const CHAPTERS={
 
 function openGuideChapter(key){
   const ch=CHAPTERS[key];if(!ch)return;
-  document.getElementById('chapter-title').textContent=typeof ch.title==='function'?ch.title():ch.title;
-  document.getElementById('chapter-content').innerHTML=ch.content();
   openScreen('screen-guide-chapter');
+  setTimeout(()=>{
+    const titleEl=document.getElementById('chapter-title');
+    const contentEl=document.getElementById('chapter-content');
+    if(titleEl) titleEl.textContent=typeof ch.title==='function'?ch.title():ch.title;
+    if(contentEl) contentEl.innerHTML=ch.content();
+  },10);
 }
 
 // ================================================================
