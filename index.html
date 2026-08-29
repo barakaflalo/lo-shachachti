@@ -4290,16 +4290,16 @@ const AI_PROVIDERS = {
     keyLabel:'מפתח Gemini', keyPlaceholder:'AIza...',
     keyUrl:'https://aistudio.google.com/app/apikey',
     videoUrl:'https://www.youtube.com/results?search_query=how+to+get+gemini+api+key',
-    def:'gemini-2.0-flash',
-    fallback:['gemini-2.0-flash','gemini-2.5-flash','gemini-2.0-flash-exp','gemini-1.5-flash','gemini-flash-latest'],
+    def:'gemini-flash-latest',
+    fallback:['gemini-flash-latest','gemini-2.5-flash','gemini-2.5-flash-lite','gemini-3-flash','gemini-2.0-flash','gemini-flash-lite-latest'],
     needsKey:true, isLocal:false
   },
   claude: {
     name:'Claude (Anthropic)', tag:'API', tagColor:'#d97706',
     keyLabel:'מפתח Anthropic', keyPlaceholder:'sk-ant-...',
     keyUrl:'https://console.anthropic.com/settings/keys',
-    def:'claude-3-5-haiku-latest',
-    fallback:['claude-3-5-haiku-latest','claude-3-5-sonnet-latest','claude-3-haiku-20240307'],
+    def:'claude-haiku-4-5',
+    fallback:['claude-haiku-4-5','claude-sonnet-4-5','claude-3-5-haiku-latest','claude-3-5-sonnet-latest'],
     needsKey:true, isLocal:false
   },
   openai: {
@@ -4431,30 +4431,30 @@ async function refreshAiModels(provider, key, endpoint){
       const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+encodeURIComponent(key));
       const data = await res.json();
       if(data.error) throw new Error(data.error.message);
-      return (data.models||[])
+      const list = (data.models||[])
         .filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent'))
         .map(m=>m.name.replace('models/',''));
+      return {ok:true, models:list};
     } else if(provider==='openai'){
       const res = await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':'Bearer '+key}});
       const data = await res.json();
       if(data.error) throw new Error(data.error.message);
-      return (data.data||[]).map(m=>m.id).filter(id=>/gpt/.test(id)).sort();
+      return {ok:true, models:(data.data||[]).map(m=>m.id).filter(id=>/gpt/.test(id)).sort()};
     } else if(provider==='local'){
       const url=(endpoint||'http://localhost:11434').replace(/\/$/,'')+'/v1/models';
       const res = await fetch(url);
       const data = await res.json();
-      return (data.data||[]).map(m=>m.id);
+      return {ok:true, models:(data.data||[]).map(m=>m.id)};
     } else if(provider==='claude'){
-      // ל-Claude אין endpoint רשימה ציבורי — מחזיר את ה-fallback הידוע
-      return AI_PROVIDERS.claude.fallback.slice();
+      return {ok:true, models:AI_PROVIDERS.claude.fallback.slice()};
     } else if(provider==='custom'){
       const url=(endpoint||'').replace(/\/$/,'')+'/v1/models';
       const res = await fetch(url,{headers:key?{'Authorization':'Bearer '+key}:{}});
       const data = await res.json();
-      return (data.data||[]).map(m=>m.id);
+      return {ok:true, models:(data.data||[]).map(m=>m.id)};
     }
-    return null;
-  }catch(e){ return null; }
+    return {ok:false, error:'ספק לא ידוע'};
+  }catch(e){ return {ok:false, error:e.message||'שגיאת רשת'}; }
 }
 
 let _aiEventId=null,_aiResult='';
@@ -4578,6 +4578,16 @@ async function doTestConnection(){
     result.textContent=res.ok?('🟢 '+(lang.aiConnectedOK||'החיבור תקין!')+' ('+res.model+')'):('🔴 '+res.msg);
   }
   if(btn){btn.disabled=false;btn.textContent='🔌 '+(lang.aiTestConnection||'בדוק חיבור');}
+  // חיבור הצליח — משוך אוטומטית את רשימת המודלים החיה
+  if(res.ok){
+    const provider=getAiProvider();
+    const key=await loadAiKeySecure();
+    const endpoint=getAiEndpoint(provider);
+    const mr=await refreshAiModels(provider,key,endpoint);
+    if(mr.ok && mr.models && mr.models.length){
+      localStorage.setItem('ls2_ai_models_'+provider,JSON.stringify(mr.models));
+    }
+  }
 }
 async function doRefreshModels(){
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
@@ -4587,14 +4597,22 @@ async function doRefreshModels(){
   const key=await loadAiKeySecure();
   const endpoint=getAiEndpoint(provider);
   if(btn){btn.disabled=true;btn.textContent='⏳';}
-  const models=await refreshAiModels(provider,key,endpoint);
+  const res=await refreshAiModels(provider,key,endpoint);
   if(btn){btn.disabled=false;btn.textContent='🔄';}
-  if(models&&models.length){
-    localStorage.setItem('ls2_ai_models_'+provider,JSON.stringify(models));
-    showBanner('🔄 '+(lang.aiModelsLoaded||'נטענו')+' '+models.length+' '+(lang.aiModelsCount||'מודלים'));
+  if(res.ok && res.models && res.models.length){
+    localStorage.setItem('ls2_ai_models_'+provider,JSON.stringify(res.models));
+    // אם המודל השמור לא ברשימה החדשה — עבור למודל הראשון הזמין
+    const savedModel=getAiModel(provider);
+    if(!res.models.includes(savedModel)){
+      // העדף מודל flash/haiku קל אם קיים, אחרת הראשון
+      const preferred=res.models.find(m=>/flash|haiku|mini/i.test(m))||res.models[0];
+      localStorage.setItem('ls2_ai_model_'+provider,preferred);
+    }
+    showBanner('🔄 '+(lang.aiModelsLoaded||'נטענו')+' '+res.models.length+' '+(lang.aiModelsCount||'מודלים'));
     renderScreen('screen-ai-settings');
   } else {
-    showBanner('🔴 '+(lang.aiModelsFailed||'לא ניתן לטעון מודלים - בדוק מפתח'));
+    const errMsg=res.error||(lang.aiModelsFailed||'לא ניתן לטעון מודלים - בדוק מפתח');
+    showBanner('🔴 '+errMsg.slice(0,80));
   }
 }
 function disconnectAi(){
