@@ -414,6 +414,9 @@ input[type="date"].form-input { color-scheme:dark; }
 .ai-privacy-note { font-size:11px; color:var(--muted); line-height:1.6; background:rgba(var(--acc-rgb),0.06); border:1px solid var(--border); border-radius:var(--rs); padding:10px 12px; margin-top:16px; }
 .appnest-badge { text-align:center; padding:20px 0 12px; font-size:11px; color:var(--muted); cursor:pointer; letter-spacing:0.3px; }
 .appnest-badge strong { color:var(--acc-light); }
+.insight-card { display:flex; align-items:center; gap:10px; padding:11px 13px; margin-bottom:8px; background:rgba(var(--acc-rgb),0.08); border:1px solid var(--acc-border); border-radius:var(--r); cursor:pointer; transition:all 0.15s; }
+.insight-card:hover { background:rgba(var(--acc-rgb),0.14); }
+#main-insights { margin-bottom:12px; }
 .modal-icon { text-align:center; font-size:36px; margin-bottom:10px; }
 .modal-title { text-align:center; font-size:15px; font-weight:600; margin-bottom:5px; }
 .modal-sub { text-align:center; font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.6; }
@@ -768,6 +771,7 @@ body.dark-mode #splash { background: #12121f; }
     <div id="main-calendar"></div>
 
     <div id="main-hero"></div>
+    <div id="main-insights"></div>
     <div id="main-filter-bar" style="margin-bottom:8px;"></div>
     <div class="filter-row" id="main-group-filters"></div>
     <div id="main-events-list"></div>
@@ -1321,7 +1325,95 @@ body.dark-mode #splash { background: #12121f; }
   }
 };
 
-const LANGUAGES={he:{dir:'rtl',lang:'he',name:'עברית',appName:'לא שכחתי',appSub:'האפליקציה שתזכיר לך כל אירוע חשוב',today:'היום!',tomorrow:'מחר',daysLeft:'ימים',passed:'עבר',inDays:'עוד {n} ימים',btnAdd:'➕ הוסף אירוע',btnSave:'💾 שמור אירוע',btnSaveEdit:'💾 שמור וערוך פרטים נוספים',btnCancel:'← ביטול',btnBack:'← חזרה',btnEdit:'✏️ ערוך',btnDelete:'🗑️ מחק אירוע',screenSettings:'הגדרות',formNewTitle:'אירוע חדש',formEditTitle:'✏️ עריכת אירוע',labelName:'שם האדם / האירוע *',labelDate:'תאריך *',labelType:'סוג האירוע',labelGroup:'קבוצה',labelGender:'מין',labelPhone:'טלפון',labelPhone2:'טלפון נוסף',labelEmail:'מייל',labelNotes:'הערות',labelBudget:'תקציב (₪)',labelStatus:'סטטוס',greetLabel:'💬 ברכה',greetNext:'הבא ›',greetAI:'✨ AI',greetWhatsapp:'📱 וואטסאפ',greetCopy:'📋 העתק',greetPersonal:'📝 ברכה אישית',greetFree:'לחץ ✏️ לכתיבת ברכה חופשית',greetFreePlaceholder:'כתוב ברכה חופשית...',giftBought:'✅ נקנה',giftTodo:'⏳ לביצוע',heroUpcoming:'האירוע הקרוב',heroWelcome:'ברוך הבא ל"לא שכחתי"!',heroWelcomeSub:'לחץ לקבלת מדריך קצר',heroGuide:'📖 איך מתחילים?',heroEmpty:'אין אירועים קרובים',filter30:'30 יום',filterFuture:'עתידיים',filterAll:'הכל',filterPast:'שעברו',sortDate:'תאריך',sortName:'שם',searchPlaceholder:'חפש שם, סוג, קבוצה...',noEvents:'עדיין אין אירועים',noEventsRange:'לא נמצאו אירועים בטווח זה',alertNameDate:'שם ותאריך הם שדות חובה',alertDelete:'מחק את האירוע לצמיתות?',alertDeleteAll:'מחק את כל הנתונים לצמיתות?!',alertStoresSaved:'חנויות נשמרו ✅',alertNoKey:'נא להזין מפתח API',alertRestoreConfirm:'שחזור יחליף את כל הנתונים. להמשיך?',alertImported:'יובאו {n} אירועים',alertNoNew:'לא נמצאו אירועים חדשים',langSaved:'שפה עודכנה ✅',todayTitle:'היום יש אירוע!',todayTitlePlural:'היום יש {n} אירועים!',btnGreat:'אחלה! 🎊',btnGenerate:'✨ צור ברכה',screenBudget:'💰 הגדרות תקציב',budgetPaid:'שולם',budgetPending:'פתוח',budgetTotal:'סה"כ',budgetByGroup:'לפי קבוצה',budgetNoData:'אין נתוני תקציב',genderMale:'זכר',genderFemale:'נקבה',
+// ================================================================
+// ===== מנוע חישוב חגים דינמי — לכל שנה (ללא תלות בטבלה קשיחה) =====
+// ================================================================
+function _hebParts(d){
+  const p=new Intl.DateTimeFormat('en-u-ca-hebrew',{day:'numeric',month:'long'}).formatToParts(d);
+  const o={};p.forEach(x=>o[x.type]=x.value);return o;
+}
+function _ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _hebMapForYear(gYear){
+  const map={};
+  for(let m=0;m<12;m++){
+    const dim=new Date(gYear,m+1,0).getDate();
+    for(let day=1;day<=dim;day++){
+      const d=new Date(gYear,m,day);
+      const h=_hebParts(d);
+      const key=h.month+'-'+h.day;
+      if(!map[key]) map[key]=_ymd(d);
+    }
+  }
+  return map;
+}
+function _easter(gYear){
+  const a=gYear%19,b=Math.floor(gYear/100),c=gYear%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,mm=Math.floor((a+11*h+22*l)/451),month=Math.floor((h+l-7*mm+114)/31),day=((h+l-7*mm+114)%31)+1;
+  return new Date(gYear,month-1,day);
+}
+function _addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function computeJewishHolidays(gYear){
+  const out=[]; const push=(he,en,ymd)=>{ if(ymd) out.push({name_he:he,name_en:en,date:ymd}); };
+  const M=_hebMapForYear(gYear);
+  const isLeap=!!M['Adar II-14']; const adar=isLeap?'Adar II':'Adar';
+  push('ראש השנה','Rosh Hashana',M['Tishri-1']);
+  push('יום כיפור','Yom Kippur',M['Tishri-10']);
+  push('סוכות','Sukkot',M['Tishri-15']);
+  push('שמחת תורה','Simchat Torah',M['Tishri-22']);
+  push('חנוכה','Hanukkah',M['Kislev-25']);
+  push('ט״ו בשבט','Tu BiShvat',M['Shevat-15']);
+  push('פורים','Purim',M[adar+'-14']);
+  push('פסח','Passover',M['Nisan-15']);
+  push('פסח (שביעי)','Passover (end)',M['Nisan-21']);
+  push('ל״ג בעומר','Lag BaOmer',M['Iyar-18']);
+  push('שבועות','Shavuot',M['Sivan-6']);
+  push('תשעה באב',"Tisha B'Av",M['Av-9']);
+  return out;
+}
+function computeIsraeliHolidays(gYear){
+  const out=[]; const push=(he,en,ymd)=>{ if(ymd) out.push({name_he:he,name_en:en,date:ymd}); };
+  const M=_hebMapForYear(gYear);
+  push('יום השואה','Holocaust Remembrance Day',M['Nisan-27']);
+  push('יום הזיכרון','Memorial Day',M['Iyar-4']);
+  push('יום העצמאות','Independence Day',M['Iyar-5']);
+  push('יום ירושלים','Jerusalem Day',M['Iyar-28']);
+  return out;
+}
+function computeChristianHolidays(gYear){
+  const out=[]; const easter=_easter(gYear);
+  out.push({name_he:'חג המולד',name_en:'Christmas',date:gYear+'-12-25'});
+  out.push({name_he:'ראש השנה האזרחי',name_en:'New Year',date:gYear+'-01-01'});
+  out.push({name_he:'ולנטיין',name_en:"Valentine's Day",date:gYear+'-02-14'});
+  out.push({name_he:'האלווין',name_en:'Halloween',date:gYear+'-10-31'});
+  out.push({name_he:'פסחא',name_en:'Easter',date:_ymd(easter)});
+  out.push({name_he:'שישי הטוב',name_en:'Good Friday',date:_ymd(_addDays(easter,-2))});
+  return out;
+}
+function computeMuslimHolidays(gYear){
+  const out=[]; const seen={};
+  for(let m=0;m<12;m++){
+    const dim=new Date(gYear,m+1,0).getDate();
+    for(let day=1;day<=dim;day++){
+      const d=new Date(gYear,m,day);
+      const p=new Intl.DateTimeFormat('en-u-ca-islamic',{day:'numeric',month:'numeric'}).formatToParts(d);
+      const o={};p.forEach(x=>o[x.type]=x.value);
+      const key=o.month+'-'+o.day; if(seen[key])continue; seen[key]=1;
+      if(o.month==='9'&&o.day==='1') out.push({name_he:'תחילת רמאדאן',name_en:'Ramadan begins',date:_ymd(d)});
+      if(o.month==='10'&&o.day==='1') out.push({name_he:'עיד אל-פיטר',name_en:'Eid al-Fitr',date:_ymd(d)});
+      if(o.month==='12'&&o.day==='10') out.push({name_he:'עיד אל-אדחא',name_en:'Eid al-Adha',date:_ymd(d)});
+      if(o.month==='1'&&o.day==='1') out.push({name_he:'ראש השנה האסלאמי',name_en:'Islamic New Year',date:_ymd(d)});
+      if(o.month==='3'&&o.day==='12') out.push({name_he:'מולד הנביא',name_en:'Mawlid',date:_ymd(d)});
+    }
+  }
+  return out;
+}
+const HOLIDAY_COMPUTERS={jewish:computeJewishHolidays,israeli:computeIsraeliHolidays,christian:computeChristianHolidays,muslim:computeMuslimHolidays};
+function computeHolidaysForReligion(religion,fromYear,toYear){
+  const fn=HOLIDAY_COMPUTERS[religion]; if(!fn) return [];
+  let all=[]; for(let y=fromYear;y<=toYear;y++){ try{ all=all.concat(fn(y)); }catch(e){} } return all;
+}
+
+const LANGUAGES={he:{dir:'rtl'
+,lang:'he',name:'עברית',appName:'לא שכחתי',appSub:'האפליקציה שתזכיר לך כל אירוע חשוב',today:'היום!',tomorrow:'מחר',daysLeft:'ימים',passed:'עבר',inDays:'עוד {n} ימים',btnAdd:'➕ הוסף אירוע',btnSave:'💾 שמור אירוע',btnSaveEdit:'💾 שמור וערוך פרטים נוספים',btnCancel:'← ביטול',btnBack:'← חזרה',btnEdit:'✏️ ערוך',btnDelete:'🗑️ מחק אירוע',screenSettings:'הגדרות',formNewTitle:'אירוע חדש',formEditTitle:'✏️ עריכת אירוע',labelName:'שם האדם / האירוע *',labelDate:'תאריך *',labelType:'סוג האירוע',labelGroup:'קבוצה',labelGender:'מין',labelPhone:'טלפון',labelPhone2:'טלפון נוסף',labelEmail:'מייל',labelNotes:'הערות',labelBudget:'תקציב (₪)',labelStatus:'סטטוס',greetLabel:'💬 ברכה',greetNext:'הבא ›',greetAI:'✨ AI',greetWhatsapp:'📱 וואטסאפ',greetCopy:'📋 העתק',greetPersonal:'📝 ברכה אישית',greetFree:'לחץ ✏️ לכתיבת ברכה חופשית',greetFreePlaceholder:'כתוב ברכה חופשית...',giftBought:'✅ נקנה',giftTodo:'⏳ לביצוע',heroUpcoming:'האירוע הקרוב',heroWelcome:'ברוך הבא ל"לא שכחתי"!',heroWelcomeSub:'לחץ לקבלת מדריך קצר',heroGuide:'📖 איך מתחילים?',heroEmpty:'אין אירועים קרובים',filter30:'30 יום',filterFuture:'עתידיים',filterAll:'הכל',filterPast:'שעברו',sortDate:'תאריך',sortName:'שם',searchPlaceholder:'חפש שם, סוג, קבוצה...',noEvents:'עדיין אין אירועים',noEventsRange:'לא נמצאו אירועים בטווח זה',alertNameDate:'שם ותאריך הם שדות חובה',alertDelete:'מחק את האירוע לצמיתות?',alertDeleteAll:'מחק את כל הנתונים לצמיתות?!',alertStoresSaved:'חנויות נשמרו ✅',alertNoKey:'נא להזין מפתח API',alertRestoreConfirm:'שחזור יחליף את כל הנתונים. להמשיך?',alertImported:'יובאו {n} אירועים',alertNoNew:'לא נמצאו אירועים חדשים',langSaved:'שפה עודכנה ✅',todayTitle:'היום יש אירוע!',todayTitlePlural:'היום יש {n} אירועים!',btnGreat:'אחלה! 🎊',btnGenerate:'✨ צור ברכה',screenBudget:'💰 הגדרות תקציב',budgetPaid:'שולם',budgetPending:'פתוח',budgetTotal:'סה"כ',budgetByGroup:'לפי קבוצה',budgetNoData:'אין נתוני תקציב',genderMale:'זכר',genderFemale:'נקבה',
 calDays:['א','ב','ג','ד','ה','ו','ש'],calMonths:['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'],
 typeLabel:{birthday:'🎉 יום הולדת',wedding:'💒 חתונה',anniversary:'💍 יום נישואין',memorial:'🕯️ אזכרה',barmitzvah:'✡️ בר/בת מצווה',friends:'👥 מפגש',trip:'✈️ טיול',car:'🚗 טסט רכב',medical:'🏥 תור רפואי',holiday:'🎊 חג',graduation:'🎓 סיום לימודים',custom:'✨ אירוע'},
 groups:['משפחה','חברים','עבודה','צבא','טיול','לימודים','שכנים'],groupNoGroup:'ללא קבוצה',groupAll:'הכל',
@@ -1391,6 +1483,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'פתח את האפליקציה מהאתר, לא כקובץ מקומי',
     backupReminderMsg:'💾 מזמן לא גיבית את האירועים שלך. הנתונים נשמרים רק במכשיר הזה — אם תמחק את הדפדפן, הכל יימחק.\n\nלגבות עכשיו?',
     aboutDiag:'🩺 דוח תמיכה (לפתרון תקלות)', diagCopyPrompt:'להעתיק את הדוח? (לשליחה לתמיכה)', diagCopied:'הדוח הועתק',
+    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה',
     rightsTitle:'זכויות יוצרים',
     rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
     welcomeTitle:'איך עובדים עם האפליקציה?',
@@ -1455,6 +1548,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Open the app from the website, not as a local file',
     backupReminderMsg:'💾 You haven\'t backed up your events in a while. Data is stored only on this device — if you clear your browser, it\'s all gone.\n\nBack up now?',
     aboutDiag:'🩺 Support report (troubleshooting)', diagCopyPrompt:'Copy the report? (to send to support)', diagCopied:'Report copied',
+    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting',
     rightsTitle:'Copyright',
     rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version 3.0<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
     welcomeTitle:'How does the app work?',
@@ -1519,6 +1613,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Откройте приложение с сайта, а не как локальный файл',
     backupReminderMsg:'💾 Вы давно не делали резервную копию. Данные хранятся только на этом устройстве — если очистить браузер, всё пропадёт.\n\nСоздать копию сейчас?',
     aboutDiag:'🩺 Отчёт поддержки (диагностика)', diagCopyPrompt:'Скопировать отчёт? (для отправки в поддержку)', diagCopied:'Отчёт скопирован',
+    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления',
     rightsTitle:'Авторские права',
     rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия 3.0<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
     welcomeTitle:'Как работает приложение?',
@@ -1588,6 +1683,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Abre la app desde el sitio web, no como archivo local',
     backupReminderMsg:'💾 Hace tiempo que no haces copia de tus eventos. Los datos se guardan solo en este dispositivo — si borras el navegador, se pierde todo.\n\n¿Hacer copia ahora?',
     aboutDiag:'🩺 Informe de soporte (solución de problemas)', diagCopyPrompt:'¿Copiar el informe? (para enviar a soporte)', diagCopied:'Informe copiado',
+    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación',
     rightsTitle:'Derechos de autor',
     rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión 3.0<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
     welcomeTitle:'¿Cómo funciona la app?',
@@ -1652,6 +1748,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'افتح التطبيق من الموقع، وليس كملف محلي',
     backupReminderMsg:'💾 لم تقم بنسخ مناسباتك منذ فترة. تُحفظ البيانات على هذا الجهاز فقط — إذا مسحت المتصفح، سيضيع كل شيء.\n\nنسخ احتياطي الآن؟',
     aboutDiag:'🩺 تقرير الدعم (حل المشاكل)', diagCopyPrompt:'نسخ التقرير؟ (لإرساله للدعم)', diagCopied:'تم نسخ التقرير',
+    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة',
     rightsTitle:'حقوق النشر',
     rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار 3.0<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
     welcomeTitle:'كيف يعمل التطبيق؟',
@@ -2680,8 +2777,8 @@ const SCREEN_RENDERERS = {
     let rows = '';
     religions.forEach(function(r){
       const isOn = selected.includes(r.key);
-      const db = HOLIDAYS_DB[r.key];
-      const count = db ? db.events.filter(function(e){return e.date>='2026'&&e.date<='2028';}).length : 0;
+      const _yr = new Date().getFullYear();
+      const count = computeHolidaysForReligion(r.key, _yr, _yr).length;
       const name = isRtl ? r.nameHe : r.nameEn;
       rows += '<div class="toggle-row" style="padding:14px 0;border-bottom:1px solid var(--border);">' +
         '<div style="display:flex;align-items:center;gap:12px;">' +
@@ -3033,7 +3130,7 @@ function renderMain(){
   const _ts = document.getElementById('tb-settings');
   if(_ts) _ts.textContent = '⚙️ ' + (_lang.screenSettings||'הגדרות');
   const _ta = document.getElementById('tb-add');
-  if(_ta) _ta.textContent = _lang.btnAdd;const today=new Date();if(calYear===undefined){calYear=today.getFullYear();calMonth=today.getMonth();}const enriched=events.map(ev=>({...ev,...calcDays(ev)}));const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const statsEl=document.getElementById('main-stats');if(settings.showStats){const u30=enriched.filter(e=>e.daysLeft!==null&&e.daysLeft<=30).length;const budgetTotal=events.reduce((s,e)=>s+(parseInt(e.budget)||0),0);statsEl.style.display='';statsEl.innerHTML='<div class="stat-card"><div class="stat-num">'+u30+'</div><div class="stat-label">'+(lang.statsEvents30||'אירועים ב-30 יום')+'</div></div>'+(settings.showBudget?'<div class="stat-card"><div class="stat-num green">'+budgetTotal+'₪</div><div class="stat-label">'+(lang.statsBudget||'תקציב מתנות')+'</div></div>':'<div class="stat-card"><div class="stat-num">'+events.length+'</div><div class="stat-label">'+(lang.statsTotal||'סה"כ')+'</div></div>');}else statsEl.style.display='none';const calEl=document.getElementById('main-calendar');if(settings.showCalendar){calEl.style.display='';renderCalendar(enriched);}else calEl.style.display='none';const heroEl=document.getElementById('main-hero');if(settings.showHero){heroEl.style.display='';renderHero(enriched);}else heroEl.style.display='none';renderFilterBar();renderGroupFilters(enriched);renderEventsList(enriched);const todayEvs=enriched.filter(e=>e.daysLeft===0);if(todayEvs.length){setTimeout(()=>{triggerConfetti();showTodayModal(todayEvs);},1000);}}
+  if(_ta) _ta.textContent = _lang.btnAdd;const today=new Date();if(calYear===undefined){calYear=today.getFullYear();calMonth=today.getMonth();}const enriched=events.map(ev=>({...ev,...calcDays(ev)}));const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const statsEl=document.getElementById('main-stats');if(settings.showStats){const u30=enriched.filter(e=>e.daysLeft!==null&&e.daysLeft<=30).length;const budgetTotal=events.reduce((s,e)=>s+(parseInt(e.budget)||0),0);statsEl.style.display='';statsEl.innerHTML='<div class="stat-card"><div class="stat-num">'+u30+'</div><div class="stat-label">'+(lang.statsEvents30||'אירועים ב-30 יום')+'</div></div>'+(settings.showBudget?'<div class="stat-card"><div class="stat-num green">'+budgetTotal+'₪</div><div class="stat-label">'+(lang.statsBudget||'תקציב מתנות')+'</div></div>':'<div class="stat-card"><div class="stat-num">'+events.length+'</div><div class="stat-label">'+(lang.statsTotal||'סה"כ')+'</div></div>');}else statsEl.style.display='none';const calEl=document.getElementById('main-calendar');if(settings.showCalendar){calEl.style.display='';renderCalendar(enriched);}else calEl.style.display='none';const heroEl=document.getElementById('main-hero');if(settings.showHero){heroEl.style.display='';renderHero(enriched);}else heroEl.style.display='none';renderInsights(enriched);renderFilterBar();renderGroupFilters(enriched);renderEventsList(enriched);const todayEvs=enriched.filter(e=>e.daysLeft===0);if(todayEvs.length){setTimeout(()=>{triggerConfetti();showTodayModal(todayEvs);},1000);}}
 
 function renderCalendar(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const months=lang.calMonths;const dayNames=lang.calDays;const today=new Date();const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();const evDays={};enriched.forEach(ev=>{if(!ev.date)return;const d=new Date(ev.date);let y=d.getFullYear(),m=d.getMonth(),day=d.getDate();if(getRecurrence(ev)==='yearly')y=calYear;if(y===calYear&&m===calMonth){if(!evDays[day])evDays[day]=[];evDays[day].push(ev);}});const todayDay=today.getFullYear()===calYear&&today.getMonth()===calMonth?today.getDate():-1;let grid='';for(let i=0;i<first;i++)grid+='<div class="cal-day"></div>';for(let d=1;d<=days;d++){const isToday=d===todayDay;const hasEv=evDays[d];const isUrgent=hasEv&&hasEv.some(e=>e.daysLeft!==null&&e.daysLeft<=7);let cls='cal-day';if(isToday&&events.length===0)cls+=' welcome-day';else if(isToday)cls+=' today';if(hasEv)cls+=' has-event';if(isUrgent)cls+=' urgent';const _cds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       const _chs=isHolidayDate(_cds);
@@ -3118,6 +3215,48 @@ function onCalDay(d,m,y){
 function closeCalPopup(){closeModal('modal-cal-popup');}
 function showTodayModal(todayEvents){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const title=todayEvents.length===1?'🎉 '+(lang.todayTitle||'היום יש אירוע!'):'🎉 '+(lang.todayTitlePlural||'היום יש {n} אירועים!').replace('{n}',todayEvents.length);document.getElementById('today-modal-title').textContent=title;document.getElementById('today-modal-events').innerHTML=todayEvents.map(ev=>'<div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:10px;">'+avatarHTML(ev,'av-sm')+'<div><div style="font-size:14px;font-weight:600;">'+ev.name+'</div><div style="font-size:12px;color:var(--acc-light);">'+getLabel(ev.type,ev.customType)+'</div></div></div>').join('');const bg=document.getElementById('btn-great');if(bg)bg.textContent=(lang.btnGreat||'אחלה! 🎊');openModal('modal-today');}
 function renderHero(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const upcoming=enriched.filter(e=>e.daysLeft!==null).sort((a,b)=>a.daysLeft-b.daysLeft);const heroEl=document.getElementById('main-hero');if(!upcoming.length&&events.length===0&&settings.isFirstTime){heroEl.innerHTML='<div class="hero-welcome" onclick="openModal(\'modal-welcome-guide\')"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><div style="font-size:28px;">🎉</div><div><div style="font-size:14px;font-weight:600;">'+lang.heroWelcome+'</div><div style="font-size:11px;color:var(--muted);">'+lang.heroWelcomeSub+'</div></div></div><span style="background:var(--acc-dim);color:var(--acc-light);font-size:10px;padding:3px 10px;border-radius:var(--rf);display:inline-block;">📖 '+(lang.heroGuide||'איך מתחילים?')+'</span></div>';return;}if(!upcoming.length){heroEl.innerHTML='';return;}const ev=upcoming[0];heroEl.innerHTML='<div class="hero-card" onclick="openDetail('+ev.id+')"><div class="hero-label">'+lang.heroUpcoming+'</div><div style="display:flex;align-items:center;gap:12px;margin-top:5px;">'+avatarHTML(ev,'av-sm')+'<div><div class="hero-name">'+ev.name+'</div><div style="font-size:11px;margin-top:2px;opacity:0.8;">'+getLabel(ev.type,ev.customType)+'</div></div></div><span class="hero-badge">'+(ev.daysLeft===0?'🎉 '+lang.today:ev.daysLeft===1?'🔥 '+lang.tomorrow:'📅 '+lang.inDays.replace('{n}',ev.daysLeft))+'</span></div>';}
+
+// ================================================================
+// ===== 🔔 תזכורות חכמות פרואקטיביות =====
+// ================================================================
+// כללים מקומיים (ללא AI) שמזהים דברים שדורשים תשומת לב.
+function computeInsights(enriched){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const tips=[];
+  // 1. אירוע קרוב (≤7 ימים) עם מתנה שטרם נקנתה
+  enriched.filter(e=>e.daysLeft!==null&&e.daysLeft>=0&&e.daysLeft<=7).forEach(e=>{
+    const hasGiftIdea=e.giftIdea||e.budget;
+    if(hasGiftIdea && e.giftStatus!=='paid'){
+      tips.push({icon:'🎁',id:e.id,text:(lang.insightGiftNotBought||'{name} בעוד {n} ימים — עוד לא קנית מתנה!').replace('{name}',e.name).replace('{n}',e.daysLeft)});
+    }
+  });
+  // 2. אירוע היום/מחר
+  enriched.filter(e=>e.daysLeft===0).forEach(e=>{
+    tips.push({icon:'🎉',id:e.id,text:(lang.insightToday||'היום: {name}! אל תשכח לברך').replace('{name}',e.name)});
+  });
+  enriched.filter(e=>e.daysLeft===1).forEach(e=>{
+    tips.push({icon:'🔥',id:e.id,text:(lang.insightTomorrow||'מחר: {name} — התכונן!').replace('{name}',e.name)});
+  });
+  // 3. אירוע קרוב בלי מספר טלפון (אי אפשר לשלוח ברכה)
+  enriched.filter(e=>e.daysLeft!==null&&e.daysLeft>=0&&e.daysLeft<=3&&!e.phone&&e.type!=='memorial'&&e.type!=='medical'&&e.type!=='car').forEach(e=>{
+    tips.push({icon:'📱',id:e.id,text:(lang.insightNoPhone||'{name} בקרוב — אין מספר טלפון לשליחת ברכה').replace('{name}',e.name)});
+  });
+  return tips.slice(0,4); // מקסימום 4
+}
+function renderInsights(enriched){
+  const el=document.getElementById('main-insights');
+  if(!el)return;
+  const tips=computeInsights(enriched);
+  if(!tips.length){el.innerHTML='';el.style.display='none';return;}
+  el.style.display='';
+  el.innerHTML=tips.map(t=>
+    '<div class="insight-card" onclick="openDetail('+t.id+')">'
+    +'<span style="font-size:18px;flex-shrink:0;">'+t.icon+'</span>'
+    +'<span style="flex:1;font-size:12px;">'+t.text+'</span>'
+    +'<span style="color:var(--muted);font-size:14px;">›</span>'
+    +'</div>'
+  ).join('');
+}
 function renderGroupFilters(enriched){
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
   const FIXED=lang.groups||['משפחה','חברים','עבודה'];
@@ -5471,20 +5610,21 @@ function removeHolidayEvents(){
 function getActiveHolidays(){
   const selected = JSON.parse(localStorage.getItem('ls2_holidays_selected')||'["jewish","israeli"]');
   const today = new Date();
+  const fromYear = today.getFullYear()-1;
+  const toYear = today.getFullYear()+3;
+  const isRTL = (LANGUAGES[currentLang]||LANGUAGES['he']).dir==='rtl';
+  const colors={jewish:'#3b82f6',christian:'#10b981',muslim:'#f59e0b',israeli:'#8b5cf6'};
   const result = [];
   selected.forEach(religion => {
-    const db = HOLIDAYS_DB[religion];
-    if(!db) return;
-    db.events.forEach(ev => {
-      const d = new Date(ev.date);
-      if(d.getFullYear() >= today.getFullYear()-1 && d.getFullYear() <= today.getFullYear()+2){
-        result.push({
-          date: ev.date,
-          name: (LANGUAGES[currentLang]||LANGUAGES['he']).dir==='rtl' ? ev.name_he : ev.name_en,
-          religion,
-          color: db.color
-        });
-      }
+    // חישוב דינמי — עובד לכל שנה
+    const computed = computeHolidaysForReligion(religion, fromYear, toYear);
+    computed.forEach(ev => {
+      result.push({
+        date: ev.date,
+        name: isRTL ? ev.name_he : ev.name_en,
+        religion,
+        color: colors[religion]||'#3b82f6'
+      });
     });
   });
   return result;
@@ -5507,14 +5647,16 @@ function renderHolidaysSettings(){
     {key:'israeli', icon:'🇮🇱', name_he:'ישראלי לאומי', name_en:'Israeli National'},
   ];
 
+  const _hcolors={jewish:'#3b82f6',christian:'#10b981',muslim:'#f59e0b',israeli:'#8b5cf6'};
   el.innerHTML = religions.map(r => {
     const isOn = selected.includes(r.key);
-    const dbEntry = HOLIDAYS_DB[r.key];
-    const count = dbEntry ? dbEntry.events.filter(e=>e.date.startsWith('2026')||e.date.startsWith('2027')).length : 0;
+    const _yr = new Date().getFullYear();
+    const count = computeHolidaysForReligion(r.key, _yr, _yr).length;
+    const _color = _hcolors[r.key]||'#3b82f6';
     const name = lang.dir==='rtl' ? r.name_he : r.name_en;
     return `<div class="toggle-row" style="padding:12px 0;border-bottom:1px solid var(--border);">
       <div style="display:flex;align-items:center;gap:10px;">
-        <div style="width:14px;height:14px;border-radius:50%;background:${dbEntry.color};flex-shrink:0;"></div>
+        <div style="width:14px;height:14px;border-radius:50%;background:${_color};flex-shrink:0;"></div>
         <div>
           <div style="font-size:13px;font-weight:500;">${r.icon} ${name}</div>
           <div style="font-size:11px;color:var(--muted);">${count} ${lang.holidayDates||'תאריכים'}</div>
