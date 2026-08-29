@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מדיניות פרטיות · לא שכחתי</title>
+<style>
+  :root{ --bg:#12121f; --panel:#1a1a2e; --text:#e8e8f0; --muted:#a0a0b8; --acc:#d4af37; --border:rgba(255,255,255,0.1); }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; line-height:1.8; padding:0 0 60px; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 20px; }
+  header{ background:var(--panel); border-bottom:2px solid var(--acc); padding:28px 20px; text-align:center; margin-bottom:28px; }
+  header h1{ margin:0 0 6px; font-size:22px; color:var(--acc); }
+  header .sub{ font-size:13px; color:var(--muted); }
+  h2{ color:var(--acc); font-size:17px; margin-top:32px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+  h3{ font-size:14px; margin-top:20px; color:var(--text); }
+  p,li{ font-size:14px; color:var(--text); }
+  .muted{ color:var(--muted); font-size:13px; }
+  .lang-toggle{ text-align:center; margin-bottom:20px; }
+  .lang-toggle button{ background:var(--panel); color:var(--acc); border:1px solid var(--acc); border-radius:8px; padding:8px 18px; margin:0 4px; cursor:pointer; font-size:13px; }
+  .lang-toggle button.active{ background:var(--acc); color:#12121f; font-weight:600; }
+  section[data-lang]{ display:none; }
+  section.active{ display:block; }
+  section[data-lang="en"]{ direction:ltr; text-align:left; }
+  a{ color:var(--acc); }
+  .card{ background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin:14px 0; }
+  footer{ text-align:center; margin-top:40px; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🔔 לא שכחתי — מדיניות פרטיות</h1>
+  <div class="sub">Never Forgot — Privacy Policy · AppNest</div>
+</header>
+
+<div class="wrap">
+  <div class="lang-toggle">
+    <button id="btn-he" class="active" onclick="setLang('he')">עברית</button>
+    <button id="btn-en" onclick="setLang('en')">English</button>
+  </div>
+
+  <!-- ============ עברית ============ -->
+  <section data-lang="he" class="active">
+    <p class="muted">עדכון אחרון: 2026 · גרסה 3.0</p>
+
+    <div class="card">
+      <strong>בקצרה:</strong> כל הנתונים שלך נשמרים על המכשיר שלך בלבד. איננו מפעילים שרת שאוסף מידע, איננו עוקבים אחריך, ואין באפליקציה פרסומות או אנליטיקה.
+    </div>
+
+    <h2>1. איזה מידע נשמר ואיפה</h2>
+    <p>כל האירועים, ההגדרות, הברכות והבחירות שלך נשמרים מקומית בדפדפן של המכשיר (localStorage / IndexedDB). המידע הזה אינו עוזב את המכשיר שלך אלא אם אתה בוחר במפורש לייצא אותו או להשתמש בתכונות המחוברות לשירות חיצוני (ראה למטה).</p>
+
+    <h2>2. מה נשלח החוצה, ומתי</h2>
+    <h3>סנכרון Google Calendar (אופציונלי)</h3>
+    <p>אם תבחר להתחבר ליומן Google, ההתחברות היא ישירה בינך לבין Google (OAuth). אנחנו לא מפעילים שרת ביניים ולא רואים את נתוני היומן שלך. ההרשאות מוגבלות לקריאה והוספה של אירועים.</p>
+    <h3>ברכות AI (אופציונלי — BYOK)</h3>
+    <p>אם תזין מפתח API משלך (OpenAI / Google Gemini) ותשתמש בתכונת "ברכה עם AI", הטקסט של הברכה נשלח ישירות לספק שבחרת. המפתח שלך נשמר מוצפן על המכשיר בלבד (AES-256-GCM), אינו נכלל בקבצי הגיבוי, ואינו עובר דרך שום שרת שלנו.</p>
+    <h3>התראות Push (אופציונלי)</h3>
+    <p>אם תאשר התראות, נעשה שימוש בשירות OneSignal כדי לשלוח תזכורות. זה מופעל רק בהסכמה מפורשת.</p>
+
+    <h2>3. מצלמה ואנשי קשר</h2>
+    <p>אם תוסיף תמונה לאיש קשר או תשתמש בבורר אנשי הקשר, הגישה היא מקומית במכשיר בלבד. התמונות ופרטי הקשר נשמרים מקומית ואינם נשלחים לשום מקום.</p>
+
+    <h2>4. אין מעקב, אנליטיקה או פרסום</h2>
+    <p>האפליקציה אינה כוללת כלי מעקב, אנליטיקה, קובצי cookie פרסומיים או פרסומות מכל סוג.</p>
+
+    <h2>5. שליטה מלאה שלך במידע</h2>
+    <p>אתה יכול לייצא את כל הנתונים שלך (JSON / CSV) בכל עת, ולמחוק את כל המידע דרך מסך ההגדרות. מחיקה היא סופית ומוחקת את כל המידע מהמכשיר.</p>
+
+    <h2>6. הבהרה</h2>
+    <p>האפליקציה מספקת תזכורות וכלי עזר בלבד ואינה מהווה ייעוץ מקצועי מכל סוג. השימוש באחריות המשתמש.</p>
+
+    <h2>7. יצירת קשר</h2>
+    <p>לשאלות או בקשות בנוגע לפרטיות: <a href="mailto:loshachachti.app@gmail.com">loshachachti.app@gmail.com</a></p>
+  </section>
+
+  <!-- ============ English ============ -->
+  <section data-lang="en">
+    <p class="muted">Last updated: 2026 · Version 3.0</p>
+
+    <div class="card">
+      <strong>In short:</strong> All your data is stored only on your own device. We do not run a server that collects information, we do not track you, and the app contains no ads or analytics.
+    </div>
+
+    <h2>1. What is stored, and where</h2>
+    <p>All your events, settings, greetings and choices are stored locally in your device's browser (localStorage / IndexedDB). This data never leaves your device unless you explicitly export it or use features connected to an external service (see below).</p>
+
+    <h2>2. What is sent out, and when</h2>
+    <h3>Google Calendar sync (optional)</h3>
+    <p>If you choose to connect your Google Calendar, the connection is directly between you and Google (OAuth). We run no intermediary server and never see your calendar data. Permissions are limited to reading and adding events.</p>
+    <h3>AI greetings (optional — BYOK)</h3>
+    <p>If you enter your own API key (OpenAI / Google Gemini) and use the "AI Greeting" feature, the greeting text is sent directly to the provider you chose. Your key is stored encrypted on your device only (AES-256-GCM), is never included in backup files, and never passes through any server of ours.</p>
+    <h3>Push notifications (optional)</h3>
+    <p>If you enable notifications, the OneSignal service is used to deliver reminders. This is activated only with your explicit consent.</p>
+
+    <h2>3. Camera and contacts</h2>
+    <p>If you add a contact photo or use the contact picker, access is local to your device only. Photos and contact details are stored locally and are not sent anywhere.</p>
+
+    <h2>4. No tracking, analytics or ads</h2>
+    <p>The app contains no tracking tools, analytics, advertising cookies, or ads of any kind.</p>
+
+    <h2>5. You are in full control</h2>
+    <p>You can export all your data (JSON / CSV) at any time, and delete all data from the Settings screen. Deletion is permanent and removes all information from the device.</p>
+
+    <h2>6. Disclaimer</h2>
+    <p>The app provides reminders and helper tools only and does not constitute professional advice of any kind. Use is at the user's own responsibility.</p>
+
+    <h2>7. Contact</h2>
+    <p>For privacy questions or requests: <a href="mailto:loshachachti.app@gmail.com">loshachachti.app@gmail.com</a></p>
+  </section>
+
+  <footer>
+    לא שכחתי · Never Forgot · © AppNest 2026 · ברק אפללו
+  </footer>
+</div>
+
+<script>
+function setLang(l){
+  document.querySelectorAll('section[data-lang]').forEach(s=>s.classList.toggle('active', s.getAttribute('data-lang')===l));
+  document.getElementById('btn-he').classList.toggle('active', l==='he');
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.documentElement.lang = l;
+  document.documentElement.dir = (l==='he') ? 'rtl' : 'ltr';
+}
+</script>
+</body>
+</html>
