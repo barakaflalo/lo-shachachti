@@ -412,6 +412,8 @@ input[type="date"].form-input { color-scheme:dark; }
 .ai-provider-card:hover { border-color:var(--acc-border); }
 .ai-tag { font-size:9px; font-weight:700; color:white; padding:2px 7px; border-radius:8px; letter-spacing:0.5px; }
 .ai-privacy-note { font-size:11px; color:var(--muted); line-height:1.6; background:rgba(var(--acc-rgb),0.06); border:1px solid var(--border); border-radius:var(--rs); padding:10px 12px; margin-top:16px; }
+.appnest-badge { text-align:center; padding:20px 0 12px; font-size:11px; color:var(--muted); cursor:pointer; letter-spacing:0.3px; }
+.appnest-badge strong { color:var(--acc-light); }
 .modal-icon { text-align:center; font-size:36px; margin-bottom:10px; }
 .modal-title { text-align:center; font-size:15px; font-weight:600; margin-bottom:5px; }
 .modal-sub { text-align:center; font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.6; }
@@ -599,6 +601,11 @@ body.dark-mode #splash { background: #12121f; }
 @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:none} }
 .new-card { animation:slideIn 0.3s ease; }
 
+/* ===== ACCESSIBILITY: reduced motion ===== */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after { animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
+}
+
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -668,6 +675,7 @@ body.dark-mode #splash { background: #12121f; }
       <a href="./privacy_policy.html" target="_blank" class="about-link-btn" id="about-privacy">🔒 מדיניות פרטיות</a>
       <a href="#" onclick="closeModal('modal-about');openScreen('screen-guide');return false;" class="about-link-btn" id="about-guide">📖 מדריך למשתמש</a>
       <a href="https://barakaflalo.github.io/appnest" target="_blank" class="about-link-btn" id="about-appnest">🏠 עוד אפליקציות AppNest</a>
+      <a href="#" onclick="showDiagnostics();return false;" class="about-link-btn" id="about-diag">🩺 דוח תמיכה (לפתרון תקלות)</a>
     </div>
     <button class="btn-primary" onclick="closeModal('modal-about')" id="about-close-btn">סגור</button>
   </div>
@@ -763,6 +771,9 @@ body.dark-mode #splash { background: #12121f; }
     <div id="main-filter-bar" style="margin-bottom:8px;"></div>
     <div class="filter-row" id="main-group-filters"></div>
     <div id="main-events-list"></div>
+    <div class="appnest-badge" onclick="openModal('modal-about')">
+      <span style="opacity:0.6;">Powered by</span> <strong>AppNest</strong>
+    </div>
   </div>
 </div>
 
@@ -1376,6 +1387,10 @@ const I18N_EXTRA = {
     assistantSuggestions:['מי יש לי החודש?','כמה הוצאתי על מתנות?','למי לא קניתי מתנה עדיין?'],
     summaryTitle:'📊 סיכום ותובנות',
     summaryOptions:['סכם את החודש הקרוב','כמה הוצאתי על מתנות השנה','מי האירועים הכי קרובים','תובנות כלליות'],
+    sectionUserName:'השם שלי', userNamePlaceholder:'השם שלך (יופיע בשיתופים)', userNameHint:'השם יתווסף לברכות ולגיבויים שתשתף',
+    fileProtocolWarn:'פתח את האפליקציה מהאתר, לא כקובץ מקומי',
+    backupReminderMsg:'💾 מזמן לא גיבית את האירועים שלך. הנתונים נשמרים רק במכשיר הזה — אם תמחק את הדפדפן, הכל יימחק.\n\nלגבות עכשיו?',
+    aboutDiag:'🩺 דוח תמיכה (לפתרון תקלות)', diagCopyPrompt:'להעתיק את הדוח? (לשליחה לתמיכה)', diagCopied:'הדוח הועתק',
     rightsTitle:'זכויות יוצרים',
     rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
     welcomeTitle:'איך עובדים עם האפליקציה?',
@@ -1436,6 +1451,10 @@ const I18N_EXTRA = {
     assistantSuggestions:['Who do I have this month?','How much did I spend on gifts?','Who haven\'t I bought a gift for yet?'],
     summaryTitle:'📊 Summary & insights',
     summaryOptions:['Summarize the coming month','How much did I spend on gifts this year','Which events are closest','General insights'],
+    sectionUserName:'My name', userNamePlaceholder:'Your name (appears in shares)', userNameHint:'Your name will be added to greetings and backups you share',
+    fileProtocolWarn:'Open the app from the website, not as a local file',
+    backupReminderMsg:'💾 You haven\'t backed up your events in a while. Data is stored only on this device — if you clear your browser, it\'s all gone.\n\nBack up now?',
+    aboutDiag:'🩺 Support report (troubleshooting)', diagCopyPrompt:'Copy the report? (to send to support)', diagCopied:'Report copied',
     rightsTitle:'Copyright',
     rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version 3.0<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
     welcomeTitle:'How does the app work?',
@@ -1496,6 +1515,10 @@ const I18N_EXTRA = {
     assistantSuggestions:['Кто у меня в этом месяце?','Сколько я потратил на подарки?','Кому я ещё не купил подарок?'],
     summaryTitle:'📊 Сводка и аналитика',
     summaryOptions:['Итоги предстоящего месяца','Сколько потрачено на подарки в этом году','Ближайшие события','Общие выводы'],
+    sectionUserName:'Моё имя', userNamePlaceholder:'Ваше имя (появится в отправках)', userNameHint:'Ваше имя добавится к поздравлениям и копиям, которыми вы делитесь',
+    fileProtocolWarn:'Откройте приложение с сайта, а не как локальный файл',
+    backupReminderMsg:'💾 Вы давно не делали резервную копию. Данные хранятся только на этом устройстве — если очистить браузер, всё пропадёт.\n\nСоздать копию сейчас?',
+    aboutDiag:'🩺 Отчёт поддержки (диагностика)', diagCopyPrompt:'Скопировать отчёт? (для отправки в поддержку)', diagCopied:'Отчёт скопирован',
     rightsTitle:'Авторские права',
     rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия 3.0<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
     welcomeTitle:'Как работает приложение?',
@@ -1561,6 +1584,10 @@ const I18N_EXTRA = {
     assistantSuggestions:['¿Quién tengo este mes?','¿Cuánto gasté en regalos?','¿A quién no le he comprado regalo aún?'],
     summaryTitle:'📊 Resumen y análisis',
     summaryOptions:['Resume el próximo mes','Cuánto gasté en regalos este año','Qué eventos están más cerca','Perspectivas generales'],
+    sectionUserName:'Mi nombre', userNamePlaceholder:'Tu nombre (aparece al compartir)', userNameHint:'Tu nombre se añadirá a las felicitaciones y copias que compartas',
+    fileProtocolWarn:'Abre la app desde el sitio web, no como archivo local',
+    backupReminderMsg:'💾 Hace tiempo que no haces copia de tus eventos. Los datos se guardan solo en este dispositivo — si borras el navegador, se pierde todo.\n\n¿Hacer copia ahora?',
+    aboutDiag:'🩺 Informe de soporte (solución de problemas)', diagCopyPrompt:'¿Copiar el informe? (para enviar a soporte)', diagCopied:'Informe copiado',
     rightsTitle:'Derechos de autor',
     rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión 3.0<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
     welcomeTitle:'¿Cómo funciona la app?',
@@ -1621,6 +1648,10 @@ const I18N_EXTRA = {
     assistantSuggestions:['من لدي هذا الشهر؟','كم أنفقت على الهدايا؟','لمن لم أشترِ هدية بعد؟'],
     summaryTitle:'📊 ملخص ورؤى',
     summaryOptions:['لخّص الشهر القادم','كم أنفقت على الهدايا هذا العام','ما أقرب المناسبات','رؤى عامة'],
+    sectionUserName:'اسمي', userNamePlaceholder:'اسمك (يظهر عند المشاركة)', userNameHint:'سيُضاف اسمك إلى التهاني والنسخ التي تشاركها',
+    fileProtocolWarn:'افتح التطبيق من الموقع، وليس كملف محلي',
+    backupReminderMsg:'💾 لم تقم بنسخ مناسباتك منذ فترة. تُحفظ البيانات على هذا الجهاز فقط — إذا مسحت المتصفح، سيضيع كل شيء.\n\nنسخ احتياطي الآن؟',
+    aboutDiag:'🩺 تقرير الدعم (حل المشاكل)', diagCopyPrompt:'نسخ التقرير؟ (لإرساله للدعم)', diagCopied:'تم نسخ التقرير',
     rightsTitle:'حقوق النشر',
     rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار 3.0<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
     welcomeTitle:'كيف يعمل التطبيق؟',
@@ -2083,6 +2114,7 @@ function applyLangToUI() {
   setText('about-privacy', lang.aboutPrivacy);
   setText('about-guide', lang.aboutGuide);
   setText('about-appnest', lang.aboutAppnest);
+  setText('about-diag', lang.aboutDiag);
 
   // ===== MODAL: RIGHTS =====
   setText('rights-title', lang.rightsTitle);
@@ -2282,6 +2314,11 @@ const SCREEN_RENDERERS = {
     const mkSel = (id, opts, cur) => `<select class="form-select" id="${id}">${opts.map(o=>`<option value="${o.v}"${o.v===cur?' selected':''}>${o.l}</option>`).join('')}</select>`;
     return TB(lang.screenUserSettings||'הגדרות משתמש', 'screen-settings') + `
     <div style="padding:12px 0;">
+      <div class="section-lbl">${lang.sectionUserName||'השם שלי'}</div>
+      <div class="form-group">
+        <input class="form-input" type="text" id="user-name-input" placeholder="${lang.userNamePlaceholder||'השם שלך (יופיע בשיתופים)'}" value="${(settings.userName||'').replace(/"/g,'&quot;')}">
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">${lang.userNameHint||'השם יתווסף לברכות ולגיבויים שתשתף'}</div>
+      </div>
       <div class="section-lbl">${lang.sectionMainScreen||'מה יוצג במסך הראשי'}</div>
       ${TR('📊', lang.togStats||'סטטיסטיקות', '', 'tog-stats', 'showStats')}
       ${TR('🔥', lang.togHero||'האירוע הקרוב', '', 'tog-hero', 'showHero')}
@@ -2953,8 +2990,24 @@ function openScreen(id, animDir){
   }
   window.scrollTo(0,0);const map={'screen-main':renderMain,'screen-contacts':()=>{renderScreen('screen-contacts');renderContacts();},'screen-search':initSearch,
     'screen-greetings':()=>{renderScreen('screen-greetings');renderGreetings();},'screen-my-greetings':()=>{renderScreen('screen-my-greetings');renderMyGreetings();},'screen-stores':()=>{renderScreen('screen-stores');renderStores();},'screen-budget-settings':()=>{renderScreen('screen-budget-settings');renderBudgetSettings();},'screen-print':()=>{renderScreen('screen-print');initPrint();},'screen-guide':()=>{renderScreen('screen-guide');},'screen-appearance':()=>{renderScreen('screen-appearance');renderAppearance();},'screen-language':()=>{renderScreen('screen-language');renderLanguageScreen();},'screen-add':()=>renderScreen('screen-add'),'screen-search':()=>{renderScreen('screen-search');initSearch();},'screen-guide-chapter':()=>renderScreen('screen-guide-chapter'),'screen-user-settings':()=>{renderScreen('screen-user-settings');initUserSettings();},'screen-notifications':()=>{renderScreen('screen-notifications');initNotifications();},'screen-settings':()=>renderScreen('screen-settings'),'screen-detail':()=>{/* rendered by openDetail */},'screen-holidays':()=>renderScreen('screen-holidays'),'screen-system-settings':()=>renderScreen('screen-system-settings'),'screen-import':()=>renderScreen('screen-import'),'screen-import-ics':()=>renderScreen('screen-import-ics'),'screen-google-cal':()=>renderScreen('screen-google-cal'),'screen-import-fb':()=>renderScreen('screen-import-fb'),'screen-backup':()=>renderScreen('screen-backup'),'screen-vcf-preview':()=>renderScreen('screen-vcf-preview')};if(map[id])map[id]();}
-function openModal(id){const el=document.getElementById(id);if(el)el.classList.add('open');}
+function openModal(id){const el=document.getElementById(id);if(el){el.classList.add('open');el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');}}
 function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('open');}
+function closeTopModal(){
+  // סגור את המודל הפתוח העליון (ל-Escape ולחיצה על רקע)
+  const open=document.querySelectorAll('.modal-overlay.open');
+  if(open.length){ open[open.length-1].classList.remove('open'); return true; }
+  return false;
+}
+// Escape סוגר מודל פתוח
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeTopModal();
+});
+// לחיצה על הרקע (מחוץ לתיבה) סוגרת את המודל
+document.addEventListener('click',e=>{
+  if(e.target.classList && e.target.classList.contains('modal-overlay') && e.target.classList.contains('open')){
+    e.target.classList.remove('open');
+  }
+},true);
 
 // ================================================================
 // ===== SOUNDS =====
@@ -3437,6 +3490,36 @@ function shareApp(){
   if(navigator.share)navigator.share({text}).catch(()=>{});
   else navigator.clipboard.writeText(text).then(()=>alert('📋'));
 }
+// דוח תמיכה — מידע טכני לפתרון תקלות (ללא נתונים אישיים)
+function showDiagnostics(){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const provider=getAiProvider();
+  const aiStatus=localStorage.getItem('ls2_ai_status')||'unknown';
+  const swVer=(navigator.serviceWorker&&navigator.serviceWorker.controller)?'פעיל':'לא פעיל';
+  let storageOK='כן';
+  try{ localStorage.setItem('_t','1'); localStorage.removeItem('_t'); }catch(e){ storageOK='לא (חסום!)'; }
+  const report=
+    'דוח תמיכה — לא שכחתי v3\n'+
+    '─────────────────\n'+
+    'גרסה: 3.0\n'+
+    'שפה: '+currentLang+'\n'+
+    'מספר אירועים: '+events.length+'\n'+
+    'ערכת צבע: '+(settings.theme||'?')+'\n'+
+    'מצב: '+(settings.mode||'?')+'\n'+
+    'אחסון מקומי: '+storageOK+'\n'+
+    'Service Worker: '+swVer+'\n'+
+    'ספק AI: '+provider+' ('+aiStatus+')\n'+
+    'מודל AI: '+getAiModel(provider)+'\n'+
+    'פרוטוקול: '+location.protocol+'\n'+
+    'דפדפן: '+navigator.userAgent+'\n'+
+    'מסך: '+window.innerWidth+'×'+window.innerHeight+'\n'+
+    'אונליין: '+(navigator.onLine?'כן':'לא')+'\n'+
+    'תאריך: '+new Date().toLocaleString('he-IL');
+  if(confirm(report+'\n\n'+(lang.diagCopyPrompt||'להעתיק את הדוח? (לשליחה לתמיכה)'))){
+    navigator.clipboard.writeText(report).then(()=>showBanner('📋 '+(lang.diagCopied||'הדוח הועתק')))
+      .catch(()=>{});
+  }
+}
 
 // ================================================================
 // ===== SEARCH =====
@@ -3596,6 +3679,8 @@ function initUserSettings(){
   const ds=document.getElementById('default-sort');if(ds)ds.value=settings.defaultSort||'date';
 }
 function saveUserSettings(){
+  const nameEl=document.getElementById('user-name-input');
+  if(nameEl) settings.userName=nameEl.value.trim();
   settings.defaultFilter=document.getElementById('default-filter').value;
   settings.defaultSort=document.getElementById('default-sort').value;
   saveSettings();renderMain();openScreen('screen-main');
@@ -3880,6 +3965,7 @@ function exportJSON(){
   };
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
   a.download='lo-shachachti-safe-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  localStorage.setItem('ls2_last_backup',String(Date.now()));
 }
 function restoreBackup(input){
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
@@ -4828,7 +4914,7 @@ async function generateAiGreeting(){
   const extra=document.getElementById('ai-extra-input').value.trim();
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
   const styleLabel=(lang.aiStyles&&lang.aiStyles[style])||style;
-  const prompt='כתוב ברכה ב'+(lang.lang||'he')+' לאירוע "'+getLabel(ev.type,ev.customType)+'" עבור '+ev.name+'.\nסגנון: '+styleLabel+'.\n'+(ev.group?'קשר: '+ev.group+'.':'')+'\n'+(extra?'פרטים: '+extra+'.':'')+'\nכתוב רק את הברכה עצמה, ללא הסברים. עד 3 משפטים. כלול אמוג\'י מתאים.';
+  const prompt='כתוב ברכה ב'+(lang.lang||'he')+' לאירוע "'+getLabel(ev.type,ev.customType)+'" עבור '+ev.name+'.\nסגנון: '+styleLabel+'.\n'+(ev.group?'קשר: '+ev.group+'.':'')+'\n'+(extra?'פרטים: '+extra+'.':'')+'\n'+(settings.userName?'חתום בשם: '+settings.userName+'.':'')+'\nכתוב רק את הברכה עצמה, ללא הסברים. עד 3 משפטים. כלול אמוג\'י מתאים.';
   const btn=document.getElementById('ai-generate-btn');
   const resultBox=document.getElementById('ai-result-box');
   const resultText=document.getElementById('ai-result-text');
@@ -5533,7 +5619,38 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // 11. swipe navigation (calendar months + settings carousel)
   initSwipeNavigation();
+
+  // 12. אזהרת file:// — האפליקציה חייבת לרוץ משרת (GitHub Pages), לא כקובץ מקומי
+  if(location.protocol==='file:'){
+    setTimeout(()=>{
+      const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+      showBanner('⚠️ '+(lang.fileProtocolWarn||'פתח את האפליקציה מהאתר, לא כקובץ מקומי'));
+    },1500);
+  }
+
+  // 13. תזכורת גיבוי עדינה — כל הנתונים על המכשיר בלבד
+  setTimeout(()=>checkBackupReminder(),3000);
 });
+// תזכורת גיבוי: אם יש אירועים ולא היה גיבוי מעל 30 יום
+function checkBackupReminder(){
+  if(!events.length) return;
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const last=parseInt(localStorage.getItem('ls2_last_backup')||'0');
+  const dismissed=parseInt(localStorage.getItem('ls2_backup_remind_dismissed')||'0');
+  const now=Date.now();
+  const DAY=86400000;
+  // אל תציק אם נדחה לאחרונה (שבוע)
+  if(now-dismissed < 7*DAY) return;
+  // הזכר אם לא גובה מעולם ויש 5+ אירועים, או אם עברו 30 יום מהגיבוי האחרון
+  const should = (last===0 && events.length>=5) || (last>0 && now-last > 30*DAY);
+  if(!should) return;
+  if(confirm(lang.backupReminderMsg||'💾 מזמן לא גיבית את האירועים שלך. הנתונים נשמרים רק במכשיר הזה — אם תמחק את הדפדפן, הכל יימחק.\n\nלגבות עכשיו?')){
+    exportJSON();
+    localStorage.setItem('ls2_last_backup',String(now));
+  } else {
+    localStorage.setItem('ls2_backup_remind_dismissed',String(now));
+  }
+}
 </script>
 </body>
 </html>

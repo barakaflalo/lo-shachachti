@@ -1,7 +1,7 @@
 // לא שכחתי v3 — Service Worker
 // cache: רק אייקונים ו-manifest. לא JS/HTML כדי שעדכונים יגיעו מיד
 
-const CACHE = 'lo-shachachti-v35';
+const CACHE = 'lo-shachachti-v36';
 const STATIC = [
   './icon-192.png',
   './icon-512.png',
