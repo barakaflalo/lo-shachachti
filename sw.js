@@ -1,18 +1,26 @@
 // לא שכחתי v3 — Service Worker
-// cache: רק אייקונים ו-manifest. לא JS/HTML כדי שעדכונים יגיעו מיד
+// אסטרטגיה: network-first עבור index.html (תמיד מנסה להביא עדכני),
+// אבל שומר עותק ב-cache כדי שיעבוד אופליין. אייקונים: cache-first.
 
-const CACHE = 'lo-shachachti-v37';
+const CACHE = 'lo-shachachti-v38';
 const STATIC = [
   './icon-192.png',
   './icon-512.png',
   './manifest.json',
   './OneSignalSDKWorker.js',
 ];
+// קבצים שחובה שיהיו זמינים אופליין (מנסים לשמור בהתקנה)
+const APP_SHELL = [
+  './',
+  './index.html',
+];
 
-// install — cache רק קבצים סטטיים
+// install — cache קבצים סטטיים + מעטפת האפליקציה
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(STATIC))
+    caches.open(CACHE).then(c =>
+      Promise.allSettled([...STATIC, ...APP_SHELL].map(u => c.add(u)))
+    )
   );
   self.skipWaiting();
 });
@@ -27,31 +35,51 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// fetch — network first לכל קובץ JS/HTML, cache first רק לאייקונים
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  const isStatic = STATIC.some(f => url.pathname.endsWith(f.replace('./', '/')));
+function isIconOrManifest(url){
+  return STATIC.some(f => url.pathname.endsWith(f.replace('./', '/')));
+}
+function isAppShell(req){
+  return req.mode === 'navigate' ||
+    req.url.endsWith('/') || req.url.endsWith('/index.html');
+}
 
-  if (isStatic) {
-    // אייקונים: cache first
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+
+  if (isIconOrManifest(url)) {
+    // אייקונים/manifest: cache-first
     e.respondWith(
-      caches.match(e.request).then(cached => cached || fetch(e.request))
+      caches.match(req).then(cached => cached || fetch(req).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(req, clone));
+        return res;
+      }))
     );
-  } else {
-    // index.html + כל השאר: network first (תמיד עדכני)
+    return;
+  }
+
+  if (isAppShell(req)) {
+    // index.html: network-first, נשמר ל-cache ונופל אליו אופליין
     e.respondWith(
-      fetch(e.request)
+      fetch(req)
         .then(res => {
-          // cache אייקונים שמגיעים מ-network
-          if (isStatic) {
-            const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, clone));
-          }
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put('./index.html', clone));
           return res;
         })
-        .catch(() => caches.match(e.request))
+        .catch(() =>
+          caches.match('./index.html').then(c => c || caches.match('./'))
+        )
     );
+    return;
   }
+
+  // כל השאר: network-first עם נפילה ל-cache
+  e.respondWith(
+    fetch(req).catch(() => caches.match(req))
+  );
 });
 
 // notification click
