@@ -748,6 +748,7 @@ body.dark-mode #splash { background: #12121f; }
     <span class="topbar-title">לא שכחתי 🔔</span>
     <div class="topbar-actions">
       <button class="icon-btn" onclick="openScreen('screen-search')" title="חיפוש">🔍</button>
+      <button class="icon-btn" onclick="openAiMenu()" title="AI" id="ai-btn">🤖</button>
       <button class="icon-btn" onclick="openLangScreen('screen-main')" title="Language" id="lang-btn">🌐</button>
       <button class="icon-btn" onclick="quickToggleMode()" id="mode-toggle-btn" title="שנה מראה">🌙</button>
       <button class="settings-btn" id="tb-settings" onclick="openScreen('screen-settings')">⚙️ הגדרות</button>
@@ -920,6 +921,75 @@ body.dark-mode #splash { background: #12121f; }
         <button class="greet-btn sec" onclick="copyAiGreeting()" id="btn-ai-copy">📋 העתק</button>
         <button class="greet-btn sec" onclick="generateAiGreeting()" style="flex:0;padding:0 10px">🔄</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: AI MENU ========== -->
+<div class="modal-overlay center" id="modal-ai-menu">
+  <div class="modal-box" style="max-width:360px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:600;" id="ai-menu-title">🤖 כלי AI</div>
+      <span onclick="closeModal('modal-ai-menu')" style="cursor:pointer;color:var(--muted);font-size:20px;">✕</span>
+    </div>
+    <div class="sheet-option" onclick="closeModal('modal-ai-menu');openAssistant()"><span style="font-size:22px;">💬</span><div><div style="font-size:13px;font-weight:500;" id="ai-menu-assistant">עוזר חכם</div><div style="font-size:11px;color:var(--muted);" id="ai-menu-assistant-sub">שאל שאלות על האירועים שלך</div></div></div>
+    <div class="sheet-option" onclick="closeModal('modal-ai-menu');openSummary()"><span style="font-size:22px;">📊</span><div><div style="font-size:13px;font-weight:500;" id="ai-menu-summary">סיכום ותובנות</div><div style="font-size:11px;color:var(--muted);" id="ai-menu-summary-sub">סכם את החודש, הוצאות ועוד</div></div></div>
+    <div class="sheet-option" onclick="closeModal('modal-ai-menu');openScreen('screen-ai-settings')"><span style="font-size:22px;">⚙️</span><div><div style="font-size:13px;font-weight:500;" id="ai-menu-settings">הגדרות AI</div><div style="font-size:11px;color:var(--muted);" id="ai-menu-settings-sub">ספק, מפתח ומודל</div></div></div>
+    <button class="btn-ghost" onclick="closeModal('modal-ai-menu')" id="ai-menu-close" style="margin-top:8px;">סגור</button>
+  </div>
+</div>
+
+<!-- ========== MODAL: GIFT SUGGESTIONS (AI) ========== -->
+<div class="modal-overlay center" id="modal-gift-suggest">
+  <div class="modal-box" style="max-width:400px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:15px;font-weight:600;" id="gift-suggest-title">🎁 הצעות מתנה</div>
+      <span onclick="closeModal('modal-gift-suggest')" style="cursor:pointer;color:var(--muted);font-size:20px;">✕</span>
+    </div>
+    <div id="gift-suggest-sub" style="font-size:12px;color:var(--muted);margin-bottom:12px;"></div>
+    <div class="form-group">
+      <label class="form-label" id="gift-budget-label">💰 תקציב (אופציונלי)</label>
+      <input class="form-input" type="text" id="gift-budget-input" placeholder="₪">
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="gift-extra-label">💡 פרטים נוספים (גיל, תחביבים...)</label>
+      <input class="form-input" type="text" id="gift-extra-input" placeholder="">
+    </div>
+    <button class="btn-primary" id="gift-gen-btn" onclick="generateGiftSuggest()">✨ <span id="gift-gen-label">הצע מתנות</span></button>
+    <div id="gift-result-box" style="display:none;margin-top:12px;">
+      <div id="gift-loading" style="display:none;text-align:center;padding:12px;font-size:20px;">⏳</div>
+      <div id="gift-result-text" style="font-size:13px;line-height:1.8;white-space:pre-wrap;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: SMART ASSISTANT (AI CHAT) ========== -->
+<div class="modal-overlay center" id="modal-assistant">
+  <div class="modal-box" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:15px;font-weight:600;" id="assistant-title">💬 עוזר חכם</div>
+      <span onclick="closeModal('modal-assistant')" style="cursor:pointer;color:var(--muted);font-size:20px;">✕</span>
+    </div>
+    <div id="assistant-chat" style="max-height:280px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="assistant-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input class="form-input" type="text" id="assistant-input" placeholder="שאל אותי משהו..." style="flex:1;" onkeydown="if(event.key==='Enter')sendAssistant()">
+      <button class="btn-primary" onclick="sendAssistant()" style="width:auto;padding:8px 16px;margin:0;" id="assistant-send-btn">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: AI SUMMARY ========== -->
+<div class="modal-overlay center" id="modal-summary">
+  <div class="modal-box" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:15px;font-weight:600;" id="summary-title">📊 סיכום ותובנות</div>
+      <span onclick="closeModal('modal-summary')" style="cursor:pointer;color:var(--muted);font-size:20px;">✕</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;" id="summary-options"></div>
+    <div id="summary-result-box" style="display:none;">
+      <div id="summary-loading" style="display:none;text-align:center;padding:12px;font-size:20px;">⏳</div>
+      <div id="summary-result-text" style="font-size:13px;line-height:1.8;white-space:pre-wrap;"></div>
     </div>
   </div>
 </div>
@@ -1299,6 +1369,13 @@ const I18N_EXTRA = {
     aiDisconnect:'נתק והסר מפתח', aiDisconnectConfirm:'לנתק ולהסיר את המפתח?', aiDisconnected:'נותק',
     aiSettingsSaved:'ההגדרות נשמרו', aiModelsLoaded:'נטענו', aiModelsCount:'מודלים', aiModelsFailed:'לא ניתן לטעון מודלים - בדוק מפתח',
     aiPrivacyNote:'⚠️ פיצ\'רי הבינה שולחים את הטקסט לספק שבחרת. המפתח נשמר מוצפן במכשיר בלבד ואינו נכלל בגיבוי.', aiNeedKeyFirst:'נא להזין מפתח API ולשמור קודם', aiNeedEndpoint:'נא להזין כתובת Endpoint',
+    giftSuggestBtn:'הצעות מתנה חכמות (AI)', giftSuggestFor:'הצעות עבור', giftBudgetLabel:'💰 תקציב (אופציונלי)', giftExtraLabel:'💡 פרטים נוספים (גיל, תחביבים...)', giftGenLabel:'הצע מתנות',
+    aiNotConfiguredGoSettings:'צריך להגדיר ספק AI קודם. לעבור להגדרות?',
+    aiMenuTitle:'🤖 כלי AI', aiMenuAssistant:'עוזר חכם', aiMenuAssistantSub:'שאל שאלות על האירועים שלך', aiMenuSummary:'סיכום ותובנות', aiMenuSummarySub:'סכם את החודש, הוצאות ועוד', aiMenuSettings:'הגדרות AI', aiMenuSettingsSub:'ספק, מפתח ומודל',
+    assistantTitle:'💬 עוזר חכם', assistantWelcome:'שלום! אני יכול לעזור לך עם האירועים שלך. שאל אותי כל דבר 😊', assistantPlaceholder:'שאל אותי משהו...',
+    assistantSuggestions:['מי יש לי החודש?','כמה הוצאתי על מתנות?','למי לא קניתי מתנה עדיין?'],
+    summaryTitle:'📊 סיכום ותובנות',
+    summaryOptions:['סכם את החודש הקרוב','כמה הוצאתי על מתנות השנה','מי האירועים הכי קרובים','תובנות כלליות'],
     rightsTitle:'זכויות יוצרים',
     rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
     welcomeTitle:'איך עובדים עם האפליקציה?',
@@ -1352,6 +1429,13 @@ const I18N_EXTRA = {
     aiDisconnect:'Disconnect & remove key', aiDisconnectConfirm:'Disconnect and remove the key?', aiDisconnected:'Disconnected',
     aiSettingsSaved:'Settings saved', aiModelsLoaded:'Loaded', aiModelsCount:'models', aiModelsFailed:'Could not load models - check key',
     aiPrivacyNote:'⚠️ AI features send your text to the chosen provider. The key is stored encrypted on-device only and is never included in backups.', aiNeedKeyFirst:'Please enter and save an API key first', aiNeedEndpoint:'Please enter an Endpoint URL',
+    giftSuggestBtn:'Smart gift ideas (AI)', giftSuggestFor:'Ideas for', giftBudgetLabel:'💰 Budget (optional)', giftExtraLabel:'💡 Extra details (age, hobbies...)', giftGenLabel:'Suggest gifts',
+    aiNotConfiguredGoSettings:'You need to set up an AI provider first. Go to settings?',
+    aiMenuTitle:'🤖 AI Tools', aiMenuAssistant:'Smart assistant', aiMenuAssistantSub:'Ask questions about your events', aiMenuSummary:'Summary & insights', aiMenuSummarySub:'Summarize the month, spending & more', aiMenuSettings:'AI Settings', aiMenuSettingsSub:'Provider, key & model',
+    assistantTitle:'💬 Smart assistant', assistantWelcome:'Hi! I can help you with your events. Ask me anything 😊', assistantPlaceholder:'Ask me something...',
+    assistantSuggestions:['Who do I have this month?','How much did I spend on gifts?','Who haven\'t I bought a gift for yet?'],
+    summaryTitle:'📊 Summary & insights',
+    summaryOptions:['Summarize the coming month','How much did I spend on gifts this year','Which events are closest','General insights'],
     rightsTitle:'Copyright',
     rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version 3.0<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
     welcomeTitle:'How does the app work?',
@@ -1405,6 +1489,13 @@ const I18N_EXTRA = {
     aiDisconnect:'Отключить и удалить ключ', aiDisconnectConfirm:'Отключить и удалить ключ?', aiDisconnected:'Отключено',
     aiSettingsSaved:'Настройки сохранены', aiModelsLoaded:'Загружено', aiModelsCount:'моделей', aiModelsFailed:'Не удалось загрузить модели - проверьте ключ',
     aiPrivacyNote:'⚠️ Функции AI отправляют ваш текст выбранному провайдеру. Ключ хранится зашифрованным только на устройстве и не включается в резервные копии.', aiNeedKeyFirst:'Сначала введите и сохраните ключ API', aiNeedEndpoint:'Введите URL Endpoint',
+    giftSuggestBtn:'Умные идеи подарков (AI)', giftSuggestFor:'Идеи для', giftBudgetLabel:'💰 Бюджет (необязательно)', giftExtraLabel:'💡 Доп. детали (возраст, хобби...)', giftGenLabel:'Предложить подарки',
+    aiNotConfiguredGoSettings:'Сначала нужно настроить провайдера AI. Перейти к настройкам?',
+    aiMenuTitle:'🤖 Инструменты AI', aiMenuAssistant:'Умный помощник', aiMenuAssistantSub:'Задайте вопросы о ваших событиях', aiMenuSummary:'Сводка и аналитика', aiMenuSummarySub:'Итоги месяца, расходы и др.', aiMenuSettings:'Настройки AI', aiMenuSettingsSub:'Провайдер, ключ и модель',
+    assistantTitle:'💬 Умный помощник', assistantWelcome:'Привет! Я помогу с вашими событиями. Спрашивайте что угодно 😊', assistantPlaceholder:'Спросите меня...',
+    assistantSuggestions:['Кто у меня в этом месяце?','Сколько я потратил на подарки?','Кому я ещё не купил подарок?'],
+    summaryTitle:'📊 Сводка и аналитика',
+    summaryOptions:['Итоги предстоящего месяца','Сколько потрачено на подарки в этом году','Ближайшие события','Общие выводы'],
     rightsTitle:'Авторские права',
     rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия 3.0<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
     welcomeTitle:'Как работает приложение?',
@@ -1463,6 +1554,13 @@ const I18N_EXTRA = {
     aiDisconnect:'Desconectar y quitar clave', aiDisconnectConfirm:'¿Desconectar y quitar la clave?', aiDisconnected:'Desconectado',
     aiSettingsSaved:'Ajustes guardados', aiModelsLoaded:'Cargados', aiModelsCount:'modelos', aiModelsFailed:'No se pudieron cargar modelos - revisa la clave',
     aiPrivacyNote:'⚠️ Las funciones de IA envían tu texto al proveedor elegido. La clave se guarda cifrada solo en el dispositivo y nunca se incluye en las copias.', aiNeedKeyFirst:'Primero ingresa y guarda una clave API', aiNeedEndpoint:'Ingresa una URL de Endpoint',
+    giftSuggestBtn:'Ideas de regalo (IA)', giftSuggestFor:'Ideas para', giftBudgetLabel:'💰 Presupuesto (opcional)', giftExtraLabel:'💡 Detalles extra (edad, aficiones...)', giftGenLabel:'Sugerir regalos',
+    aiNotConfiguredGoSettings:'Primero debes configurar un proveedor de IA. ¿Ir a ajustes?',
+    aiMenuTitle:'🤖 Herramientas IA', aiMenuAssistant:'Asistente inteligente', aiMenuAssistantSub:'Pregunta sobre tus eventos', aiMenuSummary:'Resumen y análisis', aiMenuSummarySub:'Resume el mes, gastos y más', aiMenuSettings:'Ajustes de IA', aiMenuSettingsSub:'Proveedor, clave y modelo',
+    assistantTitle:'💬 Asistente inteligente', assistantWelcome:'¡Hola! Puedo ayudarte con tus eventos. Pregúntame lo que quieras 😊', assistantPlaceholder:'Pregúntame algo...',
+    assistantSuggestions:['¿Quién tengo este mes?','¿Cuánto gasté en regalos?','¿A quién no le he comprado regalo aún?'],
+    summaryTitle:'📊 Resumen y análisis',
+    summaryOptions:['Resume el próximo mes','Cuánto gasté en regalos este año','Qué eventos están más cerca','Perspectivas generales'],
     rightsTitle:'Derechos de autor',
     rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión 3.0<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
     welcomeTitle:'¿Cómo funciona la app?',
@@ -1516,6 +1614,13 @@ const I18N_EXTRA = {
     aiDisconnect:'قطع الاتصال وإزالة المفتاح', aiDisconnectConfirm:'قطع الاتصال وإزالة المفتاح؟', aiDisconnected:'تم قطع الاتصال',
     aiSettingsSaved:'تم حفظ الإعدادات', aiModelsLoaded:'تم تحميل', aiModelsCount:'نماذج', aiModelsFailed:'تعذر تحميل النماذج - تحقق من المفتاح',
     aiPrivacyNote:'⚠️ ميزات الذكاء الاصطناعي ترسل نصك إلى المزود المختار. يُحفظ المفتاح مشفراً على الجهاز فقط ولا يُدرج في النسخ الاحتياطية.', aiNeedKeyFirst:'الرجاء إدخال مفتاح API وحفظه أولاً', aiNeedEndpoint:'الرجاء إدخال عنوان Endpoint',
+    giftSuggestBtn:'أفكار هدايا ذكية (AI)', giftSuggestFor:'أفكار لـ', giftBudgetLabel:'💰 الميزانية (اختياري)', giftExtraLabel:'💡 تفاصيل إضافية (العمر، الهوايات...)', giftGenLabel:'اقترح هدايا',
+    aiNotConfiguredGoSettings:'يجب إعداد مزود الذكاء الاصطناعي أولاً. الانتقال إلى الإعدادات؟',
+    aiMenuTitle:'🤖 أدوات AI', aiMenuAssistant:'مساعد ذكي', aiMenuAssistantSub:'اسأل عن مناسباتك', aiMenuSummary:'ملخص ورؤى', aiMenuSummarySub:'لخّص الشهر والمصاريف والمزيد', aiMenuSettings:'إعدادات AI', aiMenuSettingsSub:'المزود والمفتاح والنموذج',
+    assistantTitle:'💬 مساعد ذكي', assistantWelcome:'مرحباً! يمكنني مساعدتك في مناسباتك. اسألني أي شيء 😊', assistantPlaceholder:'اسألني شيئاً...',
+    assistantSuggestions:['من لدي هذا الشهر؟','كم أنفقت على الهدايا؟','لمن لم أشترِ هدية بعد؟'],
+    summaryTitle:'📊 ملخص ورؤى',
+    summaryOptions:['لخّص الشهر القادم','كم أنفقت على الهدايا هذا العام','ما أقرب المناسبات','رؤى عامة'],
     rightsTitle:'حقوق النشر',
     rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار 3.0<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
     welcomeTitle:'كيف يعمل التطبيق؟',
@@ -2034,6 +2139,22 @@ function applyLangToUI() {
   setText('btn-ai-send', lang.greetWhatsapp);
   setText('btn-ai-copy', lang.greetCopy);
   if(typeof onAiProviderChange==='function') onAiProviderChange();
+
+  // ===== AI MENU + FEATURES =====
+  setText('ai-menu-title', lang.aiMenuTitle);
+  setText('ai-menu-assistant', lang.aiMenuAssistant);
+  setText('ai-menu-assistant-sub', lang.aiMenuAssistantSub);
+  setText('ai-menu-summary', lang.aiMenuSummary);
+  setText('ai-menu-summary-sub', lang.aiMenuSummarySub);
+  setText('ai-menu-settings', lang.aiMenuSettings);
+  setText('ai-menu-settings-sub', lang.aiMenuSettingsSub);
+  setText('ai-menu-close', lang.btnClose);
+  setText('gift-budget-label', lang.giftBudgetLabel);
+  setText('gift-extra-label', lang.giftExtraLabel);
+  setText('gift-gen-label', lang.giftGenLabel);
+  setText('assistant-title', lang.assistantTitle);
+  setPH('assistant-input', lang.assistantPlaceholder);
+  setText('summary-title', lang.summaryTitle);
 }
 
 
@@ -2988,7 +3109,7 @@ function openDetail(id){
     const calc=calcDays(ev);
     const storeLinks=ev.giftIdea?(settings.activeStores||['Amazon','KSP','זאפ']).map(s=>'<a href="https://www.google.com/search?q='+encodeURIComponent(ev.giftIdea+' '+s)+'" target="_blank" class="store-link">🔍 '+s+'</a>').join(''):'';
     const dc=document.getElementById('detail-content');
-    if(dc) dc.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">'+avatarHTML(ev,'av-lg')+'<div><div style="font-size:20px;font-weight:600;">'+ev.name+'</div><div style="font-size:13px;color:var(--accent);margin-top:2px;">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:5px;">'+countdownHTML(calc.daysLeft,calc.isOver)+'</div></div></div><div class="card" style="margin-bottom:12px;"><div class="detail-row"><span class="detail-label">📅 '+(lang.detailDate||'תאריך')+'</span><span>'+(ev.date||'')+'</span></div>'+(ev.group?'<div class="detail-row"><span class="detail-label">🏷️</span><span>'+ev.group+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span class="detail-label">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span class="detail-label">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span class="detail-label">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div class="detail-row"><span class="detail-label">💡</span><span style="color:var(--muted);">'+ev.notes+'</span></div>':'')+'</div>'+((ev.giftIdea||ev.budget)?'<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 '+(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+' </span><button onclick="toggleGift('+ev.id+');openDetail('+ev.id+');" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>':'')+
+    if(dc) dc.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">'+avatarHTML(ev,'av-lg')+'<div><div style="font-size:20px;font-weight:600;">'+ev.name+'</div><div style="font-size:13px;color:var(--accent);margin-top:2px;">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:5px;">'+countdownHTML(calc.daysLeft,calc.isOver)+'</div></div></div><div class="card" style="margin-bottom:12px;"><div class="detail-row"><span class="detail-label">📅 '+(lang.detailDate||'תאריך')+'</span><span>'+(ev.date||'')+'</span></div>'+(ev.group?'<div class="detail-row"><span class="detail-label">🏷️</span><span>'+ev.group+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span class="detail-label">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span class="detail-label">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span class="detail-label">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div class="detail-row"><span class="detail-label">💡</span><span style="color:var(--muted);">'+ev.notes+'</span></div>':'')+'</div>'+((ev.giftIdea||ev.budget)?'<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 '+(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+' </span><button onclick="toggleGift('+ev.id+');openDetail('+ev.id+');" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>':'')+'<button class="btn-secondary" onclick="openGiftSuggest('+ev.id+')" style="margin-bottom:12px;">🎁 '+(lang.giftSuggestBtn||'הצעות מתנה חכמות (AI)')+'</button>'+
 '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>'+lang.greetLabel+'</span><div style="display:flex;gap:5px;"><button class="greet-next-btn" onclick="nextVariant('+ev.id+');updateDetailGreet('+ev.id+')">'+lang.greetNext+'</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.2);" onclick="openAiGreet('+ev.id+')">'+lang.greetAI+'</button></div></div><div class="greet-text" id="greet-text-'+ev.id+'">'+buildGreeting(ev)+'</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyGreet('+ev.id+')">'+lang.greetCopy+'</button></div></div>'+
 '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+(ev.phone?'<button class="card-btn" style="flex:1;" onclick="window.location.href=\'tel:'+ev.phone+'\'">📱</button>':'')+'<button class="card-btn" style="flex:1;" onclick="exportEventToGoogle('+ev.id+')">📅</button><button class="card-btn" style="flex:1;" onclick="shareEvent('+ev.id+')">📤</button><button class="card-btn" style="flex:1;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);" onclick="deleteEventDirect('+ev.id+')">🗑️</button></div>';
     // עדכן topbar
@@ -4739,6 +4860,182 @@ function copyAiGreeting(){
     if(btn){const orig=btn.textContent;btn.textContent='✅';setTimeout(()=>btn.textContent=orig,1500);}
   });
 }
+
+// ================================================================
+// ===== 🎁 GIFT SUGGESTIONS (AI) =====
+// ================================================================
+let _giftEventId=null;
+function openAiMenu(){
+  openModal('modal-ai-menu');
+}
+function openGiftSuggest(id){
+  id=parseInt(id)||id;
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  if(!aiIsConfigured()){
+    if(confirm(lang.aiNotConfiguredGoSettings||'צריך להגדיר ספק AI קודם. לעבור להגדרות?')) openScreen('screen-ai-settings');
+    return;
+  }
+  _giftEventId=id;
+  const ev=events.find(e=>e.id===id); if(!ev)return;
+  document.getElementById('gift-suggest-sub').textContent=(lang.giftSuggestFor||'הצעות עבור')+' '+ev.name+' · '+getLabel(ev.type,ev.customType);
+  document.getElementById('gift-budget-input').value=ev.budget||'';
+  document.getElementById('gift-extra-input').value='';
+  document.getElementById('gift-result-box').style.display='none';
+  document.getElementById('gift-result-text').innerHTML='';
+  openModal('modal-gift-suggest');
+}
+async function generateGiftSuggest(){
+  const ev=events.find(e=>e.id===_giftEventId);if(!ev)return;
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const budget=document.getElementById('gift-budget-input').value.trim();
+  const extra=document.getElementById('gift-extra-input').value.trim();
+  const btn=document.getElementById('gift-gen-btn');
+  const box=document.getElementById('gift-result-box');
+  const loading=document.getElementById('gift-loading');
+  const result=document.getElementById('gift-result-text');
+  const prompt='הצע 4 רעיונות מתנה ב'+(lang.lang||'he')+' לאירוע "'+getLabel(ev.type,ev.customType)+'" עבור '+ev.name+'.\n'
+    +(ev.group?'קשר: '+ev.group+'.\n':'')
+    +(budget?'תקציב: עד '+budget+' ₪.\n':'')
+    +(extra?'פרטים: '+extra+'.\n':'')
+    +'לכל רעיון: שם קצר + משפט הסבר קצר למה זה מתאים. מספר כל רעיון 1-4. בלי הקדמות.';
+  btn.disabled=true;
+  box.style.display='block';result.innerHTML='';loading.style.display='block';
+  try{
+    const text=await aiComplete(prompt);
+    loading.style.display='none';
+    // הפוך כל שורת רעיון לכפתור חיפוש בחנויות
+    const stores=settings.activeStores||['Amazon','KSP','זאפ'];
+    const lines=text.split('\n').filter(l=>l.trim());
+    let html='';
+    lines.forEach(line=>{
+      const clean=line.trim();
+      // חלץ שם מתנה (עד הנקודה/מקף הראשון) לחיפוש
+      const giftName=clean.replace(/^\d+[\.\)]\s*/,'').split(/[:\-–—.]/)[0].trim();
+      html+='<div style="padding:8px 0;border-bottom:1px solid var(--border);">'
+        +'<div style="font-size:13px;">'+clean+'</div>';
+      if(giftName && giftName.length>1 && giftName.length<40){
+        html+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;">'
+          +stores.map(s=>'<a href="https://www.google.com/search?q='+encodeURIComponent(giftName+' '+s)+'" target="_blank" class="store-link">🔍 '+s+'</a>').join('')
+          +'</div>';
+      }
+      html+='</div>';
+    });
+    result.innerHTML=html;
+  }catch(err){
+    loading.style.display='none';
+    result.innerHTML='<div style="color:var(--red);">❌ '+(err.message||'שגיאה')+'</div>';
+  }
+  btn.disabled=false;
+}
+
+// ================================================================
+// ===== 💬 SMART ASSISTANT (AI CHAT) =====
+// ================================================================
+let _assistantHistory=[];
+function openAssistant(){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  if(!aiIsConfigured()){
+    if(confirm(lang.aiNotConfiguredGoSettings||'צריך להגדיר ספק AI קודם. לעבור להגדרות?')) openScreen('screen-ai-settings');
+    return;
+  }
+  _assistantHistory=[];
+  document.getElementById('assistant-chat').innerHTML='';
+  document.getElementById('assistant-input').value='';
+  // הצעות פתיחה
+  const suggestions=lang.assistantSuggestions||['מי יש לי החודש?','כמה הוצאתי על מתנות?','למי לא קניתי מתנה עדיין?'];
+  const sugBox=document.getElementById('assistant-suggestions');
+  sugBox.innerHTML=suggestions.map(s=>'<button class="chip" onclick="askAssistant(this.textContent)" style="font-size:11px;">'+s+'</button>').join('');
+  addAssistantMsg('assistant', lang.assistantWelcome||'שלום! אני יכול לעזור לך עם האירועים שלך. שאל אותי כל דבר 😊');
+  openModal('modal-assistant');
+}
+function addAssistantMsg(role, text){
+  const chat=document.getElementById('assistant-chat');
+  const isUser=role==='user';
+  const div=document.createElement('div');
+  div.style.cssText='max-width:85%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;'
+    +(isUser?'align-self:flex-start;background:var(--acc-dim);border:1px solid var(--acc-border);':'align-self:flex-end;background:rgba(255,255,255,0.05);border:1px solid var(--border);');
+  div.textContent=text;
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+  return div;
+}
+function askAssistant(text){
+  document.getElementById('assistant-input').value=text;
+  sendAssistant();
+}
+function eventsContextForAI(){
+  // בונה הקשר תמציתי של האירועים ל-AI
+  const now=new Date();
+  const list=events.map(e=>{
+    const c=calcDays(e);
+    return '- '+e.name+' ('+getLabel(e.type,e.customType)+')'
+      +', תאריך: '+(e.date||'?')
+      +(c.daysLeft!=null?', בעוד '+c.daysLeft+' ימים':'')
+      +(e.group?', קבוצה: '+e.group:'')
+      +(e.budget?', תקציב: '+e.budget+'₪':'')
+      +(e.giftIdea?', מתנה: '+e.giftIdea:'')
+      +(e.giftStatus==='paid'?' (נקנתה)':(e.giftIdea?' (טרם נקנתה)':''));
+  }).join('\n');
+  return list||'(אין אירועים)';
+}
+async function sendAssistant(){
+  const input=document.getElementById('assistant-input');
+  const text=input.value.trim();
+  if(!text)return;
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  input.value='';
+  document.getElementById('assistant-suggestions').innerHTML='';
+  addAssistantMsg('user',text);
+  const thinking=addAssistantMsg('assistant','⏳');
+  const today=new Date().toLocaleDateString('he-IL');
+  const prompt='אתה עוזר אישי באפליקציית תזכורות אירועים בשם "לא שכחתי". התאריך היום: '+today+'.\n'
+    +'הנה רשימת האירועים של המשתמש:\n'+eventsContextForAI()+'\n\n'
+    +'ענה ב'+(lang.lang||'he')+' בקצרה ובעזרה. שאלת המשתמש: '+text;
+  try{
+    const answer=await aiComplete(prompt);
+    thinking.textContent=answer;
+    document.getElementById('assistant-chat').scrollTop=document.getElementById('assistant-chat').scrollHeight;
+  }catch(err){
+    thinking.textContent='❌ '+(err.message||'שגיאה');
+    thinking.style.color='var(--red)';
+  }
+}
+
+// ================================================================
+// ===== 📊 AI SUMMARY =====
+// ================================================================
+function openSummary(){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  if(!aiIsConfigured()){
+    if(confirm(lang.aiNotConfiguredGoSettings||'צריך להגדיר ספק AI קודם. לעבור להגדרות?')) openScreen('screen-ai-settings');
+    return;
+  }
+  const opts=lang.summaryOptions||['סכם את החודש הקרוב','כמה הוצאתי על מתנות השנה','מי האירועים הכי קרובים','תובנות כלליות'];
+  document.getElementById('summary-options').innerHTML=opts.map(o=>'<button class="chip" onclick="generateSummary(this.textContent)" style="font-size:11px;">'+o+'</button>').join('');
+  document.getElementById('summary-result-box').style.display='none';
+  document.getElementById('summary-result-text').textContent='';
+  openModal('modal-summary');
+}
+async function generateSummary(topic){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const box=document.getElementById('summary-result-box');
+  const loading=document.getElementById('summary-loading');
+  const result=document.getElementById('summary-result-text');
+  const today=new Date().toLocaleDateString('he-IL');
+  const prompt='אתה עוזר באפליקציית "לא שכחתי". התאריך היום: '+today+'.\n'
+    +'רשימת האירועים:\n'+eventsContextForAI()+'\n\n'
+    +'המשימה: '+topic+'.\nענה ב'+(lang.lang||'he')+' בצורה ברורה ומסודרת, עם נקודות אם רלוונטי.';
+  box.style.display='block';result.textContent='';loading.style.display='block';
+  try{
+    const text=await aiComplete(prompt);
+    loading.style.display='none';
+    result.textContent=text;
+  }catch(err){
+    loading.style.display='none';
+    result.innerHTML='<div style="color:var(--red);">❌ '+(err.message||'שגיאה')+'</div>';
+  }
+}
+
 
 // ================================================================
 // ===== INIT =====
