@@ -2,6 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<script>/* Moved to its own address. Redirect ONLY from the old GitHub Pages address (same repo feeds both). */(function(){try{if(location.hostname==='barakaflalo.github.io'){var p=location.pathname.replace(/^\/[^\/]+/,'')||'/';location.replace('https://lo-shachachti.pages.dev'+p+location.search+location.hash);}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#12121f">
 <title>לא שכחתי</title>
@@ -677,7 +678,7 @@ body.dark-mode #splash { background: #12121f; }
       <a href="mailto:loshachachti.app@gmail.com?subject=משוב%20-%20לא%20שכחתי" class="about-link-btn" id="about-feedback">✉️ שלח משוב</a>
       <a href="./privacy_policy.html" target="_blank" class="about-link-btn" id="about-privacy">🔒 מדיניות פרטיות</a>
       <a href="#" onclick="closeModal('modal-about');openScreen('screen-guide');return false;" class="about-link-btn" id="about-guide">📖 מדריך למשתמש</a>
-      <a href="https://barakaflalo.github.io/appnest" target="_blank" class="about-link-btn" id="about-appnest">🏠 עוד אפליקציות AppNest</a>
+      <a href="https://appnest-store.pages.dev" target="_blank" class="about-link-btn" id="about-appnest">🏠 עוד אפליקציות AppNest</a>
       <a href="#" onclick="showDiagnostics();return false;" class="about-link-btn" id="about-diag">🩺 דוח תמיכה (לפתרון תקלות)</a>
     </div>
     <button class="btn-primary" onclick="closeModal('modal-about')" id="about-close-btn">סגור</button>
@@ -862,7 +863,7 @@ body.dark-mode #splash { background: #12121f; }
 
 <!-- AppNest Badge -->
 <div style="margin:16px;padding:12px 14px;background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.2);border-radius:12px;">
-  <a href="https://barakaflalo.github.io/appnest" target="_blank" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+  <a href="https://appnest-store.pages.dev" target="_blank" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
     <svg width="28" height="28" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
       <polygon points="29,2 54,16 54,42 29,56 4,42 4,16" fill="#d4a853"/>
       <polygon points="29,5 51,17.5 51,40.5 29,53 7,40.5 7,17.5" fill="#0a0a0a"/>
@@ -3571,7 +3572,7 @@ function shareEvent(id){
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
   const text=lang.appName+' 🔔\n'+esc(ev.name)+' — '+getLabel(ev.type,ev.customType)+
     (calc.daysLeft!==null?' ('+lang.inDays.replace('{n}',calc.daysLeft)+')':'')+
-    '\n\nhttps://barakaflalo.github.io/lo-shachachti';
+    '\n\nhttps://lo-shachachti.pages.dev';
   if(navigator.share)navigator.share({text}).catch(()=>{});
   else navigator.clipboard.writeText(text).then(()=>alert('📋'));
 }
@@ -3652,7 +3653,7 @@ function addToAndroidCalendar(id){
 
 function shareApp(){
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
-  const text='🔔 "'+lang.appName+'" — '+lang.appSub+'!\nhttps://barakaflalo.github.io/lo-shachachti';
+  const text='🔔 "'+lang.appName+'" — '+lang.appSub+'!\nhttps://lo-shachachti.pages.dev';
   if(navigator.share)navigator.share({text}).catch(()=>{});
   else navigator.clipboard.writeText(text).then(()=>alert('📋'));
 }
