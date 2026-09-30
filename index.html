@@ -646,6 +646,17 @@ body.nav-on .undo-toast{bottom:96px;}
 .cal-row-day{min-width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;background:var(--acc-dim);color:var(--acc-light);font-size:14px;}
 .cal-row.hol{cursor:default;opacity:0.85;}
 .event-card.lp-active{transform:scale(0.98);transition:transform .2s;}
+/* ===== ניגודיות במצב יום: הזהב הבהיר לא קריא על רקע לבן — גוון כהה יותר של צבע הערכה ===== */
+body:not(.dark-mode){ --acc-light: color-mix(in srgb, var(--accent) 72%, #000); }
+body .hero-card .hero-label, body.dark-mode .hero-card .hero-label, body .hero-card div[style*="color:#818cf8"]{ color: var(--accent)!important; }
+body.large-font .topbar-title{ white-space:nowrap; font-size:14px; min-width:0; flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; }
+body.large-font .topbar-actions{ gap:4px; flex-shrink:0; }
+body.large-font .topbar .icon-btn{ padding:6px 8px; }
+body.large-font .topbar{ gap:8px; }
+/* ===== מתג "אנימציות" כבוי ===== */
+body.no-anim *, body.no-anim *::before, body.no-anim *::after { animation:none!important; transition:none!important; }
+/* zoom לגופן גדול — קנבס הקונפטי מקוזז כדי לא לחרוג מהמסך */
+body.large-font #confettiCanvas { zoom: calc(1 / var(--z,1)); }
 /* ===== ACCESSIBILITY: reduced motion ===== */
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after { animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
@@ -656,7 +667,7 @@ body.nav-on .undo-toast{bottom:96px;}
 <link rel="icon" href="icon-192.png">
 <script>
 // ===== גרסה + יומן שגיאות (נטען ראשון) =====
-const APP_VERSION='3.3.0';
+const APP_VERSION='3.3.1';
 (function(){
   function logErr(msg,src,line){
     try{
@@ -729,7 +740,7 @@ function loadOneSignal(){
   <div class="modal-box" style="text-align:center;">
     <div style="font-size:48px;margin-bottom:8px;">🔔</div>
     <div style="font-size:18px;font-weight:700;margin-bottom:4px;" id="about-app-name">לא שכחתי</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.3.0</span> · AppNest · ברק אפללו</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.3.1</span> · AppNest · ברק אפללו</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;" id="about-desc">
       האפליקציה שתזכיר לך כל אירוע חשוב.<br>
       5 שפות · AI ברכות · PWA · ייבוא/ייצוא
@@ -1246,7 +1257,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'פתח את האפליקציה מהאתר, לא כקובץ מקומי',
     backupReminderMsg:'💾 מזמן לא גיבית את האירועים שלך. הנתונים נשמרים רק במכשיר הזה — אם תמחק את הדפדפן, הכל יימחק.\n\nלגבות עכשיו?',
     aboutDiag:'🩺 דוח תמיכה (לפתרון תקלות)', diagCopyPrompt:'להעתיק את הדוח? (לשליחה לתמיכה)', diagCopied:'הדוח הועתק',
-    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', welcomeGotIt:'הבנתי, תודה', navHome:'בית', dateModeGreg:'לפי תאריך לועזי', dateModeHeb:'לפי תאריך עברי', afterSunset:'קרה אחרי השקיעה (התאריך העברי מתחלף בערב)', hebModeHint:'יחושב מחדש כל שנה לפי הלוח העברי', hebModeShort:'לפי הלוח העברי', sectionPhoneCal:'תזכורות ביומן הטלפון', menuExportAllG:'שלח הכל ליומן גוגל', menuExportAllGSub:'עם תזכורות — עובד גם כשהאפליקציה סגורה', menuExportICS:'הורד קובץ יומן (ICS)', menuExportICSSub:'לכל יומן: סמסונג, אאוטלוק, אפל', menuGContacts:'ימי הולדת מאנשי קשר בגוגל', menuGContactsSub:'ייבוא עם תצוגה מקדימה', gcalNeedConnect:'צריך להתחבר לגוגל. להתחבר עכשיו?', gcalExportAllConfirm:'לשלוח {n} אירועים ליומן גוגל, עם תזכורות?\n(אירועים שכבר נשלחו יתעדכנו, לא ישוכפלו)', gcalExportAllDone:'✅ נשלחו {ok} אירועים ליומן גוגל.\nהתזכורות יגיעו מאפליקציית היומן — גם כשהאפליקציה סגורה.', gcalExportFailed:'נכשלו — התחבר מחדש ונסה שוב', gcalExported:'נוסף ליומן גוגל עם תזכורות!', icsExportHelp:'📅 הקובץ ירד.\nבאנדרואיד: פתח אותו מתיקיית ההורדות ובחר את אפליקציית היומן.\nלגוגל קלנדר: במחשב ← הגדרות ← ייבוא.', gcontactsExplain:'📇 האפליקציה תקרא (קריאה בלבד) את אנשי הקשר שלך בגוגל ותציג רק את מי שיש לו יום הולדת.\nשום דבר לא נשמר בלי שתאשר, ושום מידע לא נשלח לשרת שלנו.\n\nלהתחבר לגוגל?', gcontactsLoading:'טוען אנשי קשר מגוגל...', gcontactsNone:'לא נמצאו אנשי קשר עם יום הולדת בחשבון הגוגל.', gcontactsApiOff:'צריך להפעיל את People API בפרויקט של גוגל (פעם אחת, ע״י מפתח האפליקציה).', insightGiftSoon:'{name} {when} — עוד לא קנית מתנה!', navCalendar:'לוח שנה', navAI:'AI', screenCalendar:'📅 לוח שנה', calMonthEvents:'אירועים החודש', calMonthEmpty:'אין אירועים בחודש הזה', calMonthHolidays:'חגים החודש', deletedMsg:'🗑️ "{name}" נמחק', undoBtn:'בטל', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
+    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', welcomeGotIt:'הבנתי, תודה', navHome:'בית', fontSizeLbl:'גודל:', fontLarge:'גדול', fontLarger:'גדול יותר', fontLargest:'הכי גדול', reportBy:'הופק ע״י', dateModeGreg:'לפי תאריך לועזי', dateModeHeb:'לפי תאריך עברי', afterSunset:'קרה אחרי השקיעה (התאריך העברי מתחלף בערב)', hebModeHint:'יחושב מחדש כל שנה לפי הלוח העברי', hebModeShort:'לפי הלוח העברי', sectionPhoneCal:'תזכורות ביומן הטלפון', menuExportAllG:'שלח הכל ליומן גוגל', menuExportAllGSub:'עם תזכורות — עובד גם כשהאפליקציה סגורה', menuExportICS:'הורד קובץ יומן (ICS)', menuExportICSSub:'לכל יומן: סמסונג, אאוטלוק, אפל', menuGContacts:'ימי הולדת מאנשי קשר בגוגל', menuGContactsSub:'ייבוא עם תצוגה מקדימה', gcalNeedConnect:'צריך להתחבר לגוגל. להתחבר עכשיו?', gcalExportAllConfirm:'לשלוח {n} אירועים ליומן גוגל, עם תזכורות?\n(אירועים שכבר נשלחו יתעדכנו, לא ישוכפלו)', gcalExportAllDone:'✅ נשלחו {ok} אירועים ליומן גוגל.\nהתזכורות יגיעו מאפליקציית היומן — גם כשהאפליקציה סגורה.', gcalExportFailed:'נכשלו — התחבר מחדש ונסה שוב', gcalExported:'נוסף ליומן גוגל עם תזכורות!', icsExportHelp:'📅 הקובץ ירד.\nבאנדרואיד: פתח אותו מתיקיית ההורדות ובחר את אפליקציית היומן.\nלגוגל קלנדר: במחשב ← הגדרות ← ייבוא.', gcontactsExplain:'📇 האפליקציה תקרא (קריאה בלבד) את אנשי הקשר שלך בגוגל ותציג רק את מי שיש לו יום הולדת.\nשום דבר לא נשמר בלי שתאשר, ושום מידע לא נשלח לשרת שלנו.\n\nלהתחבר לגוגל?', gcontactsLoading:'טוען אנשי קשר מגוגל...', gcontactsNone:'לא נמצאו אנשי קשר עם יום הולדת בחשבון הגוגל.', gcontactsApiOff:'צריך להפעיל את People API בפרויקט של גוגל (פעם אחת, ע״י מפתח האפליקציה).', insightGiftSoon:'{name} {when} — עוד לא קנית מתנה!', navCalendar:'לוח שנה', navAI:'AI', screenCalendar:'📅 לוח שנה', calMonthEvents:'אירועים החודש', calMonthEmpty:'אין אירועים בחודש הזה', calMonthHolidays:'חגים החודש', deletedMsg:'🗑️ "{name}" נמחק', undoBtn:'בטל', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
     rightsTitle:'זכויות יוצרים',
     rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה {ver}<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
     welcomeTitle:'איך עובדים עם האפליקציה?',
@@ -1311,7 +1322,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Open the app from the website, not as a local file',
     backupReminderMsg:'💾 You haven\'t backed up your events in a while. Data is stored only on this device — if you clear your browser, it\'s all gone.\n\nBack up now?',
     aboutDiag:'🩺 Support report (troubleshooting)', diagCopyPrompt:'Copy the report? (to send to support)', diagCopied:'Report copied',
-    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', welcomeGotIt:'Got it, thanks', navHome:'Home', dateModeGreg:'By Gregorian date', dateModeHeb:'By Hebrew date', afterSunset:'Happened after sunset (Hebrew date changes in the evening)', hebModeHint:'recalculated every year by the Hebrew calendar', hebModeShort:'by the Hebrew calendar', sectionPhoneCal:'Reminders in your phone calendar', menuExportAllG:'Send all to Google Calendar', menuExportAllGSub:'With reminders — works even when the app is closed', menuExportICS:'Download calendar file (ICS)', menuExportICSSub:'For any calendar: Samsung, Outlook, Apple', menuGContacts:'Birthdays from Google Contacts', menuGContactsSub:'Import with preview', gcalNeedConnect:'You need to connect to Google. Connect now?', gcalExportAllConfirm:'Send {n} events to Google Calendar with reminders?\n(Events already sent will be updated, not duplicated)', gcalExportAllDone:'✅ {ok} events sent to Google Calendar.\nReminders will come from your calendar app — even when this app is closed.', gcalExportFailed:'failed — reconnect and try again', gcalExported:'Added to Google Calendar with reminders!', icsExportHelp:'📅 File downloaded.\nAndroid: open it from Downloads and choose your calendar app.\nGoogle Calendar: on a computer ← Settings ← Import.', gcontactsExplain:'📇 The app will read (read-only) your Google contacts and show only those with a birthday.\nNothing is saved until you approve, and nothing is sent to our server.\n\nConnect to Google?', gcontactsLoading:'Loading Google contacts...', gcontactsNone:'No contacts with a birthday were found in the Google account.', gcontactsApiOff:'The People API must be enabled in the Google project (one-time, by the app developer).', insightGiftSoon:'{name} {when} — you haven\'t bought a gift yet!', navCalendar:'Calendar', navAI:'AI', screenCalendar:'📅 Calendar', calMonthEvents:'Events this month', calMonthEmpty:'No events this month', calMonthHolidays:'Holidays this month', deletedMsg:'🗑️ "{name}" deleted', undoBtn:'Undo', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
+    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', welcomeGotIt:'Got it, thanks', navHome:'Home', fontSizeLbl:'Size:', fontLarge:'Large', fontLarger:'Larger', fontLargest:'Largest', reportBy:'Prepared by', dateModeGreg:'By Gregorian date', dateModeHeb:'By Hebrew date', afterSunset:'Happened after sunset (Hebrew date changes in the evening)', hebModeHint:'recalculated every year by the Hebrew calendar', hebModeShort:'by the Hebrew calendar', sectionPhoneCal:'Reminders in your phone calendar', menuExportAllG:'Send all to Google Calendar', menuExportAllGSub:'With reminders — works even when the app is closed', menuExportICS:'Download calendar file (ICS)', menuExportICSSub:'For any calendar: Samsung, Outlook, Apple', menuGContacts:'Birthdays from Google Contacts', menuGContactsSub:'Import with preview', gcalNeedConnect:'You need to connect to Google. Connect now?', gcalExportAllConfirm:'Send {n} events to Google Calendar with reminders?\n(Events already sent will be updated, not duplicated)', gcalExportAllDone:'✅ {ok} events sent to Google Calendar.\nReminders will come from your calendar app — even when this app is closed.', gcalExportFailed:'failed — reconnect and try again', gcalExported:'Added to Google Calendar with reminders!', icsExportHelp:'📅 File downloaded.\nAndroid: open it from Downloads and choose your calendar app.\nGoogle Calendar: on a computer ← Settings ← Import.', gcontactsExplain:'📇 The app will read (read-only) your Google contacts and show only those with a birthday.\nNothing is saved until you approve, and nothing is sent to our server.\n\nConnect to Google?', gcontactsLoading:'Loading Google contacts...', gcontactsNone:'No contacts with a birthday were found in the Google account.', gcontactsApiOff:'The People API must be enabled in the Google project (one-time, by the app developer).', insightGiftSoon:'{name} {when} — you haven\'t bought a gift yet!', navCalendar:'Calendar', navAI:'AI', screenCalendar:'📅 Calendar', calMonthEvents:'Events this month', calMonthEmpty:'No events this month', calMonthHolidays:'Holidays this month', deletedMsg:'🗑️ "{name}" deleted', undoBtn:'Undo', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
     rightsTitle:'Copyright',
     rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version {ver}<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
     welcomeTitle:'How does the app work?',
@@ -1376,7 +1387,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Откройте приложение с сайта, а не как локальный файл',
     backupReminderMsg:'💾 Вы давно не делали резервную копию. Данные хранятся только на этом устройстве — если очистить браузер, всё пропадёт.\n\nСоздать копию сейчас?',
     aboutDiag:'🩺 Отчёт поддержки (диагностика)', diagCopyPrompt:'Скопировать отчёт? (для отправки в поддержку)', diagCopied:'Отчёт скопирован',
-    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', welcomeGotIt:'Понятно, спасибо', navHome:'Главная', dateModeGreg:'По григорианской дате', dateModeHeb:'По еврейской дате', afterSunset:'Произошло после заката (еврейская дата меняется вечером)', hebModeHint:'пересчитывается каждый год по еврейскому календарю', hebModeShort:'по еврейскому календарю', sectionPhoneCal:'Напоминания в календаре телефона', menuExportAllG:'Отправить всё в Google Календарь', menuExportAllGSub:'С напоминаниями — работает даже когда приложение закрыто', menuExportICS:'Скачать файл календаря (ICS)', menuExportICSSub:'Для любого календаря: Samsung, Outlook, Apple', menuGContacts:'Дни рождения из контактов Google', menuGContactsSub:'Импорт с предпросмотром', gcalNeedConnect:'Нужно подключиться к Google. Подключиться сейчас?', gcalExportAllConfirm:'Отправить {n} событий в Google Календарь с напоминаниями?\n(Уже отправленные обновятся, без дублей)', gcalExportAllDone:'✅ Отправлено событий: {ok}.\nНапоминания придут из приложения календаря — даже когда это приложение закрыто.', gcalExportFailed:'не удалось — подключитесь заново и повторите', gcalExported:'Добавлено в Google Календарь с напоминаниями!', icsExportHelp:'📅 Файл скачан.\nAndroid: откройте его из Загрузок и выберите календарь.\nGoogle Календарь: на компьютере ← Настройки ← Импорт.', gcontactsExplain:'📇 Приложение прочитает (только чтение) ваши контакты Google и покажет только тех, у кого указан день рождения.\nНичего не сохраняется без вашего подтверждения, и ничего не отправляется на наш сервер.\n\nПодключиться к Google?', gcontactsLoading:'Загрузка контактов Google...', gcontactsNone:'В аккаунте Google не найдено контактов с днём рождения.', gcontactsApiOff:'Нужно включить People API в проекте Google (один раз, разработчиком приложения).', insightGiftSoon:'{name} {when} — вы ещё не купили подарок!', navCalendar:'Календарь', navAI:'AI', screenCalendar:'📅 Календарь', calMonthEvents:'События в этом месяце', calMonthEmpty:'В этом месяце нет событий', calMonthHolidays:'Праздники в этом месяце', deletedMsg:'🗑️ «{name}» удалено', undoBtn:'Отменить', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
+    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', welcomeGotIt:'Понятно, спасибо', navHome:'Главная', fontSizeLbl:'Размер:', fontLarge:'Крупный', fontLarger:'Крупнее', fontLargest:'Самый крупный', reportBy:'Подготовил(а)', dateModeGreg:'По григорианской дате', dateModeHeb:'По еврейской дате', afterSunset:'Произошло после заката (еврейская дата меняется вечером)', hebModeHint:'пересчитывается каждый год по еврейскому календарю', hebModeShort:'по еврейскому календарю', sectionPhoneCal:'Напоминания в календаре телефона', menuExportAllG:'Отправить всё в Google Календарь', menuExportAllGSub:'С напоминаниями — работает даже когда приложение закрыто', menuExportICS:'Скачать файл календаря (ICS)', menuExportICSSub:'Для любого календаря: Samsung, Outlook, Apple', menuGContacts:'Дни рождения из контактов Google', menuGContactsSub:'Импорт с предпросмотром', gcalNeedConnect:'Нужно подключиться к Google. Подключиться сейчас?', gcalExportAllConfirm:'Отправить {n} событий в Google Календарь с напоминаниями?\n(Уже отправленные обновятся, без дублей)', gcalExportAllDone:'✅ Отправлено событий: {ok}.\nНапоминания придут из приложения календаря — даже когда это приложение закрыто.', gcalExportFailed:'не удалось — подключитесь заново и повторите', gcalExported:'Добавлено в Google Календарь с напоминаниями!', icsExportHelp:'📅 Файл скачан.\nAndroid: откройте его из Загрузок и выберите календарь.\nGoogle Календарь: на компьютере ← Настройки ← Импорт.', gcontactsExplain:'📇 Приложение прочитает (только чтение) ваши контакты Google и покажет только тех, у кого указан день рождения.\nНичего не сохраняется без вашего подтверждения, и ничего не отправляется на наш сервер.\n\nПодключиться к Google?', gcontactsLoading:'Загрузка контактов Google...', gcontactsNone:'В аккаунте Google не найдено контактов с днём рождения.', gcontactsApiOff:'Нужно включить People API в проекте Google (один раз, разработчиком приложения).', insightGiftSoon:'{name} {when} — вы ещё не купили подарок!', navCalendar:'Календарь', navAI:'AI', screenCalendar:'📅 Календарь', calMonthEvents:'События в этом месяце', calMonthEmpty:'В этом месяце нет событий', calMonthHolidays:'Праздники в этом месяце', deletedMsg:'🗑️ «{name}» удалено', undoBtn:'Отменить', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
     rightsTitle:'Авторские права',
     rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия {ver}<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
     welcomeTitle:'Как работает приложение?',
@@ -1446,7 +1457,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Abre la app desde el sitio web, no como archivo local',
     backupReminderMsg:'💾 Hace tiempo que no haces copia de tus eventos. Los datos se guardan solo en este dispositivo — si borras el navegador, se pierde todo.\n\n¿Hacer copia ahora?',
     aboutDiag:'🩺 Informe de soporte (solución de problemas)', diagCopyPrompt:'¿Copiar el informe? (para enviar a soporte)', diagCopied:'Informe copiado',
-    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', welcomeGotIt:'Entendido, gracias', navHome:'Inicio', dateModeGreg:'Por fecha gregoriana', dateModeHeb:'Por fecha hebrea', afterSunset:'Ocurrió después del atardecer (la fecha hebrea cambia al anochecer)', hebModeHint:'se recalcula cada año según el calendario hebreo', hebModeShort:'según el calendario hebreo', sectionPhoneCal:'Recordatorios en el calendario del teléfono', menuExportAllG:'Enviar todo a Google Calendar', menuExportAllGSub:'Con recordatorios — funciona aunque la app esté cerrada', menuExportICS:'Descargar archivo de calendario (ICS)', menuExportICSSub:'Para cualquier calendario: Samsung, Outlook, Apple', menuGContacts:'Cumpleaños de Contactos de Google', menuGContactsSub:'Importar con vista previa', gcalNeedConnect:'Necesitas conectar con Google. ¿Conectar ahora?', gcalExportAllConfirm:'¿Enviar {n} eventos a Google Calendar con recordatorios?\n(Los ya enviados se actualizarán, sin duplicados)', gcalExportAllDone:'✅ Se enviaron {ok} eventos a Google Calendar.\nLos recordatorios llegarán desde tu app de calendario — aunque esta app esté cerrada.', gcalExportFailed:'fallaron — vuelve a conectar e inténtalo de nuevo', gcalExported:'¡Añadido a Google Calendar con recordatorios!', icsExportHelp:'📅 Archivo descargado.\nAndroid: ábrelo desde Descargas y elige tu app de calendario.\nGoogle Calendar: en un ordenador ← Configuración ← Importar.', gcontactsExplain:'📇 La app leerá (solo lectura) tus contactos de Google y mostrará solo quienes tienen cumpleaños.\nNada se guarda sin tu aprobación y nada se envía a nuestro servidor.\n\n¿Conectar con Google?', gcontactsLoading:'Cargando contactos de Google...', gcontactsNone:'No se encontraron contactos con cumpleaños en la cuenta de Google.', gcontactsApiOff:'Hay que activar People API en el proyecto de Google (una vez, el desarrollador de la app).', insightGiftSoon:'{name} {when} — ¡aún no has comprado un regalo!', navCalendar:'Calendario', navAI:'IA', screenCalendar:'📅 Calendario', calMonthEvents:'Eventos del mes', calMonthEmpty:'No hay eventos este mes', calMonthHolidays:'Festivos del mes', deletedMsg:'🗑️ "{name}" eliminado', undoBtn:'Deshacer', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
+    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', welcomeGotIt:'Entendido, gracias', navHome:'Inicio', fontSizeLbl:'Tamaño:', fontLarge:'Grande', fontLarger:'Más grande', fontLargest:'El más grande', reportBy:'Preparado por', dateModeGreg:'Por fecha gregoriana', dateModeHeb:'Por fecha hebrea', afterSunset:'Ocurrió después del atardecer (la fecha hebrea cambia al anochecer)', hebModeHint:'se recalcula cada año según el calendario hebreo', hebModeShort:'según el calendario hebreo', sectionPhoneCal:'Recordatorios en el calendario del teléfono', menuExportAllG:'Enviar todo a Google Calendar', menuExportAllGSub:'Con recordatorios — funciona aunque la app esté cerrada', menuExportICS:'Descargar archivo de calendario (ICS)', menuExportICSSub:'Para cualquier calendario: Samsung, Outlook, Apple', menuGContacts:'Cumpleaños de Contactos de Google', menuGContactsSub:'Importar con vista previa', gcalNeedConnect:'Necesitas conectar con Google. ¿Conectar ahora?', gcalExportAllConfirm:'¿Enviar {n} eventos a Google Calendar con recordatorios?\n(Los ya enviados se actualizarán, sin duplicados)', gcalExportAllDone:'✅ Se enviaron {ok} eventos a Google Calendar.\nLos recordatorios llegarán desde tu app de calendario — aunque esta app esté cerrada.', gcalExportFailed:'fallaron — vuelve a conectar e inténtalo de nuevo', gcalExported:'¡Añadido a Google Calendar con recordatorios!', icsExportHelp:'📅 Archivo descargado.\nAndroid: ábrelo desde Descargas y elige tu app de calendario.\nGoogle Calendar: en un ordenador ← Configuración ← Importar.', gcontactsExplain:'📇 La app leerá (solo lectura) tus contactos de Google y mostrará solo quienes tienen cumpleaños.\nNada se guarda sin tu aprobación y nada se envía a nuestro servidor.\n\n¿Conectar con Google?', gcontactsLoading:'Cargando contactos de Google...', gcontactsNone:'No se encontraron contactos con cumpleaños en la cuenta de Google.', gcontactsApiOff:'Hay que activar People API en el proyecto de Google (una vez, el desarrollador de la app).', insightGiftSoon:'{name} {when} — ¡aún no has comprado un regalo!', navCalendar:'Calendario', navAI:'IA', screenCalendar:'📅 Calendario', calMonthEvents:'Eventos del mes', calMonthEmpty:'No hay eventos este mes', calMonthHolidays:'Festivos del mes', deletedMsg:'🗑️ "{name}" eliminado', undoBtn:'Deshacer', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
     rightsTitle:'Derechos de autor',
     rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión {ver}<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
     welcomeTitle:'¿Cómo funciona la app?',
@@ -1511,7 +1522,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'افتح التطبيق من الموقع، وليس كملف محلي',
     backupReminderMsg:'💾 لم تقم بنسخ مناسباتك منذ فترة. تُحفظ البيانات على هذا الجهاز فقط — إذا مسحت المتصفح، سيضيع كل شيء.\n\nنسخ احتياطي الآن؟',
     aboutDiag:'🩺 تقرير الدعم (حل المشاكل)', diagCopyPrompt:'نسخ التقرير؟ (لإرساله للدعم)', diagCopied:'تم نسخ التقرير',
-    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', welcomeGotIt:'فهمت، شكراً', navHome:'الرئيسية', dateModeGreg:'حسب التاريخ الميلادي', dateModeHeb:'حسب التاريخ العبري', afterSunset:'حدث بعد الغروب (التاريخ العبري يتغير مساءً)', hebModeHint:'يُعاد حسابه كل سنة حسب التقويم العبري', hebModeShort:'حسب التقويم العبري', sectionPhoneCal:'تذكيرات في تقويم الهاتف', menuExportAllG:'إرسال الكل إلى تقويم Google', menuExportAllGSub:'مع تذكيرات — يعمل حتى عندما يكون التطبيق مغلقاً', menuExportICS:'تنزيل ملف تقويم (ICS)', menuExportICSSub:'لأي تقويم: سامسونج، أوتلوك، آبل', menuGContacts:'أعياد الميلاد من جهات اتصال Google', menuGContactsSub:'استيراد مع معاينة', gcalNeedConnect:'يجب الاتصال بـ Google. الاتصال الآن؟', gcalExportAllConfirm:'إرسال {n} مناسبات إلى تقويم Google مع تذكيرات؟\n(المناسبات المرسلة سابقاً ستُحدَّث دون تكرار)', gcalExportAllDone:'✅ تم إرسال {ok} مناسبات إلى تقويم Google.\nستصل التذكيرات من تطبيق التقويم — حتى عندما يكون هذا التطبيق مغلقاً.', gcalExportFailed:'فشلت — أعد الاتصال وحاول مجدداً', gcalExported:'أُضيف إلى تقويم Google مع تذكيرات!', icsExportHelp:'📅 تم تنزيل الملف.\nأندرويد: افتحه من التنزيلات واختر تطبيق التقويم.\nتقويم Google: على الكمبيوتر ← الإعدادات ← استيراد.', gcontactsExplain:'📇 سيقرأ التطبيق (قراءة فقط) جهات اتصالك في Google ويعرض فقط من لديهم عيد ميلاد.\nلا يُحفظ شيء دون موافقتك، ولا يُرسل أي شيء إلى خادمنا.\n\nالاتصال بـ Google؟', gcontactsLoading:'جارٍ تحميل جهات اتصال Google...', gcontactsNone:'لم يتم العثور على جهات اتصال لديها عيد ميلاد في حساب Google.', gcontactsApiOff:'يجب تفعيل People API في مشروع Google (مرة واحدة، من قبل مطور التطبيق).', insightGiftSoon:'{name} {when} — لم تشترِ هدية بعد!', navCalendar:'التقويم', navAI:'AI', screenCalendar:'📅 التقويم', calMonthEvents:'مناسبات هذا الشهر', calMonthEmpty:'لا توجد مناسبات هذا الشهر', calMonthHolidays:'أعياد هذا الشهر', deletedMsg:'🗑️ تم حذف "{name}"', undoBtn:'تراجع', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
+    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', welcomeGotIt:'فهمت، شكراً', navHome:'الرئيسية', fontSizeLbl:'الحجم:', fontLarge:'كبير', fontLarger:'أكبر', fontLargest:'الأكبر', reportBy:'أعدّه', dateModeGreg:'حسب التاريخ الميلادي', dateModeHeb:'حسب التاريخ العبري', afterSunset:'حدث بعد الغروب (التاريخ العبري يتغير مساءً)', hebModeHint:'يُعاد حسابه كل سنة حسب التقويم العبري', hebModeShort:'حسب التقويم العبري', sectionPhoneCal:'تذكيرات في تقويم الهاتف', menuExportAllG:'إرسال الكل إلى تقويم Google', menuExportAllGSub:'مع تذكيرات — يعمل حتى عندما يكون التطبيق مغلقاً', menuExportICS:'تنزيل ملف تقويم (ICS)', menuExportICSSub:'لأي تقويم: سامسونج، أوتلوك، آبل', menuGContacts:'أعياد الميلاد من جهات اتصال Google', menuGContactsSub:'استيراد مع معاينة', gcalNeedConnect:'يجب الاتصال بـ Google. الاتصال الآن؟', gcalExportAllConfirm:'إرسال {n} مناسبات إلى تقويم Google مع تذكيرات؟\n(المناسبات المرسلة سابقاً ستُحدَّث دون تكرار)', gcalExportAllDone:'✅ تم إرسال {ok} مناسبات إلى تقويم Google.\nستصل التذكيرات من تطبيق التقويم — حتى عندما يكون هذا التطبيق مغلقاً.', gcalExportFailed:'فشلت — أعد الاتصال وحاول مجدداً', gcalExported:'أُضيف إلى تقويم Google مع تذكيرات!', icsExportHelp:'📅 تم تنزيل الملف.\nأندرويد: افتحه من التنزيلات واختر تطبيق التقويم.\nتقويم Google: على الكمبيوتر ← الإعدادات ← استيراد.', gcontactsExplain:'📇 سيقرأ التطبيق (قراءة فقط) جهات اتصالك في Google ويعرض فقط من لديهم عيد ميلاد.\nلا يُحفظ شيء دون موافقتك، ولا يُرسل أي شيء إلى خادمنا.\n\nالاتصال بـ Google؟', gcontactsLoading:'جارٍ تحميل جهات اتصال Google...', gcontactsNone:'لم يتم العثور على جهات اتصال لديها عيد ميلاد في حساب Google.', gcontactsApiOff:'يجب تفعيل People API في مشروع Google (مرة واحدة، من قبل مطور التطبيق).', insightGiftSoon:'{name} {when} — لم تشترِ هدية بعد!', navCalendar:'التقويم', navAI:'AI', screenCalendar:'📅 التقويم', calMonthEvents:'مناسبات هذا الشهر', calMonthEmpty:'لا توجد مناسبات هذا الشهر', calMonthHolidays:'أعياد هذا الشهر', deletedMsg:'🗑️ تم حذف "{name}"', undoBtn:'تراجع', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
     rightsTitle:'حقوق النشر',
     rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار {ver}<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
     welcomeTitle:'كيف يعمل التطبيق؟',
@@ -2194,6 +2205,10 @@ const SCREEN_RENDERERS = {
       ${TR('🎵', lang.togSounds||'צלילים', '', 'tog-sounds', 'sounds')}
       ${TR('🎊', lang.togConfetti||'קונפטי ביום אירוע', '', 'tog-confetti', 'confetti')}
       ${TR('🔤', lang.togLargeFont||'גופן גדול', lang.togLargeFontSub||'הגדל טקסט לנוחות קריאה', 'tog-font', 'largeFont')}
+      <div id="font-scale-row" style="display:${settings.largeFont?'flex':'none'};gap:8px;margin:-2px 0 10px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:11px;color:var(--muted);">${lang.fontSizeLbl||'גודל:'}</span>
+        ${FONT_SCALES.map((v,i)=>`<div class="chip${Math.abs(v-getFontScale())<0.01?' active':''}" data-scale="${v}" onclick="setFontScale(${v})" style="font-size:${12+i*2}px;">${['A','A+','A++'][i]} ${[lang.fontLarge||'גדול',lang.fontLarger||'גדול יותר',lang.fontLargest||'הכי גדול'][i]}</div>`).join('')}
+      </div>
       ${TR('✨', lang.togAnimations||'אנימציות', '', 'tog-animations', 'animations')}
       <div class="section-lbl" style="margin-top:14px;">${lang.sectionDefaults||'סינון ומיון ברירת מחדל'}</div>
       <div class="form-group"><label class="form-label">${lang.labelFilter||'סינון'}</label>
@@ -2841,6 +2856,20 @@ function escapeHtml(s){
 // גרסה קצרה לשימוש נוח בתבניות
 function esc(s){ return escapeHtml(s); }
 function saveSettings(){safeSet('ls2_settings',JSON.stringify(settings));}
+// הדפסה בתוך הדף (iframe) — עובד גם באפליקציה מותקנת, שבה window.open חסום או מחזיר null
+function printHTML(html){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const meta='<p style="color:#666;font-size:12px;margin:0 0 12px;">'+(settings.userName?esc((lang.reportBy||'הופק ע״י')+' '+settings.userName)+' · ':'')+new Date().toLocaleDateString(lang.lang||'he')+' · '+esc(lang.appName||'לא שכחתי')+'</p>';
+  html=html.replace(/(<\/h2>)/,'$1'+meta);
+  let f=document.getElementById('print-frame');
+  if(f) f.remove();
+  f=document.createElement('iframe'); f.id='print-frame';
+  f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0;';
+  document.body.appendChild(f);
+  const d=f.contentWindow.document; d.open(); d.write('<!doctype html><meta charset="utf-8">'+html); d.close();
+  setTimeout(()=>{ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){ showBanner('⚠️ '+(e.message||'print')); } },250);
+}
+function _printBuffer(){ let buf=''; return { document:{ write(s){ buf+=s; } }, print(){ printHTML(buf); } }; }
 // באנר קצר (toast) שמופיע לרגע ונעלם
 function showBanner(msg){
   let b=document.getElementById('global-toast');
@@ -3942,30 +3971,40 @@ function setContactGroup(g){contactsGroupFilter=g;renderContacts();}
 // ================================================================
 // ===== SETTINGS =====
 // ================================================================
+function applyAnimations(){ document.body.classList.toggle('no-anim',settings.animations===false); }
 function togSetting(key,el){
   settings[key]=!settings[key];
   el.classList.toggle('on',settings[key]);
   saveSettings();
   if(key==='largeFont'){applyFont();return;}
+  if(key==='animations'){applyAnimations();return;}
   if(key!=='sounds'&&key!=='confetti'&&key!=='animations')renderMain();
 }
-function applyFont(){
-  if(settings.largeFont){
-    const size=settings.fontSizePx||18;
-    document.documentElement.style.fontSize=size+'px';
-    document.body.classList.add('large-font');
-  }else{
-    document.documentElement.style.fontSize='16px';
-    document.body.classList.remove('large-font');
-  }
+const FONT_SCALES=[1.15,1.3,1.45];
+function getFontScale(){
+  if(settings.fontScale) return settings.fontScale;
+  if(settings.fontSizePx) return Math.min(1.6,Math.max(1.05,settings.fontSizePx/15));
+  return FONT_SCALES[0];
 }
+function applyFont(){
+  // ה-CSS כתוב בפיקסלים, לכן שינוי גודל הגופן של השורש לא השפיע. zoom מגדיל הכל באופן אחיד.
+  const z=settings.largeFont?getFontScale():1;
+  document.body.style.zoom=z===1?'':String(z);
+  document.body.style.setProperty('--z',String(z));
+  document.body.classList.toggle('large-font',!!settings.largeFont);
+  document.documentElement.style.fontSize='';
+  const row=document.getElementById('font-scale-row');
+  if(row){ row.style.display=settings.largeFont?'flex':'none';
+    row.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',Math.abs(parseFloat(c.getAttribute('data-scale'))-getFontScale())<0.01)); }
+}
+function setFontScale(v){ settings.fontScale=v; settings.largeFont=true; saveSettings(); applyFont(); const t=document.getElementById('tog-font'); if(t) t.classList.add('on'); }
 function changeFontSize(){
   const cur=settings.fontSizePx||18;
   const _lang2=LANGUAGES[currentLang]||LANGUAGES['he'];const val=prompt(_lang2.promptFontSize||'גודל גופן (14-24):',cur);
   if(!val)return;
   const n=parseInt(val);
   if(n<14||n>24){alert((_lang2||LANGUAGES['he']).promptFontSizeErr||'הכנס מספר בין 14 ל-24');return;}
-  settings.fontSizePx=n;settings.largeFont=true;saveSettings();applyFont();
+  settings.fontScale=Math.min(1.6,Math.max(1.05,n/15));settings.largeFont=true;saveSettings();applyFont();
   const tog=document.getElementById('tog-font');if(tog)tog.classList.add('on');
 }
 function initUserSettings(){
@@ -4186,12 +4225,12 @@ function printBudgetReport(groupFilter){
   const paidTotal=list.filter(e=>e.giftStatus==='paid').reduce((s,e)=>s+(parseInt(e.budget)||0),0);
   const total=list.reduce((s,e)=>s+(parseInt(e.budget)||0),0);
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
-  const win=window.open('');
+  const win=_printBuffer();
   win.document.write('<html dir="'+lang.dir+'"><body style="font-family:sans-serif;padding:20px;">');
   win.document.write('<h2>'+lang.appName+' — '+(lang.screenBudget||'דוח תקציב')+(groupFilter?' ('+groupFilter+')':'')+'</h2>');
   win.document.write('<p>'+(lang.budgetPaid||'שולם')+': <b>'+paidTotal+'₪</b> | '+(lang.budgetTotal||'סה"כ')+': <b>'+total+'₪</b></p>');
   win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>'+(lang.printColName||'שם')+'</th><th>'+(lang.printColDate||'תאריך')+'</th><th>'+(lang.printColGroup||'קבוצה')+'</th><th>'+(lang.printColBudget||'תקציב')+'</th><th>'+(lang.printColStatus||'סטטוס')+'</th></tr>');
-  list.forEach(e=>win.document.write('<tr><td>'+(e.name||'')+'</td><td>'+(e.date||'')+'</td><td>'+(e.group||'')+'</td><td>'+(e.budget||'')+'₪</td><td>'+(e.giftStatus==='paid'?'✅':'⏳')+'</td></tr>'));
+  list.forEach(e=>win.document.write('<tr><td>'+esc(e.name||'')+'</td><td>'+(e.date||'')+'</td><td>'+esc(e.group||'')+'</td><td>'+esc(e.budget||'')+'₪</td><td>'+(e.giftStatus==='paid'?'✅':'⏳')+'</td></tr>'));
   win.document.write('</table></body></html>');win.print();
 }
 function exportBudgetCSV(){
@@ -4241,11 +4280,11 @@ function printReport(){
   const to=(document.getElementById('print-to')||{}).value||'';
   const list=getReportList(from,to);
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
-  const win=window.open('');
+  const win=_printBuffer();
   win.document.write('<html dir="'+lang.dir+'"><body style="font-family:sans-serif;padding:20px;"><h2>'+lang.appName+'</h2>');
   if(from||to)win.document.write('<p style="color:#888;">'+from+' — '+to+'</p>');
   win.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>'+(lang.printColName||'שם')+'</th><th>'+(lang.printColDate||'תאריך')+'</th><th>'+(lang.printColType||'סוג')+'</th><th>'+(lang.printColGroup||'קבוצה')+'</th><th>'+(lang.printColBudget||'תקציב')+'</th></tr>');
-  list.forEach(e=>win.document.write('<tr><td>'+(e.name||'')+'</td><td>'+(e.date||'')+'</td><td>'+getLabel(e.type,e.customType)+'</td><td>'+(e.group||'')+'</td><td>'+(e.budget?e.budget+'₪':'')+'</td></tr>'));
+  list.forEach(e=>win.document.write('<tr><td>'+esc(e.name||'')+'</td><td>'+(e.date||'')+(isHebrewEvent(e)?' ('+hebLabel(e)+')':'')+'</td><td>'+getLabel(e.type,e.customType)+'</td><td>'+esc(e.group||'')+'</td><td>'+(e.budget?e.budget+'₪':'')+'</td></tr>'));
   win.document.write('</table></body></html>');win.print();
 }
 
@@ -5859,7 +5898,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // 1. apply theme & mode
   applyTheme(settings.theme||'goldblack');
   applyMode(settings.mode||'light');
-  if(settings.largeFont){const sz=settings.fontSizePx||18;document.documentElement.style.fontSize=sz+'px';document.body.classList.add('large-font');}
+  applyFont(); applyAnimations();
 
   // 2. apply language
   const savedLang=localStorage.getItem('ls2_lang')||'he';
