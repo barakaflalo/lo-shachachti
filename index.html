@@ -605,6 +605,47 @@ body.dark-mode #splash { background: #12121f; }
 @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:none} }
 .new-card { animation:slideIn 0.3s ease; }
 
+
+/* ===== BOTTOM NAV (שלב 2) ===== */
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:900;display:none;align-items:flex-end;justify-content:space-around;
+  background:var(--panel);border-top:1px solid var(--acc-border);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));
+  box-shadow:0 -4px 18px rgba(0,0,0,0.25);}
+body.nav-on .bottom-nav{display:flex;}
+body.nav-on{padding-bottom:78px;}
+.nav-item{flex:1;background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;cursor:pointer;font-family:inherit;border-radius:12px;min-height:52px;justify-content:center;}
+.nav-item .nav-ic{font-size:21px;line-height:1;filter:grayscale(0.6);opacity:0.75;transition:all .15s;}
+.nav-item .nav-lb{font-size:11px;font-weight:500;}
+.nav-item.active{color:var(--acc-light);}
+.nav-item.active .nav-ic{filter:none;opacity:1;transform:translateY(-1px);}
+.nav-add{flex:0 0 auto;width:58px;height:58px;margin:-22px 6px 4px;border-radius:50%;border:3px solid var(--bg);
+  background:linear-gradient(135deg,var(--accent),var(--acc-light));color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);font-size:32px;font-weight:300;line-height:1;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(var(--acc-rgb),0.45);}
+.nav-add:active{transform:scale(0.94);}
+body.nav-on #scrollTopBtn{bottom:92px;}
+body.nav-on #global-toast{bottom:96px!important;}
+/* ===== HERO — תואם לערכת הצבע (היה סגול קבוע) ===== */
+body .hero-card,body.dark-mode .hero-card{background:linear-gradient(135deg,#1a1a2c,#26263d);border:1px solid var(--acc-border);box-shadow:0 4px 18px rgba(var(--acc-rgb),0.15);}
+body .hero-card .hero-label,body.dark-mode .hero-card .hero-label, body .hero-card div[style*="color:#818cf8"]{color:var(--acc-light)!important;}
+body .hero-card .hero-name{color:#fff;}
+body .hero-card div[style*="opacity:0.8"]{color:rgba(255,255,255,0.75);}
+/* ===== סינונים בשורה אחת נגללת (דף בית נקי) ===== */
+#main-group-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+#main-filter-bar > div{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+#main-group-filters::-webkit-scrollbar,#main-filter-bar > div::-webkit-scrollbar{display:none;}
+#main-group-filters .chip,#main-filter-bar .chip{flex:0 0 auto;white-space:nowrap;}
+/* ===== UNDO TOAST ===== */
+.undo-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);z-index:1100;opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--acc-border);color:var(--text);
+  padding:10px 12px 10px 16px;border-radius:14px;font-size:13px;box-shadow:0 6px 22px rgba(0,0,0,0.35);transition:all .25s;max-width:92%;}
+.undo-toast.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+body.nav-on .undo-toast{bottom:96px;}
+.undo-toast button{background:var(--acc-dim);border:1px solid var(--acc-border);color:var(--acc-light);border-radius:10px;padding:7px 14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;}
+/* ===== CALENDAR MONTH LIST ===== */
+.cal-list-title{font-size:12px;color:var(--muted);margin:14px 2px 8px;font-weight:600;}
+.cal-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;background:rgba(255,255,255,0.02);cursor:pointer;}
+.cal-row-day{min-width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;background:var(--acc-dim);color:var(--acc-light);font-size:14px;}
+.cal-row.hol{cursor:default;opacity:0.85;}
+.event-card.lp-active{transform:scale(0.98);transition:transform .2s;}
 /* ===== ACCESSIBILITY: reduced motion ===== */
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after { animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
@@ -615,7 +656,7 @@ body.dark-mode #splash { background: #12121f; }
 <link rel="icon" href="icon-192.png">
 <script>
 // ===== גרסה + יומן שגיאות (נטען ראשון) =====
-const APP_VERSION='3.1.1';
+const APP_VERSION='3.2.0';
 (function(){
   function logErr(msg,src,line){
     try{
@@ -659,6 +700,14 @@ function loadOneSignal(){
 </div>
 
 <canvas id="confettiCanvas"></canvas>
+<nav class="bottom-nav" id="bottom-nav" aria-label="ניווט">
+  <button class="nav-item" data-tab="screen-main" onclick="navTo('screen-main')"><span class="nav-ic">🏠</span><span class="nav-lb" id="nav-home">בית</span></button>
+  <button class="nav-item" data-tab="screen-calendar" onclick="navTo('screen-calendar')"><span class="nav-ic">📅</span><span class="nav-lb" id="nav-cal">לוח שנה</span></button>
+  <button class="nav-add" onclick="openAddForm()" aria-label="add" id="nav-add"><span>＋</span></button>
+  <button class="nav-item" data-tab="ai" onclick="openAiMenu()"><span class="nav-ic">🤖</span><span class="nav-lb" id="nav-ai">AI</span></button>
+  <button class="nav-item" data-tab="screen-settings" onclick="navTo('screen-settings')"><span class="nav-ic">⚙️</span><span class="nav-lb" id="nav-settings">הגדרות</span></button>
+</nav>
+<div id="undo-toast" class="undo-toast" role="status"><span id="undo-msg"></span><button id="undo-btn" onclick="undoDelete()">↩ בטל</button></div>
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <!-- ===== MODALS ===== -->
@@ -680,7 +729,7 @@ function loadOneSignal(){
   <div class="modal-box" style="text-align:center;">
     <div style="font-size:48px;margin-bottom:8px;">🔔</div>
     <div style="font-size:18px;font-weight:700;margin-bottom:4px;" id="about-app-name">לא שכחתי</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.1.1</span> · AppNest · ברק אפללו</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.2.0</span> · AppNest · ברק אפללו</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;" id="about-desc">
       האפליקציה שתזכיר לך כל אירוע חשוב.<br>
       5 שפות · AI ברכות · PWA · ייבוא/ייצוא
@@ -772,19 +821,14 @@ function loadOneSignal(){
     <span class="topbar-title">לא שכחתי 🔔</span>
     <div class="topbar-actions">
       <button class="icon-btn" onclick="openScreen('screen-search')" title="חיפוש">🔍</button>
-      <button class="icon-btn" onclick="openAiMenu()" title="AI" id="ai-btn">🤖</button>
       <button class="icon-btn" onclick="openLangScreen('screen-main')" title="Language" id="lang-btn">🌐</button>
       <button class="icon-btn" onclick="quickToggleMode()" id="mode-toggle-btn" title="שנה מראה">🌙</button>
-      <button class="settings-btn" id="tb-settings" onclick="openScreen('screen-settings')">⚙️ הגדרות</button>
     </div>
   </div>
   <div style="padding:12px 0 0;">
-    <div class="stat-grid" id="main-stats"></div>
-    <button class="add-event-btn" id="tb-add" onclick="openAddForm()">➕ הוסף אירוע</button>
-    <div id="main-calendar"></div>
-
     <div id="main-hero"></div>
     <div id="main-insights"></div>
+    <div class="stat-grid" id="main-stats"></div>
     <div id="main-filter-bar" style="margin-bottom:8px;"></div>
     <div class="filter-row" id="main-group-filters"></div>
     <div id="main-events-list"></div>
@@ -793,6 +837,9 @@ function loadOneSignal(){
     </div>
   </div>
 </div>
+
+<!-- ========== SCREEN — CALENDAR (טאב נפרד) ========== -->
+<div class="screen" id="screen-calendar"></div>
 
 <!-- ========== SCREEN 2 — ADD/EDIT EVENT ========== -->
 <div class="screen" id="screen-add"></div>
@@ -1195,7 +1242,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'פתח את האפליקציה מהאתר, לא כקובץ מקומי',
     backupReminderMsg:'💾 מזמן לא גיבית את האירועים שלך. הנתונים נשמרים רק במכשיר הזה — אם תמחק את הדפדפן, הכל יימחק.\n\nלגבות עכשיו?',
     aboutDiag:'🩺 דוח תמיכה (לפתרון תקלות)', diagCopyPrompt:'להעתיק את הדוח? (לשליחה לתמיכה)', diagCopied:'הדוח הועתק',
-    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', welcomeGotIt:'הבנתי, תודה', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
+    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', welcomeGotIt:'הבנתי, תודה', navHome:'בית', insightGiftSoon:'{name} {when} — עוד לא קנית מתנה!', navCalendar:'לוח שנה', navAI:'AI', screenCalendar:'📅 לוח שנה', calMonthEvents:'אירועים החודש', calMonthEmpty:'אין אירועים בחודש הזה', calMonthHolidays:'חגים החודש', deletedMsg:'🗑️ "{name}" נמחק', undoBtn:'בטל', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
     rightsTitle:'זכויות יוצרים',
     rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה {ver}<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
     welcomeTitle:'איך עובדים עם האפליקציה?',
@@ -1260,7 +1307,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Open the app from the website, not as a local file',
     backupReminderMsg:'💾 You haven\'t backed up your events in a while. Data is stored only on this device — if you clear your browser, it\'s all gone.\n\nBack up now?',
     aboutDiag:'🩺 Support report (troubleshooting)', diagCopyPrompt:'Copy the report? (to send to support)', diagCopied:'Report copied',
-    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', welcomeGotIt:'Got it, thanks', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
+    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', welcomeGotIt:'Got it, thanks', navHome:'Home', insightGiftSoon:'{name} {when} — you haven\'t bought a gift yet!', navCalendar:'Calendar', navAI:'AI', screenCalendar:'📅 Calendar', calMonthEvents:'Events this month', calMonthEmpty:'No events this month', calMonthHolidays:'Holidays this month', deletedMsg:'🗑️ "{name}" deleted', undoBtn:'Undo', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
     rightsTitle:'Copyright',
     rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version {ver}<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
     welcomeTitle:'How does the app work?',
@@ -1325,7 +1372,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Откройте приложение с сайта, а не как локальный файл',
     backupReminderMsg:'💾 Вы давно не делали резервную копию. Данные хранятся только на этом устройстве — если очистить браузер, всё пропадёт.\n\nСоздать копию сейчас?',
     aboutDiag:'🩺 Отчёт поддержки (диагностика)', diagCopyPrompt:'Скопировать отчёт? (для отправки в поддержку)', diagCopied:'Отчёт скопирован',
-    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', welcomeGotIt:'Понятно, спасибо', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
+    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', welcomeGotIt:'Понятно, спасибо', navHome:'Главная', insightGiftSoon:'{name} {when} — вы ещё не купили подарок!', navCalendar:'Календарь', navAI:'AI', screenCalendar:'📅 Календарь', calMonthEvents:'События в этом месяце', calMonthEmpty:'В этом месяце нет событий', calMonthHolidays:'Праздники в этом месяце', deletedMsg:'🗑️ «{name}» удалено', undoBtn:'Отменить', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
     rightsTitle:'Авторские права',
     rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия {ver}<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
     welcomeTitle:'Как работает приложение?',
@@ -1395,7 +1442,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Abre la app desde el sitio web, no como archivo local',
     backupReminderMsg:'💾 Hace tiempo que no haces copia de tus eventos. Los datos se guardan solo en este dispositivo — si borras el navegador, se pierde todo.\n\n¿Hacer copia ahora?',
     aboutDiag:'🩺 Informe de soporte (solución de problemas)', diagCopyPrompt:'¿Copiar el informe? (para enviar a soporte)', diagCopied:'Informe copiado',
-    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', welcomeGotIt:'Entendido, gracias', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
+    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', welcomeGotIt:'Entendido, gracias', navHome:'Inicio', insightGiftSoon:'{name} {when} — ¡aún no has comprado un regalo!', navCalendar:'Calendario', navAI:'IA', screenCalendar:'📅 Calendario', calMonthEvents:'Eventos del mes', calMonthEmpty:'No hay eventos este mes', calMonthHolidays:'Festivos del mes', deletedMsg:'🗑️ "{name}" eliminado', undoBtn:'Deshacer', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
     rightsTitle:'Derechos de autor',
     rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión {ver}<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
     welcomeTitle:'¿Cómo funciona la app?',
@@ -1460,7 +1507,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'افتح التطبيق من الموقع، وليس كملف محلي',
     backupReminderMsg:'💾 لم تقم بنسخ مناسباتك منذ فترة. تُحفظ البيانات على هذا الجهاز فقط — إذا مسحت المتصفح، سيضيع كل شيء.\n\nنسخ احتياطي الآن؟',
     aboutDiag:'🩺 تقرير الدعم (حل المشاكل)', diagCopyPrompt:'نسخ التقرير؟ (لإرساله للدعم)', diagCopied:'تم نسخ التقرير',
-    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', welcomeGotIt:'فهمت، شكراً', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
+    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', welcomeGotIt:'فهمت، شكراً', navHome:'الرئيسية', insightGiftSoon:'{name} {when} — لم تشترِ هدية بعد!', navCalendar:'التقويم', navAI:'AI', screenCalendar:'📅 التقويم', calMonthEvents:'مناسبات هذا الشهر', calMonthEmpty:'لا توجد مناسبات هذا الشهر', calMonthHolidays:'أعياد هذا الشهر', deletedMsg:'🗑️ تم حذف "{name}"', undoBtn:'تراجع', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
     rightsTitle:'حقوق النشر',
     rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار {ver}<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
     welcomeTitle:'كيف يعمل التطبيق؟',
@@ -1948,6 +1995,8 @@ function applyLangToUI() {
   setText('welcome-btn-add', lang.welcomeBtnAdd);
   setText('welcome-btn-guide', lang.welcomeBtnGuide);
   setText('welcome-btn-later', lang.welcomeGotIt||lang.btnClose);
+  setText('nav-home', lang.navHome); setText('nav-cal', lang.navCalendar);
+  setText('nav-ai', lang.navAI); setText('nav-settings', lang.screenSettings);
 
   // ===== MODAL: PHOTO =====
   setText('photo-title', lang.photoTitle);
@@ -2083,6 +2132,11 @@ function TR(icon, label, sub, id, key) {
 }
 
 const SCREEN_RENDERERS = {
+  'screen-calendar': () => {
+    const lang = LANGUAGES[currentLang] || LANGUAGES['he'];
+    return TB(lang.screenCalendar||'📅 לוח שנה', 'screen-main') +
+      '<div style="padding:12px 0;"><div id="main-calendar"></div><div id="cal-month-list"></div></div>';
+  },
 
   'screen-settings': () => {
     const lang = LANGUAGES[currentLang] || LANGUAGES['he'];
@@ -2132,7 +2186,6 @@ const SCREEN_RENDERERS = {
       ${TR('📊', lang.togStats||'סטטיסטיקות', '', 'tog-stats', 'showStats')}
       ${TR('🔥', lang.togHero||'האירוע הקרוב', '', 'tog-hero', 'showHero')}
       ${TR('💰', lang.togBudget||'תקציב מתנות', '', 'tog-budget-tog', 'showBudget')}
-      ${TR('📅', lang.togCalendar||'לוח שנה', '', 'tog-cal', 'showCalendar')}
       <div class="section-lbl" style="margin-top:14px;">${lang.sectionAppearance||'מראה וחוויה'}</div>
       ${TR('🎵', lang.togSounds||'צלילים', '', 'tog-sounds', 'sounds')}
       ${TR('🎊', lang.togConfetti||'קונפטי ביום אירוע', '', 'tog-confetti', 'confetti')}
@@ -2834,7 +2887,7 @@ function openScreen(id, animDir){
     // הסר class אחרי אנימציה
     setTimeout(()=>el.classList.remove('slide-in','slide-back','fade-in'), 300);
   }
-  window.scrollTo(0,0);const map={'screen-main':renderMain,'screen-contacts':()=>{renderScreen('screen-contacts');renderContacts();},'screen-search':initSearch,
+  window.scrollTo(0,0);updateBottomNav(id);const map={'screen-main':renderMain,'screen-calendar':()=>{renderScreen('screen-calendar');const _t=new Date();if(calYear===undefined){calYear=_t.getFullYear();calMonth=_t.getMonth();}renderCalendar(events.map(ev=>({...ev,...calcDays(ev)})));},'screen-contacts':()=>{renderScreen('screen-contacts');renderContacts();},'screen-search':initSearch,
     'screen-greetings':()=>{renderScreen('screen-greetings');renderGreetings();},'screen-my-greetings':()=>{renderScreen('screen-my-greetings');renderMyGreetings();},'screen-stores':()=>{renderScreen('screen-stores');renderStores();},'screen-budget-settings':()=>{renderScreen('screen-budget-settings');renderBudgetSettings();},'screen-print':()=>{renderScreen('screen-print');initPrint();},'screen-guide':()=>{renderScreen('screen-guide');},'screen-appearance':()=>{renderScreen('screen-appearance');renderAppearance();},'screen-language':()=>{renderScreen('screen-language');renderLanguageScreen();},'screen-add':()=>renderScreen('screen-add'),'screen-search':()=>{renderScreen('screen-search');initSearch();},'screen-guide-chapter':()=>renderScreen('screen-guide-chapter'),'screen-user-settings':()=>{renderScreen('screen-user-settings');initUserSettings();},'screen-notifications':()=>{renderScreen('screen-notifications');initNotifications();},'screen-settings':()=>renderScreen('screen-settings'),'screen-detail':()=>{/* rendered by openDetail */},'screen-holidays':()=>renderScreen('screen-holidays'),'screen-system-settings':()=>renderScreen('screen-system-settings'),'screen-import':()=>renderScreen('screen-import'),'screen-import-ics':()=>renderScreen('screen-import-ics'),'screen-google-cal':()=>renderScreen('screen-google-cal'),'screen-import-fb':()=>renderScreen('screen-import-fb'),'screen-backup':()=>renderScreen('screen-backup'),'screen-vcf-preview':()=>renderScreen('screen-vcf-preview')};if(map[id])map[id]();}
 function openModal(id){const el=document.getElementById(id);if(el){el.classList.add('open');el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');}}
 function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('open');}
@@ -2879,13 +2932,105 @@ function renderMain(){
   const _ts = document.getElementById('tb-settings');
   if(_ts) _ts.textContent = '⚙️ ' + (_lang.screenSettings||'הגדרות');
   const _ta = document.getElementById('tb-add');
-  if(_ta) _ta.textContent = _lang.btnAdd;const today=new Date();if(calYear===undefined){calYear=today.getFullYear();calMonth=today.getMonth();}const enriched=events.map(ev=>({...ev,...calcDays(ev)}));const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const statsEl=document.getElementById('main-stats');if(settings.showStats){const u30=enriched.filter(e=>e.daysLeft!==null&&e.daysLeft<=30).length;const budgetTotal=events.reduce((s,e)=>s+(parseInt(e.budget)||0),0);statsEl.style.display='';statsEl.innerHTML='<div class="stat-card"><div class="stat-num">'+u30+'</div><div class="stat-label">'+(lang.statsEvents30||'אירועים ב-30 יום')+'</div></div>'+(settings.showBudget?'<div class="stat-card"><div class="stat-num green">'+budgetTotal+'₪</div><div class="stat-label">'+(lang.statsBudget||'תקציב מתנות')+'</div></div>':'<div class="stat-card"><div class="stat-num">'+events.length+'</div><div class="stat-label">'+(lang.statsTotal||'סה"כ')+'</div></div>');}else statsEl.style.display='none';const calEl=document.getElementById('main-calendar');if(settings.showCalendar){calEl.style.display='';renderCalendar(enriched);}else calEl.style.display='none';const heroEl=document.getElementById('main-hero');if(settings.showHero){heroEl.style.display='';renderHero(enriched);}else heroEl.style.display='none';renderInsights(enriched);renderFilterBar();renderGroupFilters(enriched);renderEventsList(enriched);const todayEvs=enriched.filter(e=>e.daysLeft===0);if(todayEvs.length){const _tk=new Date().toDateString()+'|'+todayEvs.map(e=>e.id).join(',');if(localStorage.getItem('ls2_today_shown')!==_tk){localStorage.setItem('ls2_today_shown',_tk);setTimeout(()=>{triggerConfetti();showTodayModal(todayEvs);},1000);}}}
+  if(_ta) _ta.textContent = _lang.btnAdd;const today=new Date();if(calYear===undefined){calYear=today.getFullYear();calMonth=today.getMonth();}const enriched=events.map(ev=>({...ev,...calcDays(ev)}));const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const statsEl=document.getElementById('main-stats');if(settings.showStats){const u30=enriched.filter(e=>e.daysLeft!==null&&e.daysLeft<=30).length;const budgetTotal=events.reduce((s,e)=>s+(parseInt(e.budget)||0),0);statsEl.style.display='';statsEl.innerHTML='<div class="stat-card"><div class="stat-num">'+u30+'</div><div class="stat-label">'+(lang.statsEvents30||'אירועים ב-30 יום')+'</div></div>'+(settings.showBudget?'<div class="stat-card"><div class="stat-num green">'+budgetTotal+'₪</div><div class="stat-label">'+(lang.statsBudget||'תקציב מתנות')+'</div></div>':'<div class="stat-card"><div class="stat-num">'+events.length+'</div><div class="stat-label">'+(lang.statsTotal||'סה"כ')+'</div></div>');}else statsEl.style.display='none';const heroEl=document.getElementById('main-hero');if(settings.showHero){heroEl.style.display='';renderHero(enriched);}else heroEl.style.display='none';renderInsights(enriched);renderFilterBar();renderGroupFilters(enriched);renderEventsList(enriched);const todayEvs=enriched.filter(e=>e.daysLeft===0);if(todayEvs.length){const _tk=new Date().toDateString()+'|'+todayEvs.map(e=>e.id).join(',');if(localStorage.getItem('ls2_today_shown')!==_tk){localStorage.setItem('ls2_today_shown',_tk);setTimeout(()=>{triggerConfetti();showTodayModal(todayEvs);},1000);}}}
 
-function renderCalendar(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const months=lang.calMonths;const dayNames=lang.calDays;const today=new Date();const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();const evDays={};enriched.forEach(ev=>{if(!ev.date)return;const d=new Date(ev.date);let y=d.getFullYear(),m=d.getMonth(),day=d.getDate();if(getRecurrence(ev)==='yearly')y=calYear;if(y===calYear&&m===calMonth){if(!evDays[day])evDays[day]=[];evDays[day].push(ev);}});const todayDay=today.getFullYear()===calYear&&today.getMonth()===calMonth?today.getDate():-1;let grid='';for(let i=0;i<first;i++)grid+='<div class="cal-day"></div>';for(let d=1;d<=days;d++){const isToday=d===todayDay;const hasEv=evDays[d];const isUrgent=hasEv&&hasEv.some(e=>e.daysLeft!==null&&e.daysLeft<=7);let cls='cal-day';if(isToday&&events.length===0)cls+=' welcome-day';else if(isToday)cls+=' today';if(hasEv)cls+=' has-event';if(isUrgent)cls+=' urgent';const _cds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+function renderCalendar(enriched){if(!document.getElementById('main-calendar'))return;const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const months=lang.calMonths;const dayNames=lang.calDays;const today=new Date();const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();const evDays={};enriched.forEach(ev=>{if(!ev.date)return;const d=new Date(ev.date);let y=d.getFullYear(),m=d.getMonth(),day=d.getDate();if(getRecurrence(ev)==='yearly')y=calYear;if(y===calYear&&m===calMonth){if(!evDays[day])evDays[day]=[];evDays[day].push(ev);}});const todayDay=today.getFullYear()===calYear&&today.getMonth()===calMonth?today.getDate():-1;let grid='';for(let i=0;i<first;i++)grid+='<div class="cal-day"></div>';for(let d=1;d<=days;d++){const isToday=d===todayDay;const hasEv=evDays[d];const isUrgent=hasEv&&hasEv.some(e=>e.daysLeft!==null&&e.daysLeft<=7);let cls='cal-day';if(isToday&&events.length===0)cls+=' welcome-day';else if(isToday)cls+=' today';if(hasEv)cls+=' has-event';if(isUrgent)cls+=' urgent';const _cds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       const _chs=isHolidayDate(_cds);
       const _chdots=_chs.length>0?'<div style="display:flex;gap:2px;justify-content:center;margin-top:1px;">'+_chs.slice(0,3).map(h=>'<div style="width:5px;height:5px;border-radius:50%;background:'+h.color+';" title="'+h.name+'"></div>').join('')+'</div>':'';
-      grid+='<div class="'+cls+'" onclick="onCalDay('+d+','+calMonth+','+calYear+')">'+d+_chdots+'</div>';}document.getElementById('main-calendar').innerHTML='<div class="cal-wrap"><div class="cal-header"><span class="cal-nav" onclick="changeMonth(1)">›</span><span>'+months[calMonth]+' '+calYear+'</span><span class="cal-nav" onclick="changeMonth(-1)">‹</span></div><div class="cal-days-header">'+dayNames.map(d=>'<div class="cal-day-name">'+d+'</div>').join('')+'</div><div class="cal-grid">'+grid+'</div></div>';}
+      grid+='<div class="'+cls+'" onclick="onCalDay('+d+','+calMonth+','+calYear+')">'+d+_chdots+'</div>';}document.getElementById('main-calendar').innerHTML='<div class="cal-wrap"><div class="cal-header"><span class="cal-nav" onclick="changeMonth(1)">›</span><span>'+months[calMonth]+' '+calYear+'</span><span class="cal-nav" onclick="changeMonth(-1)">‹</span></div><div class="cal-days-header">'+dayNames.map(d=>'<div class="cal-day-name">'+d+'</div>').join('')+'</div><div class="cal-grid">'+grid+'</div></div>';renderCalMonthList(evDays);}
 function changeMonth(delta){calMonth+=delta;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar(events.map(ev=>({...ev,...calcDays(ev)})));const wrap=document.querySelector('#main-calendar .cal-wrap');if(wrap){wrap.classList.remove('cal-fade');requestAnimationFrame(()=>wrap.classList.add('cal-fade'));}}
+
+// ================================================================
+// ===== שלב 2: סרגל ניווט תחתון · רשימת החודש · ביטול מחיקה · לחיצה ארוכה =====
+// ================================================================
+const NAV_SCREENS=['screen-main','screen-calendar','screen-settings','screen-search'];
+function updateBottomNav(id){
+  const on=NAV_SCREENS.includes(id);
+  document.body.classList.toggle('nav-on',on);
+  document.querySelectorAll('#bottom-nav .nav-item').forEach(b=>b.classList.toggle('active',b.getAttribute('data-tab')===id));
+}
+function navTo(id){
+  const cur=document.querySelector('.screen.active');
+  if(cur&&cur.id===id){ window.scrollTo({top:0,behavior:'smooth'}); return; }
+  openScreen(id,'fade');
+}
+function renderCalMonthList(evDays){
+  const box=document.getElementById('cal-month-list'); if(!box) return;
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const rows=[];
+  Object.keys(evDays||{}).forEach(d=>evDays[d].forEach(ev=>rows.push({d:+d,ev})));
+  const hols=[];
+  const dim=new Date(calYear,calMonth+1,0).getDate();
+  for(let d=1;d<=dim;d++){
+    const ds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    isHolidayDate(ds).forEach(x=>hols.push({d,x}));
+  }
+  let html='';
+  if(rows.length){
+    rows.sort((a,b)=>a.d-b.d);
+    html+='<div class="cal-list-title">'+esc(lang.calMonthEvents||'אירועים החודש')+' ('+rows.length+')</div>';
+    html+=rows.map(r=>'<div class="cal-row" onclick="openDetail('+r.ev.id+')"><div class="cal-row-day">'+r.d+'</div>'
+      +avatarHTML(r.ev,'av-sm')+'<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:14px;">'+esc(r.ev.name)+'</div>'
+      +'<div style="font-size:11px;color:var(--acc-light);">'+getLabel(r.ev.type,r.ev.customType)+'</div></div><span style="color:var(--muted);">›</span></div>').join('');
+  }else{
+    html+='<div class="cal-list-title" style="text-align:center;font-weight:400;">'+esc(lang.calMonthEmpty||'אין אירועים בחודש הזה')+'</div>';
+  }
+  if(hols.length){
+    html+='<div class="cal-list-title">'+esc(lang.calMonthHolidays||'חגים החודש')+'</div>';
+    html+=hols.map(o=>'<div class="cal-row hol"><div class="cal-row-day" style="background:'+o.x.color+'33;color:'+o.x.color+';">'+o.d+'</div>'
+      +'<div style="flex:1;font-size:13px;">'+esc(o.x.name)+'</div><span style="width:9px;height:9px;border-radius:50%;background:'+o.x.color+';"></span></div>').join('');
+  }
+  box.innerHTML=html;
+}
+
+// ---- מחיקה עם "בטל" ----
+let _lastDeleted=null,_undoTimer=null;
+function removeEventWithUndo(id){
+  const idx=events.findIndex(e=>e.id===id); if(idx<0) return;
+  const ev=events[idx];
+  cancelNotif(id);
+  events.splice(idx,1); saveEvents();
+  _lastDeleted={ev,idx};
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  document.getElementById('undo-msg').textContent=(lang.deletedMsg||'🗑️ "{name}" נמחק').replace('{name}',ev.name);
+  document.getElementById('undo-btn').textContent='↩ '+(lang.undoBtn||'בטל');
+  const t=document.getElementById('undo-toast'); t.classList.add('show');
+  clearTimeout(_undoTimer); _undoTimer=setTimeout(()=>{t.classList.remove('show');_lastDeleted=null;},7000);
+}
+function undoDelete(){
+  if(!_lastDeleted) return;
+  const {ev,idx}=_lastDeleted; _lastDeleted=null;
+  events.splice(Math.min(idx,events.length),0,ev); saveEvents(); scheduleNotif(ev);
+  document.getElementById('undo-toast').classList.remove('show');
+  const cur=document.querySelector('.screen.active');
+  if(cur&&cur.id==='screen-calendar') openScreen('screen-calendar'); else renderMain();
+}
+
+// ---- לחיצה ארוכה על כרטיס = עריכה (דרישת בסיס AppNest) ----
+(function(){
+  let timer=null,sx=0,sy=0,card=null,fired=false;
+  function cancel(){ clearTimeout(timer); timer=null; if(card) card.classList.remove('lp-active'); card=null; }
+  document.addEventListener('touchstart',e=>{
+    const c=e.target.closest&&e.target.closest('.event-card'); if(!c||e.touches.length!==1) return;
+    if(e.target.closest('button,a,textarea,input')) return;
+    card=c; sx=e.touches[0].clientX; sy=e.touches[0].clientY; fired=false;
+    timer=setTimeout(()=>{
+      const id=parseInt(((card&&card.id)||'').replace('card-',''));
+      fired=true; cancel(); setTimeout(()=>{fired=false;},800);
+      if(navigator.vibrate) navigator.vibrate(30);
+      if(id) editEvent(id);
+    },550);
+    c.classList.add('lp-active');
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{ if(!timer) return; const t=e.touches[0]; if(Math.abs(t.clientX-sx)>10||Math.abs(t.clientY-sy)>10) cancel(); },{passive:true});
+  document.addEventListener('touchend',cancel,{passive:true});
+  document.addEventListener('touchcancel',cancel,{passive:true});
+  document.addEventListener('click',e=>{ if(fired){ fired=false; e.stopPropagation(); e.preventDefault(); } },true);
+  document.addEventListener('contextmenu',e=>{
+    const c=e.target.closest&&e.target.closest('.event-card'); if(!c) return;
+    e.preventDefault(); const id=parseInt((c.id||'').replace('card-','')); if(id) editEvent(id);
+  });
+})();
 
 // ================================================================
 // ===== SWIPE NAVIGATION (calendar months + settings carousel) =====
@@ -2976,14 +3121,18 @@ function computeInsights(enriched){
   enriched.filter(e=>e.daysLeft!==null&&e.daysLeft>=0&&e.daysLeft<=7).forEach(e=>{
     const hasGiftIdea=e.giftIdea||e.budget;
     if(hasGiftIdea && e.giftStatus!=='paid'){
-      tips.push({icon:'🎁',id:e.id,text:(lang.insightGiftNotBought||'{name} בעוד {n} ימים — עוד לא קנית מתנה!').replace('{name}',e.name).replace('{n}',e.daysLeft)});
+      tips.push({icon:'🎁',id:e.id,text:(e.daysLeft<=1
+        ?(lang.insightGiftSoon||'{name} {when} — עוד לא קנית מתנה!').replace('{when}',(e.daysLeft===0?lang.today:lang.tomorrow)||'')
+        :(lang.insightGiftNotBought||'{name} בעוד {n} ימים — עוד לא קנית מתנה!').replace('{n}',e.daysLeft)).replace('{name}',e.name)});
     }
   });
-  // 2. אירוע היום/מחר
-  enriched.filter(e=>e.daysLeft===0).forEach(e=>{
+  // 2. אירוע היום/מחר (בלי לחזור על האירוע שכבר מוצג בכרטיס "האירוע הקרוב")
+  const _heroId=(enriched.filter(e=>e.daysLeft!==null).sort((a,b)=>a.daysLeft-b.daysLeft)[0]||{}).id;
+  const _skip=e=>settings.showHero&&e.id===_heroId;
+  enriched.filter(e=>e.daysLeft===0&&!_skip(e)).forEach(e=>{
     tips.push({icon:'🎉',id:e.id,text:(lang.insightToday||'היום: {name}! אל תשכח לברך').replace('{name}',e.name)});
   });
-  enriched.filter(e=>e.daysLeft===1).forEach(e=>{
+  enriched.filter(e=>e.daysLeft===1&&!_skip(e)).forEach(e=>{
     tips.push({icon:'🔥',id:e.id,text:(lang.insightTomorrow||'מחר: {name} — התכונן!').replace('{name}',e.name)});
   });
   // 3. אירוע קרוב בלי מספר טלפון (אי אפשר לשלוח ברכה)
@@ -3001,7 +3150,7 @@ function renderInsights(enriched){
   el.innerHTML=tips.map(t=>
     '<div class="insight-card" onclick="openDetail('+t.id+')">'
     +'<span style="font-size:18px;flex-shrink:0;">'+t.icon+'</span>'
-    +'<span style="flex:1;font-size:12px;">'+t.text+'</span>'
+    +'<span style="flex:1;font-size:12px;">'+esc(t.text)+'</span>'
     +'<span style="color:var(--muted);font-size:14px;">›</span>'
     +'</div>'
   ).join('');
@@ -3061,14 +3210,14 @@ function openDetail(id){
   // הצג מסך
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const detailScreen=document.getElementById('screen-detail');
-  if(detailScreen) detailScreen.classList.add('active');
+  if(detailScreen) detailScreen.classList.add('active'); updateBottomNav('screen-detail');
   }, 0);
   window.scrollTo(0,0);
 }
 function updateDetailGreet(id){const ev=events.find(e=>e.id===id);if(!ev)return;const el=document.getElementById('greet-text-'+id);if(el)el.textContent=buildGreeting(ev);}
 function editCurrentDetail(){if(_detailId)editEvent(_detailId);}
 function deleteEventDirect(id){
-  id=parseInt(id)||id;const lang=LANGUAGES[currentLang]||LANGUAGES['he'];if(!confirm(lang.alertDelete||'מחק?'))return;cancelNotif(id);events=events.filter(e=>e.id!==id);saveEvents();playSound('delete');openScreen('screen-main');}
+  id=parseInt(id)||id;const lang=LANGUAGES[currentLang]||LANGUAGES['he'];if(!confirm(lang.alertDelete||'מחק?'))return;removeEventWithUndo(id);playSound('delete');openScreen('screen-main');}
 
 // ================================================================
 // ===== FORM =====
@@ -3175,7 +3324,7 @@ function editEvent(id){
     initGiftTags();
   }, 60);
 }
-function deleteCurrentEvent(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const id=parseInt(document.getElementById('editing-id').value);if(!id||!confirm(lang.alertDelete||'מחק?'))return;cancelNotif(id);events=events.filter(e=>e.id!==id);saveEvents();playSound('delete');clearForm();openScreen('screen-main');}
+function deleteCurrentEvent(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const id=parseInt(document.getElementById('editing-id').value);if(!id||!confirm(lang.alertDelete||'מחק?'))return;removeEventWithUndo(id);playSound('delete');clearForm();openScreen('screen-main');}
 
 // ================================================================
 // ===== PHOTO =====
@@ -5551,6 +5700,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // 11. swipe navigation (calendar months + settings carousel)
   initSwipeNavigation();
+  updateBottomNav((document.querySelector('.screen.active')||{}).id||'screen-main');
 
   // 12. אזהרת file:// — האפליקציה חייבת לרוץ משרת (GitHub Pages), לא כקובץ מקומי
   if(location.protocol==='file:'){

@@ -3,7 +3,7 @@
 // • כל תשובת ניווט "מנוקה" מסימון redirect (Cloudflare מחזיר 308 מ-index.html ל-/).
 // • שמירה במטמון קובץ-קובץ (allSettled), לא addAll אטומי.
 // • בקשות ממקור אחר (AI, CDN, OneSignal) — לא נוגעים בהן.
-const VERSION = '3.1.1';
+const VERSION = '3.2.0';
 const CACHE = 'lo-shachachti-' + VERSION;
 const SHELL = './';
 const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png'];
