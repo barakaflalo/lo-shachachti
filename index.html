@@ -656,7 +656,7 @@ body.nav-on .undo-toast{bottom:96px;}
 <link rel="icon" href="icon-192.png">
 <script>
 // ===== גרסה + יומן שגיאות (נטען ראשון) =====
-const APP_VERSION='3.2.0';
+const APP_VERSION='3.3.0';
 (function(){
   function logErr(msg,src,line){
     try{
@@ -729,14 +729,14 @@ function loadOneSignal(){
   <div class="modal-box" style="text-align:center;">
     <div style="font-size:48px;margin-bottom:8px;">🔔</div>
     <div style="font-size:18px;font-weight:700;margin-bottom:4px;" id="about-app-name">לא שכחתי</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.2.0</span> · AppNest · ברק אפללו</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.3.0</span> · AppNest · ברק אפללו</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;" id="about-desc">
       האפליקציה שתזכיר לך כל אירוע חשוב.<br>
       5 שפות · AI ברכות · PWA · ייבוא/ייצוא
     </div>
     <div class="about-links" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
       <a href="#" onclick="shareApp();return false;" class="about-link-btn" id="about-share">📲 שתף את האפליקציה</a>
-      <a href="mailto:loshachachti.app@gmail.com?subject=משוב%20-%20לא%20שכחתי" class="about-link-btn" id="about-feedback">✉️ שלח משוב</a>
+      <a href="mailto:appnest55@gmail.com?subject=משוב%20-%20לא%20שכחתי" class="about-link-btn" id="about-feedback">✉️ שלח משוב</a>
       <a href="./privacy_policy.html" target="_blank" class="about-link-btn" id="about-privacy">🔒 מדיניות פרטיות</a>
       <a href="#" onclick="closeModal('modal-about');openScreen('screen-guide');return false;" class="about-link-btn" id="about-guide">📖 מדריך למשתמש</a>
       <a href="https://appnest-store.pages.dev" target="_blank" class="about-link-btn" id="about-appnest">🏠 עוד אפליקציות AppNest</a>
@@ -751,7 +751,7 @@ function loadOneSignal(){
     <div class="modal-icon">©</div>
     <div class="modal-title" id="rights-title">זכויות יוצרים</div>
     <div class="modal-sub" id="rights-text">כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "לא שכחתי" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span></div>
-    <a href="mailto:loshachachti.app@gmail.com" style="display:block;padding:10px;background:var(--acc-dim);border:1px solid var(--acc-border);color:var(--acc-light);border-radius:var(--rs);font-size:12px;text-decoration:none;margin-bottom:10px;">✉️ loshachachti.app@gmail.com</a>
+    <a href="mailto:appnest55@gmail.com" style="display:block;padding:10px;background:var(--acc-dim);border:1px solid var(--acc-border);color:var(--acc-light);border-radius:var(--rs);font-size:12px;text-decoration:none;margin-bottom:10px;">✉️ appnest55@gmail.com</a>
     <button class="btn-ghost" onclick="closeModal('modal-rights')" id="rights-close-btn">סגור</button>
   </div>
 </div>
@@ -1079,6 +1079,7 @@ let _ISL_FMT=null;
 try{ _ISL_FMT=new Intl.DateTimeFormat('en-u-ca-islamic',{day:'numeric',month:'numeric'}); }catch(e){}
 const _HMAP_CACHE={};
 const _HOL_CACHE={};
+const _HMULTI_CACHE={};
 function _hebParts(d){
   const p=_HEB_FMT.formatToParts(d);
   const o={};p.forEach(x=>o[x.type]=x.value);return o;
@@ -1087,13 +1088,16 @@ function _ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'
 function _hebMapForYear(gYear){
   if(_HMAP_CACHE[gYear]) return _HMAP_CACHE[gYear];
   const map={}; _HMAP_CACHE[gYear]=map;
+  const multi={}; _HMULTI_CACHE[gYear]=multi;
   for(let m=0;m<12;m++){
     const dim=new Date(gYear,m+1,0).getDate();
     for(let day=1;day<=dim;day++){
       const d=new Date(gYear,m,day);
       const h=_hebParts(d);
       const key=h.month+'-'+h.day;
-      if(!map[key]) map[key]=_ymd(d);
+      const ymd=_ymd(d);
+      if(!map[key]) map[key]=ymd;
+      (multi[key]=multi[key]||[]).push(ymd);
     }
   }
   return map;
@@ -1242,7 +1246,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'פתח את האפליקציה מהאתר, לא כקובץ מקומי',
     backupReminderMsg:'💾 מזמן לא גיבית את האירועים שלך. הנתונים נשמרים רק במכשיר הזה — אם תמחק את הדפדפן, הכל יימחק.\n\nלגבות עכשיו?',
     aboutDiag:'🩺 דוח תמיכה (לפתרון תקלות)', diagCopyPrompt:'להעתיק את הדוח? (לשליחה לתמיכה)', diagCopied:'הדוח הועתק',
-    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', welcomeGotIt:'הבנתי, תודה', navHome:'בית', insightGiftSoon:'{name} {when} — עוד לא קנית מתנה!', navCalendar:'לוח שנה', navAI:'AI', screenCalendar:'📅 לוח שנה', calMonthEvents:'אירועים החודש', calMonthEmpty:'אין אירועים בחודש הזה', calMonthHolidays:'חגים החודש', deletedMsg:'🗑️ "{name}" נמחק', undoBtn:'בטל', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
+    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', welcomeGotIt:'הבנתי, תודה', navHome:'בית', dateModeGreg:'לפי תאריך לועזי', dateModeHeb:'לפי תאריך עברי', afterSunset:'קרה אחרי השקיעה (התאריך העברי מתחלף בערב)', hebModeHint:'יחושב מחדש כל שנה לפי הלוח העברי', hebModeShort:'לפי הלוח העברי', sectionPhoneCal:'תזכורות ביומן הטלפון', menuExportAllG:'שלח הכל ליומן גוגל', menuExportAllGSub:'עם תזכורות — עובד גם כשהאפליקציה סגורה', menuExportICS:'הורד קובץ יומן (ICS)', menuExportICSSub:'לכל יומן: סמסונג, אאוטלוק, אפל', menuGContacts:'ימי הולדת מאנשי קשר בגוגל', menuGContactsSub:'ייבוא עם תצוגה מקדימה', gcalNeedConnect:'צריך להתחבר לגוגל. להתחבר עכשיו?', gcalExportAllConfirm:'לשלוח {n} אירועים ליומן גוגל, עם תזכורות?\n(אירועים שכבר נשלחו יתעדכנו, לא ישוכפלו)', gcalExportAllDone:'✅ נשלחו {ok} אירועים ליומן גוגל.\nהתזכורות יגיעו מאפליקציית היומן — גם כשהאפליקציה סגורה.', gcalExportFailed:'נכשלו — התחבר מחדש ונסה שוב', gcalExported:'נוסף ליומן גוגל עם תזכורות!', icsExportHelp:'📅 הקובץ ירד.\nבאנדרואיד: פתח אותו מתיקיית ההורדות ובחר את אפליקציית היומן.\nלגוגל קלנדר: במחשב ← הגדרות ← ייבוא.', gcontactsExplain:'📇 האפליקציה תקרא (קריאה בלבד) את אנשי הקשר שלך בגוגל ותציג רק את מי שיש לו יום הולדת.\nשום דבר לא נשמר בלי שתאשר, ושום מידע לא נשלח לשרת שלנו.\n\nלהתחבר לגוגל?', gcontactsLoading:'טוען אנשי קשר מגוגל...', gcontactsNone:'לא נמצאו אנשי קשר עם יום הולדת בחשבון הגוגל.', gcontactsApiOff:'צריך להפעיל את People API בפרויקט של גוגל (פעם אחת, ע״י מפתח האפליקציה).', insightGiftSoon:'{name} {when} — עוד לא קנית מתנה!', navCalendar:'לוח שנה', navAI:'AI', screenCalendar:'📅 לוח שנה', calMonthEvents:'אירועים החודש', calMonthEmpty:'אין אירועים בחודש הזה', calMonthHolidays:'חגים החודש', deletedMsg:'🗑️ "{name}" נמחק', undoBtn:'בטל', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
     rightsTitle:'זכויות יוצרים',
     rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה {ver}<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
     welcomeTitle:'איך עובדים עם האפליקציה?',
@@ -1307,7 +1311,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Open the app from the website, not as a local file',
     backupReminderMsg:'💾 You haven\'t backed up your events in a while. Data is stored only on this device — if you clear your browser, it\'s all gone.\n\nBack up now?',
     aboutDiag:'🩺 Support report (troubleshooting)', diagCopyPrompt:'Copy the report? (to send to support)', diagCopied:'Report copied',
-    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', welcomeGotIt:'Got it, thanks', navHome:'Home', insightGiftSoon:'{name} {when} — you haven\'t bought a gift yet!', navCalendar:'Calendar', navAI:'AI', screenCalendar:'📅 Calendar', calMonthEvents:'Events this month', calMonthEmpty:'No events this month', calMonthHolidays:'Holidays this month', deletedMsg:'🗑️ "{name}" deleted', undoBtn:'Undo', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
+    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', welcomeGotIt:'Got it, thanks', navHome:'Home', dateModeGreg:'By Gregorian date', dateModeHeb:'By Hebrew date', afterSunset:'Happened after sunset (Hebrew date changes in the evening)', hebModeHint:'recalculated every year by the Hebrew calendar', hebModeShort:'by the Hebrew calendar', sectionPhoneCal:'Reminders in your phone calendar', menuExportAllG:'Send all to Google Calendar', menuExportAllGSub:'With reminders — works even when the app is closed', menuExportICS:'Download calendar file (ICS)', menuExportICSSub:'For any calendar: Samsung, Outlook, Apple', menuGContacts:'Birthdays from Google Contacts', menuGContactsSub:'Import with preview', gcalNeedConnect:'You need to connect to Google. Connect now?', gcalExportAllConfirm:'Send {n} events to Google Calendar with reminders?\n(Events already sent will be updated, not duplicated)', gcalExportAllDone:'✅ {ok} events sent to Google Calendar.\nReminders will come from your calendar app — even when this app is closed.', gcalExportFailed:'failed — reconnect and try again', gcalExported:'Added to Google Calendar with reminders!', icsExportHelp:'📅 File downloaded.\nAndroid: open it from Downloads and choose your calendar app.\nGoogle Calendar: on a computer ← Settings ← Import.', gcontactsExplain:'📇 The app will read (read-only) your Google contacts and show only those with a birthday.\nNothing is saved until you approve, and nothing is sent to our server.\n\nConnect to Google?', gcontactsLoading:'Loading Google contacts...', gcontactsNone:'No contacts with a birthday were found in the Google account.', gcontactsApiOff:'The People API must be enabled in the Google project (one-time, by the app developer).', insightGiftSoon:'{name} {when} — you haven\'t bought a gift yet!', navCalendar:'Calendar', navAI:'AI', screenCalendar:'📅 Calendar', calMonthEvents:'Events this month', calMonthEmpty:'No events this month', calMonthHolidays:'Holidays this month', deletedMsg:'🗑️ "{name}" deleted', undoBtn:'Undo', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
     rightsTitle:'Copyright',
     rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version {ver}<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
     welcomeTitle:'How does the app work?',
@@ -1372,7 +1376,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Откройте приложение с сайта, а не как локальный файл',
     backupReminderMsg:'💾 Вы давно не делали резервную копию. Данные хранятся только на этом устройстве — если очистить браузер, всё пропадёт.\n\nСоздать копию сейчас?',
     aboutDiag:'🩺 Отчёт поддержки (диагностика)', diagCopyPrompt:'Скопировать отчёт? (для отправки в поддержку)', diagCopied:'Отчёт скопирован',
-    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', welcomeGotIt:'Понятно, спасибо', navHome:'Главная', insightGiftSoon:'{name} {when} — вы ещё не купили подарок!', navCalendar:'Календарь', navAI:'AI', screenCalendar:'📅 Календарь', calMonthEvents:'События в этом месяце', calMonthEmpty:'В этом месяце нет событий', calMonthHolidays:'Праздники в этом месяце', deletedMsg:'🗑️ «{name}» удалено', undoBtn:'Отменить', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
+    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', welcomeGotIt:'Понятно, спасибо', navHome:'Главная', dateModeGreg:'По григорианской дате', dateModeHeb:'По еврейской дате', afterSunset:'Произошло после заката (еврейская дата меняется вечером)', hebModeHint:'пересчитывается каждый год по еврейскому календарю', hebModeShort:'по еврейскому календарю', sectionPhoneCal:'Напоминания в календаре телефона', menuExportAllG:'Отправить всё в Google Календарь', menuExportAllGSub:'С напоминаниями — работает даже когда приложение закрыто', menuExportICS:'Скачать файл календаря (ICS)', menuExportICSSub:'Для любого календаря: Samsung, Outlook, Apple', menuGContacts:'Дни рождения из контактов Google', menuGContactsSub:'Импорт с предпросмотром', gcalNeedConnect:'Нужно подключиться к Google. Подключиться сейчас?', gcalExportAllConfirm:'Отправить {n} событий в Google Календарь с напоминаниями?\n(Уже отправленные обновятся, без дублей)', gcalExportAllDone:'✅ Отправлено событий: {ok}.\nНапоминания придут из приложения календаря — даже когда это приложение закрыто.', gcalExportFailed:'не удалось — подключитесь заново и повторите', gcalExported:'Добавлено в Google Календарь с напоминаниями!', icsExportHelp:'📅 Файл скачан.\nAndroid: откройте его из Загрузок и выберите календарь.\nGoogle Календарь: на компьютере ← Настройки ← Импорт.', gcontactsExplain:'📇 Приложение прочитает (только чтение) ваши контакты Google и покажет только тех, у кого указан день рождения.\nНичего не сохраняется без вашего подтверждения, и ничего не отправляется на наш сервер.\n\nПодключиться к Google?', gcontactsLoading:'Загрузка контактов Google...', gcontactsNone:'В аккаунте Google не найдено контактов с днём рождения.', gcontactsApiOff:'Нужно включить People API в проекте Google (один раз, разработчиком приложения).', insightGiftSoon:'{name} {when} — вы ещё не купили подарок!', navCalendar:'Календарь', navAI:'AI', screenCalendar:'📅 Календарь', calMonthEvents:'События в этом месяце', calMonthEmpty:'В этом месяце нет событий', calMonthHolidays:'Праздники в этом месяце', deletedMsg:'🗑️ «{name}» удалено', undoBtn:'Отменить', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
     rightsTitle:'Авторские права',
     rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия {ver}<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
     welcomeTitle:'Как работает приложение?',
@@ -1442,7 +1446,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Abre la app desde el sitio web, no como archivo local',
     backupReminderMsg:'💾 Hace tiempo que no haces copia de tus eventos. Los datos se guardan solo en este dispositivo — si borras el navegador, se pierde todo.\n\n¿Hacer copia ahora?',
     aboutDiag:'🩺 Informe de soporte (solución de problemas)', diagCopyPrompt:'¿Copiar el informe? (para enviar a soporte)', diagCopied:'Informe copiado',
-    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', welcomeGotIt:'Entendido, gracias', navHome:'Inicio', insightGiftSoon:'{name} {when} — ¡aún no has comprado un regalo!', navCalendar:'Calendario', navAI:'IA', screenCalendar:'📅 Calendario', calMonthEvents:'Eventos del mes', calMonthEmpty:'No hay eventos este mes', calMonthHolidays:'Festivos del mes', deletedMsg:'🗑️ "{name}" eliminado', undoBtn:'Deshacer', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
+    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', welcomeGotIt:'Entendido, gracias', navHome:'Inicio', dateModeGreg:'Por fecha gregoriana', dateModeHeb:'Por fecha hebrea', afterSunset:'Ocurrió después del atardecer (la fecha hebrea cambia al anochecer)', hebModeHint:'se recalcula cada año según el calendario hebreo', hebModeShort:'según el calendario hebreo', sectionPhoneCal:'Recordatorios en el calendario del teléfono', menuExportAllG:'Enviar todo a Google Calendar', menuExportAllGSub:'Con recordatorios — funciona aunque la app esté cerrada', menuExportICS:'Descargar archivo de calendario (ICS)', menuExportICSSub:'Para cualquier calendario: Samsung, Outlook, Apple', menuGContacts:'Cumpleaños de Contactos de Google', menuGContactsSub:'Importar con vista previa', gcalNeedConnect:'Necesitas conectar con Google. ¿Conectar ahora?', gcalExportAllConfirm:'¿Enviar {n} eventos a Google Calendar con recordatorios?\n(Los ya enviados se actualizarán, sin duplicados)', gcalExportAllDone:'✅ Se enviaron {ok} eventos a Google Calendar.\nLos recordatorios llegarán desde tu app de calendario — aunque esta app esté cerrada.', gcalExportFailed:'fallaron — vuelve a conectar e inténtalo de nuevo', gcalExported:'¡Añadido a Google Calendar con recordatorios!', icsExportHelp:'📅 Archivo descargado.\nAndroid: ábrelo desde Descargas y elige tu app de calendario.\nGoogle Calendar: en un ordenador ← Configuración ← Importar.', gcontactsExplain:'📇 La app leerá (solo lectura) tus contactos de Google y mostrará solo quienes tienen cumpleaños.\nNada se guarda sin tu aprobación y nada se envía a nuestro servidor.\n\n¿Conectar con Google?', gcontactsLoading:'Cargando contactos de Google...', gcontactsNone:'No se encontraron contactos con cumpleaños en la cuenta de Google.', gcontactsApiOff:'Hay que activar People API en el proyecto de Google (una vez, el desarrollador de la app).', insightGiftSoon:'{name} {when} — ¡aún no has comprado un regalo!', navCalendar:'Calendario', navAI:'IA', screenCalendar:'📅 Calendario', calMonthEvents:'Eventos del mes', calMonthEmpty:'No hay eventos este mes', calMonthHolidays:'Festivos del mes', deletedMsg:'🗑️ "{name}" eliminado', undoBtn:'Deshacer', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
     rightsTitle:'Derechos de autor',
     rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión {ver}<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
     welcomeTitle:'¿Cómo funciona la app?',
@@ -1507,7 +1511,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'افتح التطبيق من الموقع، وليس كملف محلي',
     backupReminderMsg:'💾 لم تقم بنسخ مناسباتك منذ فترة. تُحفظ البيانات على هذا الجهاز فقط — إذا مسحت المتصفح، سيضيع كل شيء.\n\nنسخ احتياطي الآن؟',
     aboutDiag:'🩺 تقرير الدعم (حل المشاكل)', diagCopyPrompt:'نسخ التقرير؟ (لإرساله للدعم)', diagCopied:'تم نسخ التقرير',
-    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', welcomeGotIt:'فهمت، شكراً', navHome:'الرئيسية', insightGiftSoon:'{name} {when} — لم تشترِ هدية بعد!', navCalendar:'التقويم', navAI:'AI', screenCalendar:'📅 التقويم', calMonthEvents:'مناسبات هذا الشهر', calMonthEmpty:'لا توجد مناسبات هذا الشهر', calMonthHolidays:'أعياد هذا الشهر', deletedMsg:'🗑️ تم حذف "{name}"', undoBtn:'تراجع', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
+    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', welcomeGotIt:'فهمت، شكراً', navHome:'الرئيسية', dateModeGreg:'حسب التاريخ الميلادي', dateModeHeb:'حسب التاريخ العبري', afterSunset:'حدث بعد الغروب (التاريخ العبري يتغير مساءً)', hebModeHint:'يُعاد حسابه كل سنة حسب التقويم العبري', hebModeShort:'حسب التقويم العبري', sectionPhoneCal:'تذكيرات في تقويم الهاتف', menuExportAllG:'إرسال الكل إلى تقويم Google', menuExportAllGSub:'مع تذكيرات — يعمل حتى عندما يكون التطبيق مغلقاً', menuExportICS:'تنزيل ملف تقويم (ICS)', menuExportICSSub:'لأي تقويم: سامسونج، أوتلوك، آبل', menuGContacts:'أعياد الميلاد من جهات اتصال Google', menuGContactsSub:'استيراد مع معاينة', gcalNeedConnect:'يجب الاتصال بـ Google. الاتصال الآن؟', gcalExportAllConfirm:'إرسال {n} مناسبات إلى تقويم Google مع تذكيرات؟\n(المناسبات المرسلة سابقاً ستُحدَّث دون تكرار)', gcalExportAllDone:'✅ تم إرسال {ok} مناسبات إلى تقويم Google.\nستصل التذكيرات من تطبيق التقويم — حتى عندما يكون هذا التطبيق مغلقاً.', gcalExportFailed:'فشلت — أعد الاتصال وحاول مجدداً', gcalExported:'أُضيف إلى تقويم Google مع تذكيرات!', icsExportHelp:'📅 تم تنزيل الملف.\nأندرويد: افتحه من التنزيلات واختر تطبيق التقويم.\nتقويم Google: على الكمبيوتر ← الإعدادات ← استيراد.', gcontactsExplain:'📇 سيقرأ التطبيق (قراءة فقط) جهات اتصالك في Google ويعرض فقط من لديهم عيد ميلاد.\nلا يُحفظ شيء دون موافقتك، ولا يُرسل أي شيء إلى خادمنا.\n\nالاتصال بـ Google؟', gcontactsLoading:'جارٍ تحميل جهات اتصال Google...', gcontactsNone:'لم يتم العثور على جهات اتصال لديها عيد ميلاد في حساب Google.', gcontactsApiOff:'يجب تفعيل People API في مشروع Google (مرة واحدة، من قبل مطور التطبيق).', insightGiftSoon:'{name} {when} — لم تشترِ هدية بعد!', navCalendar:'التقويم', navAI:'AI', screenCalendar:'📅 التقويم', calMonthEvents:'مناسبات هذا الشهر', calMonthEmpty:'لا توجد مناسبات هذا الشهر', calMonthHolidays:'أعياد هذا الشهر', deletedMsg:'🗑️ تم حذف "{name}"', undoBtn:'تراجع', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
     rightsTitle:'حقوق النشر',
     rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار {ver}<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
     welcomeTitle:'كيف يعمل التطبيق؟',
@@ -2273,6 +2277,9 @@ const SCREEN_RENDERERS = {
         <div><div style="font-size:13px;font-weight:500;">${lang.importGoogle||'גוגל קלנדר'}</div>
         <div style="font-size:11px;color:var(--muted);">${lang.importGoogleSub||'ייבוא ICS מגוגל'}</div></div></div>
       <div class="section-lbl" style="margin-top:10px;">${lang.sectionContacts||'אנשי קשר'}</div>
+      <div class="import-option" onclick="importGoogleContacts()"><span style="font-size:22px;">📇</span>
+        <div><div style="font-size:13px;font-weight:500;">${lang.menuGContacts||'ימי הולדת מאנשי קשר בגוגל'}</div>
+        <div style="font-size:11px;color:var(--muted);">${lang.menuGContactsSub||'ייבוא עם תצוגה מקדימה'}</div></div></div>
       <div class="import-option" onclick="document.getElementById('vcf-input2').click()"><span style="font-size:22px;">📱</span>
         <div><div style="font-size:13px;font-weight:500;">${lang.importPhone||'מהטלפון'}</div>
         <div style="font-size:11px;color:var(--muted);">${lang.importPhoneSub||'ייבוא ישיר'}</div></div></div>
@@ -2320,7 +2327,8 @@ const SCREEN_RENDERERS = {
             <div style="font-size:13px;font-weight:500;color:#34d399;">${lang.gcalConnected||'\u05de\u05d7\u05d5\u05d1\u05e8 \u05dc\u05d2\u05d5\u05d2\u05dc \u05e7\u05dc\u05e0\u05d3\u05e8'} \u2713</div>
           </div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">${email}</div>
-          <button class="btn-primary" onclick="syncGoogleCalendar()" id="btn-gcal-sync" style="margin-bottom:8px;">
+          <button class="btn-primary" onclick="exportAllToGoogle()" style="margin-bottom:8px;">📤 ${lang.menuExportAllG||'שלח הכל ליומן גוגל'}</button>
+          <button class="btn-secondary" onclick="syncGoogleCalendar()" id="btn-gcal-sync" style="margin-bottom:8px;">
             \u{1F504} ${lang.gcalSync||'\u05e1\u05e0\u05db\u05e8\u05df \u05e2\u05db\u05e9\u05d9\u05d5'}
           </button>
           <button class="btn-ghost" onclick="removeHolidayEvents()" style="font-size:11px;margin-bottom:4px;color:var(--amber);">🗑️ הסר חגים שיובאו בטעות</button>
@@ -2373,7 +2381,11 @@ const SCREEN_RENDERERS = {
     const gcalConnected = !!localStorage.getItem('gcal_access_token') && parseInt(localStorage.getItem('gcal_token_expiry')||'0') > Date.now();
     return TB(lang.screenBackupImport||'ייבוא, גיבוי והדפסה', 'screen-settings') + `
     <div style="padding:12px 0;">
-      <div class="section-lbl">📥 ${lang.sectionImport||'ייבוא'}</div>
+      <div class="section-lbl">🔔 ${lang.sectionPhoneCal||'תזכורות ביומן הטלפון'}</div>
+      ${MI('📤', lang.menuExportAllG||'שלח הכל ליומן גוגל', lang.menuExportAllGSub||'עם תזכורות — עובד גם כשהאפליקציה סגורה', 'exportAllToGoogle()')}
+      ${MI('📅', lang.menuExportICS||'הורד קובץ יומן (ICS)', lang.menuExportICSSub||'לכל יומן: סמסונג, אאוטלוק, אפל', 'exportICS()')}
+      <div class="section-lbl" style="margin-top:10px;">📥 ${lang.sectionImport||'ייבוא'}</div>
+      ${MI('📇', lang.menuGContacts||'ימי הולדת מאנשי קשר בגוגל', lang.menuGContactsSub||'ייבוא עם תצוגה מקדימה', 'importGoogleContacts()')}
       ${MI('🔄', (gcalConnected ? '✅ ' : '') + (lang.menuGcalSync||'סנכרון גוגל קלנדר'), lang.menuGcalSyncSub||'ייבוא + ייצוא אוטומטי', "openScreen('screen-google-cal')", !gcalConnected)}
       ${MI('📅', lang.menuImport||'ייבוא קובץ ICS', lang.menuImportSub||'גוגל, אפל, אאוטלוק', "openScreen('screen-import')")}
       <div class="section-lbl" style="margin-top:10px;">💾 ${lang.sectionBackup||'גיבוי נתונים'}</div>
@@ -2671,7 +2683,17 @@ Object.assign(SCREEN_RENDERERS, {
       </div>
       <div class="form-group">
         <label class="form-label">${lang.labelDate||'תאריך'} *</label>
-        <input class="form-input" id="inp-date" type="date">
+        <input class="form-input" id="inp-date" type="date" oninput="updateHebPreview()" onchange="updateHebPreview()">
+        <input type="hidden" id="inp-date-mode" value="greg">
+        <div id="date-mode-row" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
+          <div class="chip active" data-mode="greg" onclick="setDateMode('greg')">📆 ${lang.dateModeGreg||'לפי תאריך לועזי'}</div>
+          <div class="chip" data-mode="hebrew" onclick="setDateMode('hebrew')">✡️ ${lang.dateModeHeb||'לפי תאריך עברי'}</div>
+        </div>
+        <label id="sunset-row" style="display:none;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted);cursor:pointer;">
+          <input type="checkbox" id="inp-after-sunset" onchange="updateHebPreview()" style="width:18px;height:18px;accent-color:var(--accent);">
+          🌇 ${lang.afterSunset||'קרה אחרי השקיעה (התאריך העברי מתחלף בערב)'}
+        </label>
+        <div id="heb-date-preview" style="font-size:12px;color:var(--acc-light);margin-top:6px;min-height:16px;"></div>
       </div>
       <div class="form-group">
         <label class="form-label">${lang.labelType||'סוג האירוע'}</label>
@@ -2850,7 +2872,7 @@ function getLabel(type,custom){const lang=LANGUAGES[currentLang]||LANGUAGES['he'
 function avatarColor(name){const i=((name||'A').charCodeAt(0)-65)%AVATAR_COLORS.length;return AVATAR_COLORS[Math.max(0,i)];}
 function avatarHTML(ev,size){const cls='avatar '+(size||'av-sm');if(ev.photo&&ev.photo.startsWith('data:'))return'<div class="'+cls+'"><img src="'+ev.photo+'"></div>';if(ev.emoji){const[bg]=avatarColor(ev.name);const fs=size==='av-lg'?'24px':size==='av-md'?'20px':'16px';return'<div class="'+cls+'" style="background:'+bg+';font-size:'+fs+';">'+ev.emoji+'</div>';}const[bg,fg]=avatarColor(ev.name);return'<div class="'+cls+'" style="background:'+bg+';color:'+fg+';">'+(ev.name||'?')[0].toUpperCase()+'</div>';}
 function getRecurrence(ev){if(typeof ev==='string')return YEARLY.includes(ev)?'yearly':'once';if(ev.recurrence)return ev.recurrence;return YEARLY.includes(ev.type)?'yearly':'once';}
-function calcDays(ev){if(!ev.date)return{daysLeft:null,isOver:false};const today=new Date();today.setHours(0,0,0,0);const parts=ev.date.split('-');const evYear=parseInt(parts[0]),evMonth=parseInt(parts[1])-1,evDay=parseInt(parts[2]);if(getRecurrence(ev)==='yearly'){let next=new Date(today.getFullYear(),evMonth,evDay);if(next<today)next.setFullYear(today.getFullYear()+1);return{daysLeft:Math.round((next-today)/86400000),isOver:false,nextDate:next};}const d=new Date(evYear,evMonth,evDay);const diff=Math.round((d-today)/86400000);return{daysLeft:diff>=0?diff:null,isOver:diff<0};}
+function calcDays(ev){if(!ev.date)return{daysLeft:null,isOver:false};const today=new Date();today.setHours(0,0,0,0);if(getRecurrence(ev)==='yearly'){const next=nextOccurrence(ev,today,false);if(!next)return{daysLeft:null,isOver:false};return{daysLeft:Math.round((next-today)/86400000),isOver:false,nextDate:next};}const d=parseYMD(ev.date);const diff=Math.round((d-today)/86400000);return{daysLeft:diff>=0?diff:null,isOver:diff<0};}
 function countdownHTML(daysLeft,isOver){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];if(isOver||daysLeft===null)return'<span class="cd-far">'+lang.passed+'</span>';if(daysLeft===0)return'<span class="cd-today">🎉 '+lang.today+'</span>';if(daysLeft===1)return'<span class="cd-today">🔥 '+lang.tomorrow+'</span>';const txt=lang.inDays.replace('{n}',daysLeft);if(daysLeft<=7)return'<span class="cd-soon">⚡ '+txt+'</span>';if(daysLeft<=30)return'<span class="cd-normal">📅 '+txt+'</span>';return'<span class="cd-far">📅 '+txt+'</span>';}
 function urgencyBadge(daysLeft,isOver){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];if(isOver||daysLeft===null)return'<span class="badge badge-gray">'+lang.passed+'</span>';if(daysLeft===0)return'<span class="badge badge-red badge-urgent">'+lang.today+'</span>';if(daysLeft===1)return'<span class="badge badge-red badge-urgent">'+lang.tomorrow+'</span>';if(daysLeft<=7)return'<span class="badge badge-amber">'+daysLeft+' '+lang.daysLeft+'</span>';if(daysLeft<=30)return'<span class="badge badge-purple">'+daysLeft+' '+lang.daysLeft+'</span>';return'<span class="badge badge-gray">'+daysLeft+' '+lang.daysLeft+'</span>';}
 function buildGreeting(ev){const type=ev.type||'custom';let variants;if(type==='birthday'){const gender=ev.gender||'male';variants=gender==='female'?(greetings['birthday_female']||greetings['birthday']):(greetings['birthday_male']||greetings['birthday']);}else{variants=greetings[type]||greetings.custom;}if(!variants||!variants.length){const fb=LANGUAGES['he'].greetings;variants=fb[type]||fb.custom||['מזל טוב! 🎉'];}const idx=greetVariants[ev.id]||0;const text=variants[idx%variants.length]||variants[0]||'🎉';return escapeHtml(text.replace(/{name}/g,ev.name||''));}
@@ -2934,7 +2956,7 @@ function renderMain(){
   const _ta = document.getElementById('tb-add');
   if(_ta) _ta.textContent = _lang.btnAdd;const today=new Date();if(calYear===undefined){calYear=today.getFullYear();calMonth=today.getMonth();}const enriched=events.map(ev=>({...ev,...calcDays(ev)}));const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const statsEl=document.getElementById('main-stats');if(settings.showStats){const u30=enriched.filter(e=>e.daysLeft!==null&&e.daysLeft<=30).length;const budgetTotal=events.reduce((s,e)=>s+(parseInt(e.budget)||0),0);statsEl.style.display='';statsEl.innerHTML='<div class="stat-card"><div class="stat-num">'+u30+'</div><div class="stat-label">'+(lang.statsEvents30||'אירועים ב-30 יום')+'</div></div>'+(settings.showBudget?'<div class="stat-card"><div class="stat-num green">'+budgetTotal+'₪</div><div class="stat-label">'+(lang.statsBudget||'תקציב מתנות')+'</div></div>':'<div class="stat-card"><div class="stat-num">'+events.length+'</div><div class="stat-label">'+(lang.statsTotal||'סה"כ')+'</div></div>');}else statsEl.style.display='none';const heroEl=document.getElementById('main-hero');if(settings.showHero){heroEl.style.display='';renderHero(enriched);}else heroEl.style.display='none';renderInsights(enriched);renderFilterBar();renderGroupFilters(enriched);renderEventsList(enriched);const todayEvs=enriched.filter(e=>e.daysLeft===0);if(todayEvs.length){const _tk=new Date().toDateString()+'|'+todayEvs.map(e=>e.id).join(',');if(localStorage.getItem('ls2_today_shown')!==_tk){localStorage.setItem('ls2_today_shown',_tk);setTimeout(()=>{triggerConfetti();showTodayModal(todayEvs);},1000);}}}
 
-function renderCalendar(enriched){if(!document.getElementById('main-calendar'))return;const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const months=lang.calMonths;const dayNames=lang.calDays;const today=new Date();const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();const evDays={};enriched.forEach(ev=>{if(!ev.date)return;const d=new Date(ev.date);let y=d.getFullYear(),m=d.getMonth(),day=d.getDate();if(getRecurrence(ev)==='yearly')y=calYear;if(y===calYear&&m===calMonth){if(!evDays[day])evDays[day]=[];evDays[day].push(ev);}});const todayDay=today.getFullYear()===calYear&&today.getMonth()===calMonth?today.getDate():-1;let grid='';for(let i=0;i<first;i++)grid+='<div class="cal-day"></div>';for(let d=1;d<=days;d++){const isToday=d===todayDay;const hasEv=evDays[d];const isUrgent=hasEv&&hasEv.some(e=>e.daysLeft!==null&&e.daysLeft<=7);let cls='cal-day';if(isToday&&events.length===0)cls+=' welcome-day';else if(isToday)cls+=' today';if(hasEv)cls+=' has-event';if(isUrgent)cls+=' urgent';const _cds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+function renderCalendar(enriched){if(!document.getElementById('main-calendar'))return;const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const months=lang.calMonths;const dayNames=lang.calDays;const today=new Date();const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();const evDays={};enriched.forEach(ev=>{evDaysInMonth(ev,calYear,calMonth).forEach(day=>{if(!evDays[day])evDays[day]=[];evDays[day].push(ev);});});const todayDay=today.getFullYear()===calYear&&today.getMonth()===calMonth?today.getDate():-1;let grid='';for(let i=0;i<first;i++)grid+='<div class="cal-day"></div>';for(let d=1;d<=days;d++){const isToday=d===todayDay;const hasEv=evDays[d];const isUrgent=hasEv&&hasEv.some(e=>e.daysLeft!==null&&e.daysLeft<=7);let cls='cal-day';if(isToday&&events.length===0)cls+=' welcome-day';else if(isToday)cls+=' today';if(hasEv)cls+=' has-event';if(isUrgent)cls+=' urgent';const _cds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       const _chs=isHolidayDate(_cds);
       const _chdots=_chs.length>0?'<div style="display:flex;gap:2px;justify-content:center;margin-top:1px;">'+_chs.slice(0,3).map(h=>'<div style="width:5px;height:5px;border-radius:50%;background:'+h.color+';" title="'+h.name+'"></div>').join('')+'</div>':'';
       grid+='<div class="'+cls+'" onclick="onCalDay('+d+','+calMonth+','+calYear+')">'+d+_chdots+'</div>';}document.getElementById('main-calendar').innerHTML='<div class="cal-wrap"><div class="cal-header"><span class="cal-nav" onclick="changeMonth(1)">›</span><span>'+months[calMonth]+' '+calYear+'</span><span class="cal-nav" onclick="changeMonth(-1)">‹</span></div><div class="cal-days-header">'+dayNames.map(d=>'<div class="cal-day-name">'+d+'</div>').join('')+'</div><div class="cal-grid">'+grid+'</div></div>';renderCalMonthList(evDays);}
@@ -3033,6 +3055,246 @@ function undoDelete(){
 })();
 
 // ================================================================
+// ===== שלב 3א: תאריך עברי — מופעים לכל שנה (עם מטמון) =====
+// ================================================================
+const _HEB_FMT_HE=new Intl.DateTimeFormat('he-u-ca-hebrew',{day:'numeric',month:'long'});
+function parseYMD(s){ const p=String(s||'').split('-'); return new Date(+p[0],(+p[1]||1)-1,+p[2]||1); }
+function ymdOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function hebDayLetters(n){
+  if(n===15) return 'ט״ו'; if(n===16) return 'ט״ז';
+  const ones=['','א','ב','ג','ד','ה','ו','ז','ח','ט'], tens=['','י','כ','ל'];
+  const s=tens[Math.floor(n/10)]+ones[n%10];
+  return s.length>1 ? s.slice(0,-1)+'״'+s.slice(-1) : s+'׳';
+}
+function hebBaseDate(ev){ const d=parseYMD(ev.date); if(ev.afterSunset) d.setDate(d.getDate()+1); return d; }
+function hebLabelOfDate(d){ return _HEB_FMT_HE.format(d).replace(/^\d+/,n=>hebDayLetters(+n)); }
+function hebLabel(ev){ return ev&&ev.date ? hebLabelOfDate(hebBaseDate(ev)) : ''; }
+function isHebrewEvent(ev){ return ev&&ev.dateMode==='hebrew'&&getRecurrence(ev)==='yearly'; }
+// כל המופעים (Date) של האירוע בשנה לועזית נתונה
+function occurrencesInYear(ev, year){
+  if(!ev||!ev.date) return [];
+  if(isHebrewEvent(ev)){
+    const h=_hebParts(hebBaseDate(ev)); let m=h.month; let d=parseInt(h.day);
+    _hebMapForYear(year); const multi=_HMULTI_CACHE[year]||{};
+    const tryKey=(mm,dd)=>multi[mm+'-'+dd];
+    let hits=tryKey(m,d);
+    if(!hits&&m==='Adar') hits=tryKey('Adar II',d)||tryKey('Adar II',Math.min(d,29));
+    if(!hits&&(m==='Adar I'||m==='Adar II')) hits=tryKey('Adar',d)||tryKey('Adar',29);
+    if(!hits&&d===30) hits=tryKey(m,29);   // חשוון/כסלו חסרים — ל׳ הופך ל-כ״ט
+    return (hits||[]).map(parseYMD);
+  }
+  const p=ev.date.split('-'); const mo=+p[1]-1, da=+p[2];
+  let dt=new Date(year,mo,da);
+  if(dt.getMonth()!==mo) dt=new Date(year,mo,28); // 29 בפברואר בשנה רגילה → 28
+  return [dt];
+}
+// ימים בחודש (לתצוגת לוח) שבהם האירוע חל
+function evDaysInMonth(ev, year, month){
+  if(!ev||!ev.date) return [];
+  if(getRecurrence(ev)==='yearly') return occurrencesInYear(ev,year).filter(d=>d.getMonth()===month).map(d=>d.getDate());
+  const d=parseYMD(ev.date);
+  return (d.getFullYear()===year&&d.getMonth()===month) ? [d.getDate()] : [];
+}
+// המופע הבא (מהיום, כולל היום אם strict=false)
+function nextOccurrence(ev, from, strict){
+  const f=new Date(from); f.setHours(0,0,0,0);
+  const all=[...occurrencesInYear(ev,f.getFullYear()),...occurrencesInYear(ev,f.getFullYear()+1)];
+  return all.find(d=> strict ? d>f : d>=f) || null;
+}
+
+// ================================================================
+// ===== שלב 3ב: ייצוא ליומן — תזכורות שעובדות גם כשהאפליקציה סגורה =====
+// ================================================================
+function _gcalValid(){ return !!localStorage.getItem('gcal_access_token') && parseInt(localStorage.getItem('gcal_token_expiry')||'0')>Date.now(); }
+function gcalReminderMinutes(){
+  // אירוע של יום שלם מתחיל ב-00:00 — "יום לפני ב-09:00" = 15 שעות לפני
+  const [hh,mm]=notifTimeOfDay(); const at=(24*60)-(hh*60+mm);
+  const out=[];
+  if(settings.notifDayBefore!==false) out.push(at);
+  if(settings.notifWeekBefore) out.push(6*1440+at);
+  if(settings.giftReminder){ const g=Math.min(28,Math.max(2,settings.giftReminderDays||14)); out.push((g-1)*1440+at); }
+  out.push(0); // ביום עצמו בחצות
+  return [...new Set(out)].filter(x=>x>=0&&x<=40320).slice(0,5);
+}
+function eventSummary(ev){ return ev.name+' — '+getLabel(ev.type,ev.customType).replace(/<[^>]*>/g,'').replace(/&[a-z#0-9]+;/gi,''); }
+function eventDescription(ev){
+  return [ev.notes||'', ev.phone?'📱 '+ev.phone:'', ev.giftIdea?'🎁 '+ev.giftIdea:'', isHebrewEvent(ev)?'✡️ '+hebLabel(ev):'', 'לא שכחתי 🔔'].filter(Boolean).join('\n');
+}
+// תאריכים עבריים: רשימת מופעים ל-15 שנה (RDATE), כי חזרה שנתית רגילה לא מתאימה ללוח העברי
+function hebrewRdates(ev){
+  const y=new Date().getFullYear(); const out=[];
+  for(let i=0;i<15;i++) occurrencesInYear(ev,y+i).forEach(d=>out.push(d));
+  return out;
+}
+function buildGcalBody(ev){
+  const yearly=getRecurrence(ev)==='yearly';
+  let start = yearly ? (isHebrewEvent(ev) ? (hebrewRdates(ev)[0]||parseYMD(ev.date)) : parseYMD(ev.date)) : parseYMD(ev.date);
+  const end=new Date(start); end.setDate(end.getDate()+1);  // ביום שלם — סוף הוא היום הבא
+  const body={
+    summary:eventSummary(ev), description:eventDescription(ev),
+    start:{date:ymdOf(start)}, end:{date:ymdOf(end)},
+    reminders:{useDefault:false,overrides:gcalReminderMinutes().map(m=>({method:'popup',minutes:m}))},
+    extendedProperties:{private:{lsId:String(ev.id)}},
+    transparency:'transparent'
+  };
+  if(yearly){
+    if(isHebrewEvent(ev)){
+      const r=hebrewRdates(ev).slice(1).map(d=>ymdOf(d).replace(/-/g,''));
+      if(r.length) body.recurrence=['RDATE;VALUE=DATE:'+r.join(',')];
+    }else body.recurrence=['RRULE:FREQ=YEARLY'];
+  }
+  return body;
+}
+async function gcalUpsert(ev, token){
+  const base='https://www.googleapis.com/calendar/v3/calendars/primary/events';
+  const headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'};
+  const body=JSON.stringify(buildGcalBody(ev));
+  if(ev.googleEventId){
+    const r=await fetch(base+'/'+encodeURIComponent(ev.googleEventId),{method:'PUT',headers,body});
+    if(r.ok) return (await r.json()).id;
+    if(r.status===401) throw new Error('auth');
+    // נמחק בגוגל (404/410) — ניצור מחדש
+  }
+  const r=await fetch(base,{method:'POST',headers,body});
+  if(r.status===401) throw new Error('auth');
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return (await r.json()).id;
+}
+async function exportEventToGoogle(id){
+  id=parseInt(id)||id;
+  const ev=events.find(e=>e.id===id); if(!ev) return;
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  if(!_gcalValid()){ addToAndroidCalendar(id); return; }
+  try{
+    ev.googleEventId=await gcalUpsert(ev, localStorage.getItem('gcal_access_token')); saveEvents();
+    showBanner('✅ '+(lang.gcalExported||'נוסף לגוגל קלנדר!'));
+  }catch(e){ addToAndroidCalendar(id); }
+}
+async function exportAllToGoogle(){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  if(!_gcalValid()){
+    if(confirm(lang.gcalNeedConnect||'צריך להתחבר לגוגל קלנדר. להתחבר עכשיו?')){ localStorage.setItem('gcal_pending_action','exportAll'); connectGoogle(); }
+    return;
+  }
+  const list=events.filter(e=>e.date);
+  if(!list.length){ showBanner(lang.noEvents||'אין אירועים'); return; }
+  if(!confirm((lang.gcalExportAllConfirm||'לשלוח {n} אירועים ליומן גוגל, עם תזכורות?').replace('{n}',list.length))) return;
+  const token=localStorage.getItem('gcal_access_token');
+  let ok=0, fail=0;
+  for(let i=0;i<list.length;i++){
+    showBanner('⏳ '+(i+1)+'/'+list.length);
+    try{ list[i].googleEventId=await gcalUpsert(list[i],token); ok++; }
+    catch(e){ if(e.message==='auth'){ fail+=list.length-i; break; } fail++; }
+  }
+  saveEvents();
+  alert((lang.gcalExportAllDone||'✅ נשלחו {ok} אירועים ליומן גוגל.\nהתזכורות יגיעו מאפליקציית היומן — גם כשהאפליקציה סגורה.').replace('{ok}',ok)+(fail?'\n⚠️ '+fail+' '+(lang.gcalExportFailed||'נכשלו — התחבר מחדש ונסה שוב'):''));
+}
+// קובץ ICS — לכל יומן (גוגל במחשב, סמסונג, אאוטלוק, אפל)
+function _icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n'); }
+function _icsFold(line){ const out=[]; let s=line; while(s.length>73){ out.push(s.slice(0,73)); s=' '+s.slice(73);} out.push(s); return out.join('\r\n'); }
+function exportICS(){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const list=events.filter(e=>e.date);
+  if(!list.length){ showBanner(lang.noEvents||'אין אירועים'); return; }
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
+  const ICS=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//AppNest//Lo Shachachti//HE','CALSCALE:GREGORIAN','X-WR-CALNAME:לא שכחתי'];
+  list.forEach(ev=>{
+    const b=buildGcalBody(ev);
+    ICS.push('BEGIN:VEVENT','UID:ls-'+ev.id+'@lo-shachachti.pages.dev','DTSTAMP:'+stamp,
+      'DTSTART;VALUE=DATE:'+b.start.date.replace(/-/g,''),'DTEND;VALUE=DATE:'+b.end.date.replace(/-/g,''),
+      'SUMMARY:'+_icsEsc(b.summary),'DESCRIPTION:'+_icsEsc(b.description),'TRANSP:TRANSPARENT');
+    (b.recurrence||[]).forEach(r=>ICS.push(r));
+    b.reminders.overrides.forEach(o=>ICS.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+_icsEsc(b.summary),'TRIGGER:-PT'+o.minutes+'M','END:VALARM'));
+    ICS.push('END:VEVENT');
+  });
+  ICS.push('END:VCALENDAR');
+  const blob=new Blob([ICS.map(_icsFold).join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='lo-shachachti-'+ymdOf(new Date())+'.ics'; a.click();
+  setTimeout(()=>alert(lang.icsExportHelp||'📅 הקובץ ירד.\nאנדרואיד: פתח אותו מתיקיית ההורדות ובחר את אפליקציית היומן.\nגוגל קלנדר: במחשב ← הגדרות ← ייבוא.'),400);
+}
+
+// ================================================================
+// ===== שלב 3ג: ימי הולדת מאנשי הקשר בגוגל (People API, קריאה בלבד) =====
+// ================================================================
+const GCONTACTS_SCOPE='https://www.googleapis.com/auth/contacts.readonly';
+function connectGoogleWith(extraScope, pendingAction){
+  const clientId=GCAL_DEFAULT_CLIENT_ID;
+  localStorage.setItem(GCAL_CLIENT_ID_KEY, clientId);
+  localStorage.setItem('gcal_return_screen', pendingAction==='contacts'?'screen-backup':'screen-google-cal');
+  if(pendingAction) localStorage.setItem('gcal_pending_action', pendingAction);
+  const redirectUri=window.location.origin+window.location.pathname;
+  window.location.href='https://accounts.google.com/o/oauth2/v2/auth?client_id='+encodeURIComponent(clientId)+
+    '&redirect_uri='+encodeURIComponent(redirectUri)+'&response_type=token'+
+    '&scope='+encodeURIComponent(GCAL_SCOPES+(extraScope?' '+extraScope:''))+'&include_granted_scopes=true&prompt=consent';
+}
+async function importGoogleContacts(){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const scopes=localStorage.getItem('gcal_scopes')||'';
+  if(!_gcalValid()||!scopes.includes('contacts.readonly')){
+    if(confirm(lang.gcontactsExplain||'📇 האפליקציה תקרא (קריאה בלבד) את אנשי הקשר שלך בגוגל ותציג רק את מי שיש לו יום הולדת. שום דבר לא נשמר בלי שתאשר, ושום מידע לא נשלח לשרת שלנו.\n\nלהתחבר לגוגל?')){
+      connectGoogleWith(GCONTACTS_SCOPE,'contacts');
+    }
+    return;
+  }
+  const token=localStorage.getItem('gcal_access_token');
+  showBanner('⏳ '+(lang.gcontactsLoading||'טוען אנשי קשר מגוגל...'));
+  try{
+    let people=[], pageToken='';
+    for(let guard=0;guard<20;guard++){
+      const url='https://people.googleapis.com/v1/people/me/connections?personFields=names,birthdays,phoneNumbers,emailAddresses&pageSize=1000'+(pageToken?'&pageToken='+encodeURIComponent(pageToken):'');
+      const r=await fetch(url,{headers:{'Authorization':'Bearer '+token}});
+      if(r.status===401||r.status===403){ const t=await r.text(); throw new Error(r.status===403&&/has not been used|disabled/i.test(t)?'api':'auth'); }
+      const data=await r.json();
+      people=people.concat(data.connections||[]);
+      if(!data.nextPageToken) break; pageToken=data.nextPageToken;
+    }
+    const list=[];
+    people.forEach(p=>{
+      const name=((p.names||[])[0]||{}).displayName||''; if(!name) return;
+      const bd=(p.birthdays||[]).map(b=>b.date).find(d=>d&&d.month&&d.day);
+      if(!bd) return;
+      const year=bd.year||2000;
+      const birthday=year+'-'+String(bd.month).padStart(2,'0')+'-'+String(bd.day).padStart(2,'0');
+      const phone=(((p.phoneNumbers||[])[0]||{}).value||'').replace(/[^\d+]/g,'');
+      const email=((p.emailAddresses||[])[0]||{}).value||'';
+      const norm=s=>String(s||'').replace(/\D/g,'').slice(-9);
+      const exists=events.some(ev=>ev.googleContactId===p.resourceName||(ev.name===name)||(phone&&ev.phone&&norm(ev.phone)===norm(phone)));
+      list.push({name,phone,email,birthday,noYear:!bd.year,googleContactId:p.resourceName,selected:!exists,alreadyExists:exists});
+    });
+    if(!list.length){ alert(lang.gcontactsNone||'לא נמצאו אנשי קשר עם יום הולדת בחשבון הגוגל.'); return; }
+    list.sort((a,b)=>a.name.localeCompare(b.name,'he'));
+    _vcfContacts=list; _vcfFields={phone:true,email:true,birthday:true};
+    showVCFPreview();
+  }catch(e){
+    if(e.message==='api') alert(lang.gcontactsApiOff||'צריך להפעיל את People API בפרויקט של גוגל (פעם אחת, ע״י מפתח האפליקציה).');
+    else if(e.message==='auth'){ if(confirm(lang.gcalNeedConnect||'צריך להתחבר מחדש לגוגל. להתחבר עכשיו?')) connectGoogleWith(GCONTACTS_SCOPE,'contacts'); }
+    else alert('❌ '+(e.message||'שגיאה'));
+  }
+}
+
+// ================================================================
+// ===== טופס: לועזי / עברי + "נולד אחרי השקיעה" =====
+// ================================================================
+function setDateMode(mode){
+  const inp=document.getElementById('inp-date-mode'); if(!inp) return;
+  inp.value=mode;
+  document.querySelectorAll('#date-mode-row .chip').forEach(c=>c.classList.toggle('active',c.getAttribute('data-mode')===mode));
+  const ss=document.getElementById('sunset-row'); if(ss) ss.style.display=mode==='hebrew'?'flex':'none';
+  updateHebPreview();
+}
+function updateHebPreview(){
+  const el=document.getElementById('heb-date-preview'); if(!el) return;
+  const date=(document.getElementById('inp-date')||{}).value;
+  if(!date){ el.textContent=''; return; }
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const sunset=!!(document.getElementById('inp-after-sunset')||{}).checked;
+  const mode=(document.getElementById('inp-date-mode')||{}).value||'greg';
+  const lbl=hebLabel({date,afterSunset:mode==='hebrew'&&sunset});
+  el.textContent='✡️ '+lbl+(mode==='hebrew'?' — '+(lang.hebModeHint||'יחושב מחדש כל שנה לפי הלוח העברי'):'');
+}
+
+// ================================================================
 // ===== SWIPE NAVIGATION (calendar months + settings carousel) =====
 // ================================================================
 const SETTINGS_CAROUSEL=['screen-contacts','screen-user-settings','screen-system-settings','screen-budget-settings','screen-backup','screen-stores','screen-guide','screen-appearance'];
@@ -3071,7 +3333,7 @@ function onCalDay(d,m,y){
   if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear()&&events.length===0){openModal('modal-welcome-guide');return;}
   const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
   const dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  const dayEvents=events.filter(ev=>{if(!ev.date)return false;const ed=new Date(ev.date);const ey=getRecurrence(ev)==='yearly'?y:ed.getFullYear();return ey===y&&ed.getMonth()===m&&ed.getDate()===d;});
+  const dayEvents=events.filter(ev=>evDaysInMonth(ev,y,m).includes(d));
   const dayHols=isHolidayDate(dateStr);
   // פתח popup אם יש אירועים או חגים
   if(!dayEvents.length && !dayHols.length) return;
@@ -3175,7 +3437,7 @@ function renderGroupFilters(enriched){
 function setGroupFilter(g){activeGroupFilter=g;const enriched=events.map(ev=>({...ev,...calcDays(ev)}));renderGroupFilters(enriched);renderEventsList(enriched);}
 function renderEventsList(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];let list=[...enriched];if(activeGroupFilter)list=list.filter(e=>e.group===activeGroupFilter);const filter=settings.defaultFilter||'30';if(filter==='30')list=list.filter(e=>e.daysLeft!==null&&e.daysLeft<=30);else if(filter==='future')list=list.filter(e=>!e.isOver&&e.daysLeft!==null);else if(filter==='past')list=list.filter(e=>e.isOver);const sortBy=settings.defaultSort||'date';if(sortBy==='name')list.sort((a,b)=>(a.name||'').localeCompare(b.name||''));else if(sortBy==='group')list.sort((a,b)=>(a.group||'').localeCompare(b.group||''));else list.sort((a,b)=>{if(a.daysLeft===null&&b.daysLeft===null)return 0;if(a.daysLeft===null)return 1;if(b.daysLeft===null)return -1;return a.daysLeft-b.daysLeft;});const el=document.getElementById('main-events-list');if(!list.length){if(!events.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">'+(lang.noEvents||'עדיין אין אירועים')+'</div><button class="btn-secondary" style="max-width:220px;margin:0 auto 8px;" onclick="openModal(\'modal-welcome-guide\')">📖 מדריך</button><button class="btn-primary" style="max-width:220px;margin:0 auto;" onclick="openAddForm()">'+lang.btnAdd+'</button></div>';}else{el.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);">'+(lang.noEventsRange||'לא נמצאו')+'</div>';}return;}el.innerHTML=list.map(ev=>buildCard(ev)).join('');}
 
-function buildCard(ev){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const storeLinks=ev.giftIdea?(settings.activeStores||['Amazon','KSP','זאפ']).map(s=>'<a href="https://www.google.com/search?q='+encodeURIComponent(ev.giftIdea+' '+s)+'" target="_blank" class="store-link">🔍 '+s+'</a>').join(''):'';const giftHtml=(ev.giftIdea||ev.budget)?('<div class="gift-box"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:11px;color:var(--green);">🎁 '+esc(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+'</span><button onclick="event.stopPropagation();toggleGift('+ev.id+')" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:3px 9px;border-radius:var(--rf);font-size:11px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>'):'';const myGreetText=myGreetings.find(g=>g)?escapeHtml(myGreetings.find(g=>g).replace(/{name}/g,ev.name||'')):lang.greetFree;return'<div class="event-card new-card" id="card-'+ev.id+'"><div class="event-card-main"><div onclick="openDetail('+ev.id+')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;">'+avatarHTML(ev,'av-sm')+'<div style="flex:1;"><div style="font-weight:600;font-size:16px;">'+esc(ev.name)+'</div><div style="font-size:12px;color:var(--accent);">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:4px;">'+countdownHTML(ev.daysLeft,ev.isOver)+'</div></div></div>'+urgencyBadge(ev.daysLeft,ev.isOver)+'</div><div class="event-actions"><button class="card-btn share" onclick="shareEvent('+ev.id+')">📱</button><button class="card-btn" onclick="addToAndroidCalendar('+ev.id+')">📅</button><button class="card-btn" onclick="editEvent('+ev.id+')">✏️</button><button class="card-btn" onclick="toggleDetails('+ev.id+',this)">⚙️ ▼</button></div><div class="details-panel" id="dp-'+ev.id+'">'+(ev.group?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">🏷️</span><span>'+esc(ev.group)+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div style="font-size:12px;color:var(--muted);padding:6px 0;">💡 '+esc(ev.notes)+'</div>':'')+giftHtml+'<div class="greet-box" style="margin-bottom:8px;"><div class="greet-label"><span>'+lang.greetLabel+'</span><div style="display:flex;gap:5px;"><button class="greet-next-btn" onclick="nextVariant('+ev.id+')">'+lang.greetNext+'</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.2);" onclick="openAiGreet('+ev.id+')">'+lang.greetAI+'</button></div></div><div class="greet-text" id="greet-text-'+ev.id+'">'+buildGreeting(ev)+'</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyGreet('+ev.id+')">'+lang.greetCopy+'</button></div></div><div class="greet-box"><div class="greet-label"><span>'+lang.greetPersonal+'</span>'+(myGreetings.some(g=>g)?'<button class="greet-next-btn" onclick="nextMyGreet('+ev.id+')">'+lang.greetNext+'</button>':'')+'</div><div class="greet-text" id="my-greet-text-'+ev.id+'">'+myGreetText+'</div><textarea id="free-greet-ta-'+ev.id+'" class="form-textarea" style="min-height:55px;margin-bottom:8px;display:none;" placeholder="'+lang.greetFreePlaceholder+'"></textarea><div class="greet-actions"><button class="greet-btn" onclick="sendMyGreetOrFree('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyMyGreetOrFree('+ev.id+')">'+lang.greetCopy+'</button><button class="greet-btn sec" onclick="toggleFreeGreet('+ev.id+')" style="flex:0;padding:8px 10px;">✏️</button></div></div></div></div>';}
+function buildCard(ev){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const storeLinks=ev.giftIdea?(settings.activeStores||['Amazon','KSP','זאפ']).map(s=>'<a href="https://www.google.com/search?q='+encodeURIComponent(ev.giftIdea+' '+s)+'" target="_blank" class="store-link">🔍 '+s+'</a>').join(''):'';const giftHtml=(ev.giftIdea||ev.budget)?('<div class="gift-box"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:11px;color:var(--green);">🎁 '+esc(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+'</span><button onclick="event.stopPropagation();toggleGift('+ev.id+')" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:3px 9px;border-radius:var(--rf);font-size:11px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>'):'';const myGreetText=myGreetings.find(g=>g)?escapeHtml(myGreetings.find(g=>g).replace(/{name}/g,ev.name||'')):lang.greetFree;return'<div class="event-card new-card" id="card-'+ev.id+'"><div class="event-card-main"><div onclick="openDetail('+ev.id+')" style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;">'+avatarHTML(ev,'av-sm')+'<div style="flex:1;"><div style="font-weight:600;font-size:16px;">'+esc(ev.name)+'</div><div style="font-size:12px;color:var(--accent);">'+getLabel(ev.type,ev.customType)+(isHebrewEvent(ev)?' · ✡️ '+hebLabel(ev):'')+'</div><div style="margin-top:4px;">'+countdownHTML(ev.daysLeft,ev.isOver)+'</div></div></div>'+urgencyBadge(ev.daysLeft,ev.isOver)+'</div><div class="event-actions"><button class="card-btn share" onclick="shareEvent('+ev.id+')">📱</button><button class="card-btn" onclick="addToAndroidCalendar('+ev.id+')">📅</button><button class="card-btn" onclick="editEvent('+ev.id+')">✏️</button><button class="card-btn" onclick="toggleDetails('+ev.id+',this)">⚙️ ▼</button></div><div class="details-panel" id="dp-'+ev.id+'">'+(ev.group?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">🏷️</span><span>'+esc(ev.group)+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span style="color:var(--muted);font-size:11px;">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div style="font-size:12px;color:var(--muted);padding:6px 0;">💡 '+esc(ev.notes)+'</div>':'')+giftHtml+'<div class="greet-box" style="margin-bottom:8px;"><div class="greet-label"><span>'+lang.greetLabel+'</span><div style="display:flex;gap:5px;"><button class="greet-next-btn" onclick="nextVariant('+ev.id+')">'+lang.greetNext+'</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.2);" onclick="openAiGreet('+ev.id+')">'+lang.greetAI+'</button></div></div><div class="greet-text" id="greet-text-'+ev.id+'">'+buildGreeting(ev)+'</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyGreet('+ev.id+')">'+lang.greetCopy+'</button></div></div><div class="greet-box"><div class="greet-label"><span>'+lang.greetPersonal+'</span>'+(myGreetings.some(g=>g)?'<button class="greet-next-btn" onclick="nextMyGreet('+ev.id+')">'+lang.greetNext+'</button>':'')+'</div><div class="greet-text" id="my-greet-text-'+ev.id+'">'+myGreetText+'</div><textarea id="free-greet-ta-'+ev.id+'" class="form-textarea" style="min-height:55px;margin-bottom:8px;display:none;" placeholder="'+lang.greetFreePlaceholder+'"></textarea><div class="greet-actions"><button class="greet-btn" onclick="sendMyGreetOrFree('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyMyGreetOrFree('+ev.id+')">'+lang.greetCopy+'</button><button class="greet-btn sec" onclick="toggleFreeGreet('+ev.id+')" style="flex:0;padding:8px 10px;">✏️</button></div></div></div></div>';}
 
 function toggleDetails(id,btn){
   id=parseInt(id)||id;const p=document.getElementById('dp-'+id);p.classList.toggle('open');btn.textContent=p.classList.contains('open')?'▲':'⚙️ ▼';}
@@ -3199,7 +3461,7 @@ function openDetail(id){
     const calc=calcDays(ev);
     const storeLinks=ev.giftIdea?(settings.activeStores||['Amazon','KSP','זאפ']).map(s=>'<a href="https://www.google.com/search?q='+encodeURIComponent(ev.giftIdea+' '+s)+'" target="_blank" class="store-link">🔍 '+s+'</a>').join(''):'';
     const dc=document.getElementById('detail-content');
-    if(dc) dc.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">'+avatarHTML(ev,'av-lg')+'<div><div style="font-size:20px;font-weight:600;">'+esc(ev.name)+'</div><div style="font-size:13px;color:var(--accent);margin-top:2px;">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:5px;">'+countdownHTML(calc.daysLeft,calc.isOver)+'</div></div></div><div class="card" style="margin-bottom:12px;"><div class="detail-row"><span class="detail-label">📅 '+(lang.detailDate||'תאריך')+'</span><span>'+(ev.date||'')+'</span></div>'+(ev.group?'<div class="detail-row"><span class="detail-label">🏷️</span><span>'+esc(ev.group)+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span class="detail-label">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span class="detail-label">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span class="detail-label">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div class="detail-row"><span class="detail-label">💡</span><span style="color:var(--muted);">'+esc(ev.notes)+'</span></div>':'')+'</div>'+((ev.giftIdea||ev.budget)?'<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 '+esc(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+' </span><button onclick="toggleGift('+ev.id+');openDetail('+ev.id+');" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>':'')+'<button class="btn-secondary" onclick="openGiftSuggest('+ev.id+')" style="margin-bottom:12px;">🎁 '+(lang.giftSuggestBtn||'הצעות מתנה חכמות (AI)')+'</button>'+
+    if(dc) dc.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">'+avatarHTML(ev,'av-lg')+'<div><div style="font-size:20px;font-weight:600;">'+esc(ev.name)+'</div><div style="font-size:13px;color:var(--accent);margin-top:2px;">'+getLabel(ev.type,ev.customType)+'</div><div style="margin-top:5px;">'+countdownHTML(calc.daysLeft,calc.isOver)+'</div></div></div><div class="card" style="margin-bottom:12px;"><div class="detail-row"><span class="detail-label">📅 '+(lang.detailDate||'תאריך')+'</span><span>'+(ev.date||'')+(ev.date?'<br><span style="font-size:11px;color:var(--acc-light);">✡️ '+hebLabel(ev)+(isHebrewEvent(ev)?' · '+(lang.hebModeShort||'לפי הלוח העברי'):'')+'</span>':'')+'</span></div>'+(ev.group?'<div class="detail-row"><span class="detail-label">🏷️</span><span>'+esc(ev.group)+'</span></div>':'')+(ev.phone?'<div class="detail-row"><span class="detail-label">📱</span><a href="tel:'+ev.phone+'" style="color:var(--acc-light);">'+ev.phone+'</a></div>':'')+(ev.phone2?'<div class="detail-row"><span class="detail-label">📱 2</span><a href="tel:'+ev.phone2+'" style="color:var(--acc-light);">'+ev.phone2+'</a></div>':'')+(ev.email?'<div class="detail-row"><span class="detail-label">✉️</span><a href="mailto:'+ev.email+'" style="color:var(--acc-light);">'+ev.email+'</a></div>':'')+(ev.notes?'<div class="detail-row"><span class="detail-label">💡</span><span style="color:var(--muted);">'+esc(ev.notes)+'</span></div>':'')+'</div>'+((ev.giftIdea||ev.budget)?'<div class="gift-box" style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--green);">🎁 '+esc(ev.giftIdea||'')+(ev.budget?' | '+ev.budget+'₪':'')+' </span><button onclick="toggleGift('+ev.id+');openDetail('+ev.id+');" style="background:'+(ev.giftStatus==='paid'?'var(--green)':'var(--amber)')+ ';color:white;border:none;padding:4px 10px;border-radius:var(--rf);font-size:12px;cursor:pointer;">'+(ev.giftStatus==='paid'?lang.giftBought:lang.giftTodo)+'</button></div><div class="store-links">'+storeLinks+'</div></div>':'')+'<button class="btn-secondary" onclick="openGiftSuggest('+ev.id+')" style="margin-bottom:12px;">🎁 '+(lang.giftSuggestBtn||'הצעות מתנה חכמות (AI)')+'</button>'+
 '<div class="greet-box" style="margin-bottom:14px;"><div class="greet-label"><span>'+lang.greetLabel+'</span><div style="display:flex;gap:5px;"><button class="greet-next-btn" onclick="nextVariant('+ev.id+');updateDetailGreet('+ev.id+')">'+lang.greetNext+'</button><button class="greet-next-btn" style="background:rgba(var(--acc-rgb),0.2);" onclick="openAiGreet('+ev.id+')">'+lang.greetAI+'</button></div></div><div class="greet-text" id="greet-text-'+ev.id+'">'+buildGreeting(ev)+'</div><div class="greet-actions"><button class="greet-btn" onclick="sendWhatsApp('+ev.id+')">'+lang.greetWhatsapp+'</button><button class="greet-btn sec" onclick="copyGreet('+ev.id+')">'+lang.greetCopy+'</button></div></div>'+
 '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+(ev.phone?'<button class="card-btn" style="flex:1;" onclick="window.location.href=\'tel:'+ev.phone+'\'">📱</button>':'')+'<button class="card-btn" style="flex:1;" onclick="exportEventToGoogle('+ev.id+')">📅</button><button class="card-btn" style="flex:1;" onclick="shareEvent('+ev.id+')">📤</button><button class="card-btn" style="flex:1;color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);" onclick="deleteEventDirect('+ev.id+')">🗑️</button></div>';
     // עדכן topbar
@@ -3240,7 +3502,7 @@ function openAddForm(group){
     if(group){const sel=document.getElementById('inp-group-select');if(sel&&[...sel.options].find(o=>o.value===group))sel.value=group;}
   },50);
 }
-function clearForm(){['inp-name','inp-date','inp-phone','inp-phone2','inp-email','inp-notes','inp-budget','inp-gift-idea','inp-custom-type','inp-group-custom'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('inp-type').value='birthday';document.getElementById('inp-gender').value='male';document.getElementById('inp-group-select').value='';document.getElementById('inp-gift-status').value='pending';document.getElementById('inp-custom-type').style.display='none';document.getElementById('inp-group-custom').style.display='none';const sl=document.getElementById('sound-label');if(sl)sl.textContent='ברירת מחדל';const tb=document.getElementById('sound-trim-box');if(tb)tb.style.display='none';selectedGiftTags=[];_formPhoto=null;_formEmoji=null;_soundBlob=null;_soundFile=null;if(_soundObjectURL){URL.revokeObjectURL(_soundObjectURL);_soundObjectURL=null;}if(_soundAudio){_soundAudio.pause();_soundAudio=null;}document.querySelectorAll('.gift-tag').forEach(tg=>tg.classList.remove('selected'));const gd=document.getElementById('gift-selected-display');if(gd)gd.style.display='none';const fa=document.getElementById('form-avatar');if(fa){fa.innerHTML='?';fa.style.cssText='background:#1e1b4b;color:var(--acc-light);border:2px dashed rgba(var(--acc-rgb),0.4);';}['extra','gift'].forEach(id=>{const c=document.getElementById('collapse-'+id);if(c)c.classList.remove('open');const b=document.getElementById('btn-'+id);if(b)b.classList.remove('open');});}
+function clearForm(){const _dm=document.getElementById('inp-date-mode');if(_dm){const _ss=document.getElementById('inp-after-sunset');if(_ss)_ss.checked=false;setDateMode('greg');}['inp-name','inp-date','inp-phone','inp-phone2','inp-email','inp-notes','inp-budget','inp-gift-idea','inp-custom-type','inp-group-custom'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('inp-type').value='birthday';document.getElementById('inp-gender').value='male';document.getElementById('inp-group-select').value='';document.getElementById('inp-gift-status').value='pending';document.getElementById('inp-custom-type').style.display='none';document.getElementById('inp-group-custom').style.display='none';const sl=document.getElementById('sound-label');if(sl)sl.textContent='ברירת מחדל';const tb=document.getElementById('sound-trim-box');if(tb)tb.style.display='none';selectedGiftTags=[];_formPhoto=null;_formEmoji=null;_soundBlob=null;_soundFile=null;if(_soundObjectURL){URL.revokeObjectURL(_soundObjectURL);_soundObjectURL=null;}if(_soundAudio){_soundAudio.pause();_soundAudio=null;}document.querySelectorAll('.gift-tag').forEach(tg=>tg.classList.remove('selected'));const gd=document.getElementById('gift-selected-display');if(gd)gd.style.display='none';const fa=document.getElementById('form-avatar');if(fa){fa.innerHTML='?';fa.style.cssText='background:#1e1b4b;color:var(--acc-light);border:2px dashed rgba(var(--acc-rgb),0.4);';}['extra','gift'].forEach(id=>{const c=document.getElementById('collapse-'+id);if(c)c.classList.remove('open');const b=document.getElementById('btn-'+id);if(b)b.classList.remove('open');});}
 function cancelForm(){clearForm();setTimeout(()=>openScreen('screen-main'),50);}
 function onTypeChange(){const evType=document.getElementById('inp-type').value;document.getElementById('inp-custom-type').style.display=evType==='custom'?'block':'none';const autoYearly=['birthday','anniversary','memorial','holiday','barmitzvah','graduation'];setRecurrence(autoYearly.includes(evType)?'yearly':'once');}
 function setRecurrence(val){document.getElementById('inp-recurrence').value=val;const yearlyEl=document.getElementById('rec-yearly');const onceEl=document.getElementById('rec-once');if(!yearlyEl||!onceEl)return;if(val==='yearly'){yearlyEl.style.background='rgba(var(--acc-rgb),0.2)';yearlyEl.style.border='2px solid var(--accent)';yearlyEl.querySelector('div').style.color='var(--acc-light)';onceEl.style.background='rgba(0,0,0,0.04)';onceEl.style.border='1px solid var(--border2)';onceEl.querySelector('div').style.color='var(--muted)';}else{onceEl.style.background='rgba(var(--acc-rgb),0.2)';onceEl.style.border='2px solid var(--accent)';onceEl.querySelector('div').style.color='var(--acc-light)';yearlyEl.style.background='rgba(0,0,0,0.04)';yearlyEl.style.border='1px solid var(--border2)';yearlyEl.querySelector('div').style.color='var(--muted)';}}
@@ -3250,7 +3512,7 @@ function initGiftTags(){const c=document.getElementById('gift-tags-container');i
 function toggleGiftTag(el,label){const i=selectedGiftTags.indexOf(label);if(i===-1){selectedGiftTags.push(label);el.classList.add('selected');}else{selectedGiftTags.splice(i,1);el.classList.remove('selected');}updateGiftDisplay();}
 function updateGiftDisplay(){const custom=document.getElementById('inp-gift-idea').value;const all=[...selectedGiftTags,...(custom?[custom]:[])];const d=document.getElementById('gift-selected-display');if(all.length){d.style.display='block';d.textContent='🎁 '+all.join(' · ');}else d.style.display='none';}
 function getGiftIdea(){const custom=document.getElementById('inp-gift-idea').value;return[...selectedGiftTags,...(custom?[custom]:[])].join(', ');}
-function saveEvent(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const name=(document.getElementById('inp-name').value||'').trim();const date=document.getElementById('inp-date').value;if(!name||!date){alert(lang.alertNameDate||'שם ותאריך הם שדות חובה');return;}const gSel=document.getElementById('inp-group-select').value;const groupCustomEl=document.getElementById('inp-group-custom');const group=gSel==='custom'?(groupCustomEl?groupCustomEl.value.trim():''):gSel;const getVal=id=>{const el=document.getElementById(id);return el?el.value.trim():''};const getSelVal=id=>{const el=document.getElementById(id);return el?el.value:''};const data={name,date,type:getSelVal('inp-type'),customType:getVal('inp-custom-type'),recurrence:(document.getElementById('inp-recurrence')?document.getElementById('inp-recurrence').value:null)||null,gender:getSelVal('inp-gender')||'male',phone:getVal('inp-phone'),phone2:getVal('inp-phone2'),email:getVal('inp-email'),group,notes:getVal('inp-notes'),budget:getVal('inp-budget'),giftIdea:getGiftIdea(),giftStatus:getSelVal('inp-gift-status')||'pending',photo:_formPhoto||null,emoji:_formEmoji||null,customSound:_soundBlob||null};const editId=document.getElementById('editing-id').value;if(editId){const i=events.findIndex(e=>e.id===parseInt(editId));if(i!==-1){events[i]={...events[i],...data};scheduleNotif(events[i]);}}else{data.id=Date.now();data.notifications=[];events.unshift(data);if(settings.isFirstTime){settings.isFirstTime=false;saveSettings();}scheduleNotif(data);}saveEvents();playEventSound(data);clearForm();setTimeout(()=>openScreen('screen-main'),50);return false;}
+function saveEvent(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const name=(document.getElementById('inp-name').value||'').trim();const date=document.getElementById('inp-date').value;if(!name||!date){alert(lang.alertNameDate||'שם ותאריך הם שדות חובה');return;}const gSel=document.getElementById('inp-group-select').value;const groupCustomEl=document.getElementById('inp-group-custom');const group=gSel==='custom'?(groupCustomEl?groupCustomEl.value.trim():''):gSel;const getVal=id=>{const el=document.getElementById(id);return el?el.value.trim():''};const getSelVal=id=>{const el=document.getElementById(id);return el?el.value:''};const data={name,date,type:getSelVal('inp-type'),customType:getVal('inp-custom-type'),recurrence:(document.getElementById('inp-recurrence')?document.getElementById('inp-recurrence').value:null)||null,gender:getSelVal('inp-gender')||'male',phone:getVal('inp-phone'),phone2:getVal('inp-phone2'),email:getVal('inp-email'),group,notes:getVal('inp-notes'),budget:getVal('inp-budget'),giftIdea:getGiftIdea(),giftStatus:getSelVal('inp-gift-status')||'pending',dateMode:getSelVal('inp-date-mode')||'greg',afterSunset:!!(document.getElementById('inp-after-sunset')||{}).checked,photo:_formPhoto||null,emoji:_formEmoji||null,customSound:_soundBlob||null};const editId=document.getElementById('editing-id').value;if(editId){const i=events.findIndex(e=>e.id===parseInt(editId));if(i!==-1){events[i]={...events[i],...data};scheduleNotif(events[i]);}}else{data.id=Date.now();data.notifications=[];events.unshift(data);if(settings.isFirstTime){settings.isFirstTime=false;saveSettings();}scheduleNotif(data);}saveEvents();playEventSound(data);clearForm();setTimeout(()=>openScreen('screen-main'),50);return false;}
 function saveAndEdit(){saveEvent();if(events.length){editEvent(events[0].id);document.getElementById('collapse-extra').classList.add('open');document.getElementById('btn-extra').classList.add('open');}}
 function editEvent(id){
   id=parseInt(id)||id;
@@ -3273,6 +3535,8 @@ function editEvent(id){
     const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
     set('inp-name', ev.name);
     set('inp-date', ev.date);
+    const _sse=document.getElementById('inp-after-sunset'); if(_sse) _sse.checked=!!ev.afterSunset;
+    setDateMode(ev.dateMode==='hebrew'?'hebrew':'greg');
     set('inp-custom-type', ev.customType);
     set('inp-gender', ev.gender||'male');
     set('inp-phone', ev.phone);
@@ -4294,8 +4558,7 @@ function scheduleNotif(ev){
     notifDays.forEach(n=>{
       let eventDate;
       if(getRecurrence(ev)==='yearly'){
-        eventDate=new Date(today.getFullYear(),evMonth,evDay);
-        if(eventDate<=today)eventDate.setFullYear(today.getFullYear()+1);
+        eventDate=nextOccurrence(ev,today,true); if(!eventDate) return;
       }else{
         eventDate=new Date(evYear,evMonth,evDay);
       }
@@ -4368,8 +4631,10 @@ function parseVCF(text){
   return contacts;
 }
 function showVCFPreview(){
-  document.getElementById('vcf-count').textContent=(LANGUAGES[currentLang]||LANGUAGES['he']).vcfFoundContacts.replace('{n}',_vcfContacts.length)||'נמצאו '+_vcfContacts.length;
-  renderVCFList();openScreen('screen-vcf-preview');
+  openScreen('screen-vcf-preview');
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  const c=document.getElementById('vcf-count'); if(c) c.textContent=(lang.vcfFoundContacts||'נמצאו {n} אנשי קשר').replace('{n}',_vcfContacts.length);
+  renderVCFList();
 }
 function renderVCFList(){
   const cont=document.getElementById('vcf-list');
@@ -4377,13 +4642,13 @@ function renderVCFList(){
     const [bg,fg]=avatarColor(c.name);
     const details=[
       _vcfFields.phone&&c.phone?'📱 '+c.phone:'',
-      _vcfFields.email&&c.email?'✉️ '+c.email:'',
-      _vcfFields.birthday&&c.birthday?'🎂 '+c.birthday:'',
+      _vcfFields.email&&c.email?'✉️ '+esc(c.email):'',
+      _vcfFields.birthday&&c.birthday?'🎂 '+(c.noYear?c.birthday.slice(5):c.birthday):'',
     ].filter(Boolean).join(' · ');
     return '<div style="display:flex;align-items:center;gap:10px;background:'+(c.selected?'rgba(var(--acc-rgb),0.08)':'rgba(0,0,0,0.02)')+';border:1px solid '+(c.selected?'var(--acc-border)':'var(--border)')+';border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;cursor:pointer;opacity:'+(c.alreadyExists?'0.5':'1')+';" onclick="toggleVCFContact('+i+')">'+
       '<div style="width:22px;height:22px;border-radius:50%;border:2px solid '+(c.selected?'var(--accent)':'var(--muted)')+';background:'+(c.selected?'var(--accent)':'transparent')+';display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">'+(c.selected?'✓':'')+'</div>'+
-      '<div class="avatar av-sm" style="background:'+bg+';color:'+fg+';flex-shrink:0;">'+c.name[0].toUpperCase()+'</div>'+
-      '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;">'+c.name+(c.alreadyExists?' <span style="font-size:10px;color:var(--amber);">'+((LANGUAGES[currentLang]||LANGUAGES['he']).vcfExistsLabel||'קיים')+'</span>':'')+'</div>'+
+      '<div class="avatar av-sm" style="background:'+bg+';color:'+fg+';flex-shrink:0;">'+esc(c.name[0].toUpperCase())+'</div>'+
+      '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;">'+esc(c.name)+(c.alreadyExists?' <span style="font-size:10px;color:var(--amber);">'+((LANGUAGES[currentLang]||LANGUAGES['he']).vcfExistsLabel||'קיים')+'</span>':'')+'</div>'+
       (details?'<div style="font-size:10px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+details+'</div>':'')+
       '</div></div>';
   }).join('');
@@ -4396,7 +4661,7 @@ function confirmVCFImport(){
   if(!toImport.length){alert((LANGUAGES[currentLang]||LANGUAGES['he']).alertNoSelected||'לא נבחרו אנשי קשר חדשים');return;}
   let added=0;
   toImport.forEach(c=>{
-    events.push({id:Date.now()+added,name:c.name,phone:_vcfFields.phone?c.phone:'',email:_vcfFields.email?c.email:'',date:_vcfFields.birthday?c.birthday:'',type:c.birthday?'birthday':'custom',gender:'male',group:'',notes:'',notifications:[]});added++;
+    events.push({id:Date.now()+added,name:c.name,phone:_vcfFields.phone?c.phone:'',email:_vcfFields.email?c.email:'',date:_vcfFields.birthday?c.birthday:'',type:c.birthday?'birthday':'custom',gender:'male',group:'',notes:'',notifications:[],googleContactId:c.googleContactId||undefined,noYear:c.noYear||undefined});added++;
   });
   saveEvents();_vcfContacts=[];openScreen('screen-contacts');
   alert((LANGUAGES[currentLang]||LANGUAGES['he']).alertVCFImported.replace('{n}',added)||'יובאו '+added);
@@ -5234,14 +5499,18 @@ function handleGCalOAuthReturn(){
   if(!token) return;
   localStorage.setItem('gcal_access_token', token);
   localStorage.setItem('gcal_token_expiry', String(Date.now()+expiresIn*1000));
+  localStorage.setItem('gcal_scopes', params.get('scope')||GCAL_SCOPES);
   history.replaceState(null,'',window.location.pathname);
   fetch('https://www.googleapis.com/oauth2/v3/userinfo',
     {headers:{'Authorization':'Bearer '+token}})
     .then(r=>r.json()).then(u=>{
       if(u.email) localStorage.setItem('gcal_email',u.email);
     }).catch(()=>{}).finally(()=>{
-      renderScreen('screen-google-cal');
-      openScreen('screen-google-cal');
+      const back=localStorage.getItem('gcal_return_screen')||'screen-google-cal';
+      openScreen(back);
+      const pending=localStorage.getItem('gcal_pending_action'); localStorage.removeItem('gcal_pending_action');
+      if(pending==='contacts') setTimeout(importGoogleContacts,500);
+      else if(pending==='exportAll') setTimeout(exportAllToGoogle,500);
     });
 }
 
@@ -5361,35 +5630,6 @@ function mergeWithGoogleEvents(googleEvents, lang){
   if(added>0) saveEvents();
   return {added,skipped,total:googleEvents.length};
 }
-
-async function exportEventToGoogle(id){
-  id=parseInt(id)||id;
-  const ev=events.find(e=>e.id===id);if(!ev)return;
-  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
-  const token=localStorage.getItem('gcal_access_token');
-  if(!token){addToAndroidCalendar(id);return;}
-  const expiry=parseInt(localStorage.getItem('gcal_token_expiry')||'0');
-  if(expiry<Date.now()){addToAndroidCalendar(id);return;}
-  try{
-    const body={
-      summary:ev.name+' \u2014 '+getLabel(ev.type,ev.customType),
-      description:[ev.notes||'',ev.phone?'\u{1F4F1} '+ev.phone:'',ev.giftIdea?'\u{1F381} '+ev.giftIdea:'','\n\u05dc\u05d0 \u05e9\u05db\u05d7\u05ea\u05d9 \u{1F514}'].filter(Boolean).join('\n'),
-      start:{date:ev.date},end:{date:ev.date},
-      reminders:{useDefault:false,overrides:[{method:'popup',minutes:1440}]}
-    };
-    const res=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{
-      method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify(body)
-    });
-    if(res.ok){
-      const created=await res.json();
-      const idx=events.findIndex(e=>e.id===id);
-      if(idx>-1){events[idx].googleEventId=created.id;saveEvents();}
-      alert('\u2705 '+(lang.gcalExported||'\u05e0\u05d5\u05e1\u05e3 \u05dc\u05d2\u05d5\u05d2\u05dc \u05e7\u05dc\u05e0\u05d3\u05e8!'));
-    }else{addToAndroidCalendar(id);}
-  }catch(e){addToAndroidCalendar(id);}
-}
-
 
 // ================================================================
 // ===== CONTACT PICKER API =====
