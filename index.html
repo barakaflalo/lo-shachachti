@@ -613,28 +613,40 @@ body.dark-mode #splash { background: #12121f; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer onerror="console.log('OneSignal not loaded')"></script>
 <script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "2f06bdf0-3450-4c3f-9718-934b912f14f4",
-      notifyButton: { enable: false },
-      promptOptions: {
-        slidedown: {
-          prompts: [{
-            type: "push",
-            autoPrompt: false,
-            text: {
-              actionMessage: "לא שכחתי רוצה לשלוח לך תזכורות על אירועים קרובים",
-              acceptButton: "אפשר",
-              cancelButton: "אחר כך"
-            }
-          }]
-        }
-      }
-    });
+// ===== גרסה + יומן שגיאות (נטען ראשון) =====
+const APP_VERSION='3.1.0';
+(function(){
+  function logErr(msg,src,line){
+    try{
+      const a=JSON.parse(localStorage.getItem('ls2_errlog')||'[]');
+      a.unshift({t:new Date().toISOString(),m:String(msg).slice(0,200),s:String(src||'').split('/').pop(),l:line||0});
+      localStorage.setItem('ls2_errlog',JSON.stringify(a.slice(0,10)));
+    }catch(e){}
+  }
+  window.addEventListener('error',function(e){logErr(e.message,e.filename,e.lineno);});
+  window.addEventListener('unhandledrejection',function(e){logErr('Promise: '+((e.reason&&e.reason.message)||e.reason));});
+})();
+// ===== OneSignal — נטען רק אחרי הסכמה מפורשת של המשתמש =====
+function loadOneSignal(){
+  if(window._osLoaded) return; window._osLoaded=true;
+  window.OneSignalDeferred=window.OneSignalDeferred||[];
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.init({
+        appId:"2f06bdf0-3450-4c3f-9718-934b912f14f4",
+        notifyButton:{enable:false},
+        serviceWorkerPath:'OneSignalSDKWorker.js',
+        serviceWorkerParam:{scope:new URL('onesignal/',location.href).pathname},
+        promptOptions:{slidedown:{prompts:[{type:"push",autoPrompt:false}]}}
+      });
+    }catch(e){}
   });
+  const s=document.createElement('script');
+  s.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+  s.defer=true; s.onerror=function(){window._osLoaded=false;};
+  document.head.appendChild(s);
+}
 </script>
 </head>
 <body>
@@ -668,7 +680,7 @@ body.dark-mode #splash { background: #12121f; }
   <div class="modal-box" style="text-align:center;">
     <div style="font-size:48px;margin-bottom:8px;">🔔</div>
     <div style="font-size:18px;font-weight:700;margin-bottom:4px;" id="about-app-name">לא שכחתי</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">v3.0 · AppNest · ברק אפללו</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.1.0</span> · AppNest · ברק אפללו</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;" id="about-desc">
       האפליקציה שתזכיר לך כל אירוע חשוב.<br>
       5 שפות · AI ברכות · PWA · ייבוא/ייצוא
@@ -1010,332 +1022,24 @@ body.dark-mode #splash { background: #12121f; }
   </div>
 </div>
 
-<script>const HOLIDAYS_DB = {
-  "jewish": {
-    "name_he": "יהודי",
-    "name_en": "Jewish",
-    "color": "#3b82f6",
-    "events": [
-      {
-        "name_he": "ראש השנה",
-        "name_en": "Rosh Hashana",
-        "date": "2025-09-22"
-      },
-      {
-        "name_he": "ראש השנה",
-        "name_en": "Rosh Hashana",
-        "date": "2025-09-23"
-      },
-      {
-        "name_he": "יום כיפור",
-        "name_en": "Yom Kippur",
-        "date": "2025-10-01"
-      },
-      {
-        "name_he": "סוכות",
-        "name_en": "Sukkot",
-        "date": "2025-10-06"
-      },
-      {
-        "name_he": "שמחת תורה",
-        "name_en": "Simchat Torah",
-        "date": "2025-10-14"
-      },
-      {
-        "name_he": "חנוכה",
-        "name_en": "Hanukkah",
-        "date": "2025-12-14"
-      },
-      {
-        "name_he": "חנוכה",
-        "name_en": "Hanukkah",
-        "date": "2025-12-22"
-      },
-      {
-        "name_he": "פורים",
-        "name_en": "Purim",
-        "date": "2026-03-03"
-      },
-      {
-        "name_he": "פסח",
-        "name_en": "Passover",
-        "date": "2026-03-29"
-      },
-      {
-        "name_he": "פסח",
-        "name_en": "Passover (end)",
-        "date": "2026-04-05"
-      },
-      {
-        "name_he": "יום העצמאות",
-        "name_en": "Independence Day",
-        "date": "2026-04-28"
-      },
-      {
-        "name_he": "שבועות",
-        "name_en": "Shavuot",
-        "date": "2026-05-17"
-      },
-      {
-        "name_he": "תשעה באב",
-        "name_en": "Tisha B'Av",
-        "date": "2026-07-21"
-      },
-      {
-        "name_he": "ראש השנה",
-        "name_en": "Rosh Hashana",
-        "date": "2026-09-11"
-      },
-      {
-        "name_he": "יום כיפור",
-        "name_en": "Yom Kippur",
-        "date": "2026-09-20"
-      },
-      {
-        "name_he": "סוכות",
-        "name_en": "Sukkot",
-        "date": "2026-09-25"
-      },
-      {
-        "name_he": "חנוכה",
-        "name_en": "Hanukkah",
-        "date": "2026-12-04"
-      },
-      {
-        "name_he": "פורים",
-        "name_en": "Purim",
-        "date": "2027-03-22"
-      },
-      {
-        "name_he": "פסח",
-        "name_en": "Passover",
-        "date": "2027-04-17"
-      },
-      {
-        "name_he": "שבועות",
-        "name_en": "Shavuot",
-        "date": "2027-06-05"
-      },
-      {
-        "name_he": "ראש השנה",
-        "name_en": "Rosh Hashana",
-        "date": "2027-09-30"
-      }
-    ]
-  },
-  "christian": {
-    "name_he": "נוצרי",
-    "name_en": "Christian",
-    "color": "#10b981",
-    "events": [
-      {
-        "name_he": "כריסמס",
-        "name_en": "Christmas",
-        "date": "2025-12-25"
-      },
-      {
-        "name_he": "כריסמס",
-        "name_en": "Christmas",
-        "date": "2026-12-25"
-      },
-      {
-        "name_he": "כריסמס",
-        "name_en": "Christmas",
-        "date": "2027-12-25"
-      },
-      {
-        "name_he": "ראש השנה הגרגוריאני",
-        "name_en": "New Year",
-        "date": "2026-01-01"
-      },
-      {
-        "name_he": "ראש השנה הגרגוריאני",
-        "name_en": "New Year",
-        "date": "2027-01-01"
-      },
-      {
-        "name_he": "יום ולנטיין",
-        "name_en": "Valentine's Day",
-        "date": "2026-02-14"
-      },
-      {
-        "name_he": "יום ולנטיין",
-        "name_en": "Valentine's Day",
-        "date": "2027-02-14"
-      },
-      {
-        "name_he": "פסחא",
-        "name_en": "Easter",
-        "date": "2026-04-05"
-      },
-      {
-        "name_he": "פסחא",
-        "name_en": "Easter",
-        "date": "2027-03-28"
-      },
-      {
-        "name_he": "האלווין",
-        "name_en": "Halloween",
-        "date": "2025-10-31"
-      },
-      {
-        "name_he": "האלווין",
-        "name_en": "Halloween",
-        "date": "2026-10-31"
-      },
-      {
-        "name_he": "האלווין",
-        "name_en": "Halloween",
-        "date": "2027-10-31"
-      },
-      {
-        "name_he": "כריסמס אורתודוקסי",
-        "name_en": "Orthodox Christmas",
-        "date": "2026-01-07"
-      },
-      {
-        "name_he": "כריסמס אורתודוקסי",
-        "name_en": "Orthodox Christmas",
-        "date": "2027-01-07"
-      }
-    ]
-  },
-  "muslim": {
-    "name_he": "מוסלמי",
-    "name_en": "Muslim",
-    "color": "#f59e0b",
-    "events": [
-      {
-        "name_he": "ראס אלסנה",
-        "name_en": "Islamic New Year",
-        "date": "2025-06-26"
-      },
-      {
-        "name_he": "ראס אלסנה",
-        "name_en": "Islamic New Year",
-        "date": "2026-06-16"
-      },
-      {
-        "name_he": "ראס אלסנה",
-        "name_en": "Islamic New Year",
-        "date": "2027-06-05"
-      },
-      {
-        "name_he": "עיד אל-פיטר",
-        "name_en": "Eid al-Fitr",
-        "date": "2026-03-20"
-      },
-      {
-        "name_he": "עיד אל-פיטר",
-        "name_en": "Eid al-Fitr",
-        "date": "2027-03-10"
-      },
-      {
-        "name_he": "עיד אל-אדחא",
-        "name_en": "Eid al-Adha",
-        "date": "2026-05-27"
-      },
-      {
-        "name_he": "עיד אל-אדחא",
-        "name_en": "Eid al-Adha",
-        "date": "2027-05-16"
-      },
-      {
-        "name_he": "ליל אל-קדר",
-        "name_en": "Laylat al-Qadr",
-        "date": "2026-03-14"
-      },
-      {
-        "name_he": "ליל אל-קדר",
-        "name_en": "Laylat al-Qadr",
-        "date": "2027-03-04"
-      },
-      {
-        "name_he": "מולוד אנביס",
-        "name_en": "Prophet's Birthday",
-        "date": "2025-09-04"
-      },
-      {
-        "name_he": "מולוד אנביס",
-        "name_en": "Prophet's Birthday",
-        "date": "2026-08-25"
-      },
-      {
-        "name_he": "מולוד אנביס",
-        "name_en": "Prophet's Birthday",
-        "date": "2027-08-14"
-      },
-      {
-        "name_he": "ראמדאן (תחילה)",
-        "name_en": "Ramadan begins",
-        "date": "2026-02-17"
-      },
-      {
-        "name_he": "ראמדאן (תחילה)",
-        "name_en": "Ramadan begins",
-        "date": "2027-02-07"
-      }
-    ]
-  },
-  "israeli": {
-    "name_he": "ישראלי",
-    "name_en": "Israeli",
-    "color": "#6366f1",
-    "events": [
-      {
-        "name_he": "יום השואה",
-        "name_en": "Holocaust Day",
-        "date": "2026-04-07"
-      },
-      {
-        "name_he": "יום השואה",
-        "name_en": "Holocaust Day",
-        "date": "2027-04-26"
-      },
-      {
-        "name_he": "יום הזיכרון",
-        "name_en": "Memorial Day",
-        "date": "2026-04-21"
-      },
-      {
-        "name_he": "יום הזיכרון",
-        "name_en": "Memorial Day",
-        "date": "2027-05-10"
-      },
-      {
-        "name_he": "יום העצמאות",
-        "name_en": "Independence Day",
-        "date": "2026-04-22"
-      },
-      {
-        "name_he": "יום העצמאות",
-        "name_en": "Independence Day",
-        "date": "2027-05-11"
-      },
-      {
-        "name_he": "יום ירושלים",
-        "name_en": "Jerusalem Day",
-        "date": "2026-05-20"
-      },
-      {
-        "name_he": "יום ירושלים",
-        "name_en": "Jerusalem Day",
-        "date": "2027-06-09"
-      }
-    ]
-  }
-};
-
-// ================================================================
+<script>// ================================================================
 // ===== מנוע חישוב חגים דינמי — לכל שנה (ללא תלות בטבלה קשיחה) =====
 // ================================================================
+// ביצועים: יצירת Intl.DateTimeFormat יקרה מאוד — יוצרים פעם אחת בלבד,
+// וכל שנה מחושבת פעם אחת ונשמרת בזיכרון (קודם: ~8 שניות לכל ציור לוח).
+const _HEB_FMT=new Intl.DateTimeFormat('en-u-ca-hebrew',{day:'numeric',month:'long'});
+let _ISL_FMT=null;
+try{ _ISL_FMT=new Intl.DateTimeFormat('en-u-ca-islamic',{day:'numeric',month:'numeric'}); }catch(e){}
+const _HMAP_CACHE={};
+const _HOL_CACHE={};
 function _hebParts(d){
-  const p=new Intl.DateTimeFormat('en-u-ca-hebrew',{day:'numeric',month:'long'}).formatToParts(d);
+  const p=_HEB_FMT.formatToParts(d);
   const o={};p.forEach(x=>o[x.type]=x.value);return o;
 }
 function _ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function _hebMapForYear(gYear){
-  const map={};
+  if(_HMAP_CACHE[gYear]) return _HMAP_CACHE[gYear];
+  const map={}; _HMAP_CACHE[gYear]=map;
   for(let m=0;m<12;m++){
     const dim=new Date(gYear,m+1,0).getDate();
     for(let day=1;day<=dim;day++){
@@ -1395,7 +1099,8 @@ function computeMuslimHolidays(gYear){
     const dim=new Date(gYear,m+1,0).getDate();
     for(let day=1;day<=dim;day++){
       const d=new Date(gYear,m,day);
-      const p=new Intl.DateTimeFormat('en-u-ca-islamic',{day:'numeric',month:'numeric'}).formatToParts(d);
+      if(!_ISL_FMT) return out;
+      const p=_ISL_FMT.formatToParts(d);
       const o={};p.forEach(x=>o[x.type]=x.value);
       const key=o.month+'-'+o.day; if(seen[key])continue; seen[key]=1;
       if(o.month==='9'&&o.day==='1') out.push({name_he:'תחילת רמאדאן',name_en:'Ramadan begins',date:_ymd(d)});
@@ -1410,7 +1115,13 @@ function computeMuslimHolidays(gYear){
 const HOLIDAY_COMPUTERS={jewish:computeJewishHolidays,israeli:computeIsraeliHolidays,christian:computeChristianHolidays,muslim:computeMuslimHolidays};
 function computeHolidaysForReligion(religion,fromYear,toYear){
   const fn=HOLIDAY_COMPUTERS[religion]; if(!fn) return [];
-  let all=[]; for(let y=fromYear;y<=toYear;y++){ try{ all=all.concat(fn(y)); }catch(e){} } return all;
+  let all=[];
+  for(let y=fromYear;y<=toYear;y++){
+    const k=religion+'|'+y;
+    if(!_HOL_CACHE[k]){ try{ _HOL_CACHE[k]=fn(y); }catch(e){ _HOL_CACHE[k]=[]; } }
+    all=all.concat(_HOL_CACHE[k]);
+  }
+  return all;
 }
 
 const LANGUAGES={he:{dir:'rtl'
@@ -1484,9 +1195,9 @@ const I18N_EXTRA = {
     fileProtocolWarn:'פתח את האפליקציה מהאתר, לא כקובץ מקומי',
     backupReminderMsg:'💾 מזמן לא גיבית את האירועים שלך. הנתונים נשמרים רק במכשיר הזה — אם תמחק את הדפדפן, הכל יימחק.\n\nלגבות עכשיו?',
     aboutDiag:'🩺 דוח תמיכה (לפתרון תקלות)', diagCopyPrompt:'להעתיק את הדוח? (לשליחה לתמיכה)', diagCopied:'הדוח הועתק',
-    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה',
+    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
     rightsTitle:'זכויות יוצרים',
-    rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה 3.0<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
+    rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה {ver}<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
     welcomeTitle:'איך עובדים עם האפליקציה?',
     welcomeSub:'מדריך קצר ב-5 שלבים',
     welcomeStep1Title:'➕ לחץ "הוסף אירוע"',
@@ -1549,9 +1260,9 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Open the app from the website, not as a local file',
     backupReminderMsg:'💾 You haven\'t backed up your events in a while. Data is stored only on this device — if you clear your browser, it\'s all gone.\n\nBack up now?',
     aboutDiag:'🩺 Support report (troubleshooting)', diagCopyPrompt:'Copy the report? (to send to support)', diagCopied:'Report copied',
-    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting',
+    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
     rightsTitle:'Copyright',
-    rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version 3.0<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
+    rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version {ver}<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
     welcomeTitle:'How does the app work?',
     welcomeSub:'Quick 5-step guide',
     welcomeStep1Title:'➕ Tap "Add Event"',
@@ -1614,9 +1325,9 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Откройте приложение с сайта, а не как локальный файл',
     backupReminderMsg:'💾 Вы давно не делали резервную копию. Данные хранятся только на этом устройстве — если очистить браузер, всё пропадёт.\n\nСоздать копию сейчас?',
     aboutDiag:'🩺 Отчёт поддержки (диагностика)', diagCopyPrompt:'Скопировать отчёт? (для отправки в поддержку)', diagCopied:'Отчёт скопирован',
-    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления',
+    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
     rightsTitle:'Авторские права',
-    rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия 3.0<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
+    rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия {ver}<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
     welcomeTitle:'Как работает приложение?',
     welcomeSub:'Краткое руководство из 5 шагов',
     welcomeStep1Title:'➕ Нажмите "Добавить событие"',
@@ -1684,9 +1395,9 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Abre la app desde el sitio web, no como archivo local',
     backupReminderMsg:'💾 Hace tiempo que no haces copia de tus eventos. Los datos se guardan solo en este dispositivo — si borras el navegador, se pierde todo.\n\n¿Hacer copia ahora?',
     aboutDiag:'🩺 Informe de soporte (solución de problemas)', diagCopyPrompt:'¿Copiar el informe? (para enviar a soporte)', diagCopied:'Informe copiado',
-    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación',
+    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
     rightsTitle:'Derechos de autor',
-    rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión 3.0<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
+    rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión {ver}<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
     welcomeTitle:'¿Cómo funciona la app?',
     welcomeSub:'Guía rápida de 5 pasos',
     welcomeStep1Title:'➕ Toca "Agregar evento"',
@@ -1749,9 +1460,9 @@ const I18N_EXTRA = {
     fileProtocolWarn:'افتح التطبيق من الموقع، وليس كملف محلي',
     backupReminderMsg:'💾 لم تقم بنسخ مناسباتك منذ فترة. تُحفظ البيانات على هذا الجهاز فقط — إذا مسحت المتصفح، سيضيع كل شيء.\n\nنسخ احتياطي الآن؟',
     aboutDiag:'🩺 تقرير الدعم (حل المشاكل)', diagCopyPrompt:'نسخ التقرير؟ (لإرساله للدعم)', diagCopied:'تم نسخ التقرير',
-    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة',
+    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
     rightsTitle:'حقوق النشر',
-    rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار 3.0<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
+    rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار {ver}<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
     welcomeTitle:'كيف يعمل التطبيق؟',
     welcomeSub:'دليل سريع من 5 خطوات',
     welcomeStep1Title:'➕ اضغط "إضافة مناسبة"',
@@ -2172,7 +1883,7 @@ function applyLangToUI() {
 
   // ===== MISC STATIC =====
   const verTxt = document.querySelector('.ver-txt');
-  if (verTxt) verTxt.textContent = (lang.appName || 'לא שכחתי') + ' · v3.0 · ברק אפללו';
+  if (verTxt) verTxt.textContent = (lang.appName || 'לא שכחתי') + ' · v' + APP_VERSION + ' · ברק אפללו';
 
   // search cancel
   const sc = document.querySelector('.search-cancel');
@@ -2216,7 +1927,7 @@ function applyLangToUI() {
 
   // ===== MODAL: RIGHTS =====
   setText('rights-title', lang.rightsTitle);
-  setHTML('rights-text', L('rightsText',{app:lang.appName}));
+  setHTML('rights-text', L('rightsText',{app:lang.appName,ver:APP_VERSION}));
   setText('rights-close-btn', lang.btnClose);
 
   // ===== MODAL: WELCOME GUIDE =====
@@ -2393,7 +2104,7 @@ const SCREEN_RENDERERS = {
         <div class="settings-bottom-btn" onclick="openScreen('screen-appearance')">🌓 ${lang.btnAppearance||'מראה'}</div>
         <div class="settings-bottom-btn" onclick="openModal('modal-rights')">© ${lang.btnRights||'זכויות'}</div>
       </div>
-      <div class="ver-txt">${lang.appName||'לא שכחתי'} · v3.0 · ברק אפללו</div>
+      <div class="ver-txt">${lang.appName||'לא שכחתי'} · v${APP_VERSION} · ברק אפללו</div>
     </div>`;
   },
 
@@ -3029,7 +2740,17 @@ function getBaseGreetings(){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];r
 let greetings=Object.assign({},getBaseGreetings(),safeParse('ls2_greetings',{}));
 let myGreetings=safeParse('ls2_my_greetings',["","","","",""]);
 const greetVariants={};
-function saveEvents(){localStorage.setItem('ls2_events',JSON.stringify(events));}
+// כתיבה בטוחה: אם האחסון מלא/חסום — הודעה ברורה במקום כשל שקט
+function safeSet(key,val){
+  try{ localStorage.setItem(key,val); return true; }
+  catch(e){
+    const lang=(typeof LANGUAGES!=='undefined'&&(LANGUAGES[currentLang]||LANGUAGES['he']))||{};
+    const msg=lang.storageFullMsg||'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.';
+    if(typeof showBanner==='function') showBanner(msg); else alert(msg);
+    return false;
+  }
+}
+function saveEvents(){safeSet('ls2_events',JSON.stringify(events));}
 // ================================================================
 // ===== HTML escaping — הגנה מפני XSS משמות/הערות מיובאים =====
 // ================================================================
@@ -3044,7 +2765,7 @@ function escapeHtml(s){
 }
 // גרסה קצרה לשימוש נוח בתבניות
 function esc(s){ return escapeHtml(s); }
-function saveSettings(){localStorage.setItem('ls2_settings',JSON.stringify(settings));}
+function saveSettings(){safeSet('ls2_settings',JSON.stringify(settings));}
 // באנר קצר (toast) שמופיע לרגע ונעלם
 function showBanner(msg){
   let b=document.getElementById('global-toast');
@@ -3059,7 +2780,7 @@ function showBanner(msg){
   clearTimeout(b._t);
   b._t=setTimeout(()=>{ b.style.opacity='0'; },2200);
 }
-function saveGreetings(){localStorage.setItem('ls2_greetings',JSON.stringify(greetings));}
+function saveGreetings(){safeSet('ls2_greetings',JSON.stringify(greetings));}
 
 // ================================================================
 // ===== CONSTANTS =====
@@ -3665,10 +3386,10 @@ function showDiagnostics(){
   const swVer=(navigator.serviceWorker&&navigator.serviceWorker.controller)?'פעיל':'לא פעיל';
   let storageOK='כן';
   try{ localStorage.setItem('_t','1'); localStorage.removeItem('_t'); }catch(e){ storageOK='לא (חסום!)'; }
-  const report=
+  let report=
     'דוח תמיכה — לא שכחתי v3\n'+
     '─────────────────\n'+
-    'גרסה: 3.0\n'+
+    'גרסה: '+APP_VERSION+'\n'+
     'שפה: '+currentLang+'\n'+
     'מספר אירועים: '+events.length+'\n'+
     'ערכת צבע: '+(settings.theme||'?')+'\n'+
@@ -3682,6 +3403,9 @@ function showDiagnostics(){
     'מסך: '+window.innerWidth+'×'+window.innerHeight+'\n'+
     'אונליין: '+(navigator.onLine?'כן':'לא')+'\n'+
     'תאריך: '+new Date().toLocaleString('he-IL');
+  let errs='';
+  try{ const a=JSON.parse(localStorage.getItem('ls2_errlog')||'[]'); errs=a.length?('\n─────────────────\nשגיאות אחרונות:\n'+a.slice(0,5).map(x=>x.t.slice(5,16)+' '+x.m+(x.s?' ('+x.s+':'+x.l+')':'')).join('\n')):'\nשגיאות אחרונות: אין'; }catch(e){}
+  report+=errs;
   if(confirm(report+'\n\n'+(lang.diagCopyPrompt||'להעתיק את הדוח? (לשליחה לתמיכה)'))){
     navigator.clipboard.writeText(report).then(()=>showBanner('📋 '+(lang.diagCopied||'הדוח הועתק')))
       .catch(()=>{});
@@ -4374,34 +4098,33 @@ function openGuideChapter(key){
 // ================================================================
 // ===== NOTIFICATIONS =====
 // ================================================================
-function requestOneSignalPermission(){
-  if(typeof OneSignalDeferred==='undefined')return;
-  OneSignalDeferred.push(async function(OneSignal){
-    try{await OneSignal.Slidedown.promptPush();}catch(e){}
+function requestOneSignalPermission(){ /* בוטל: אין בקשת הרשאה אוטומטית */ }
+function enablePushNotifications(){
+  const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
+  if(!('Notification' in window)){alert(lang.alertNotifDenied||'לא נתמך במכשיר זה');return;}
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){
+      settings.notifEnabled=true;saveSettings();
+      localStorage.setItem('ls2_push_optin','1');
+      loadOneSignal();
+      events.forEach(scheduleNotif);
+      alert(lang.alertNotifEnabled||'✅ התראות הופעלו!');
+    }else{
+      alert(lang.alertNotifDenied||'לא אושר');
+    }
   });
 }
-function enablePushNotifications(){
-  if(typeof OneSignalDeferred!=='undefined'){
-    OneSignalDeferred.push(async function(OneSignal){
-      try{
-        const permission=await OneSignal.Notifications.requestPermission();
-        if(permission){alert((LANGUAGES[currentLang]||LANGUAGES['he']).alertNotifEnabled||'✅ התראות הופעלו!');}
-        else{alert((LANGUAGES[currentLang]||LANGUAGES['he']).alertNotifDenied||'לא אושר');}
-      }catch(e){
-        Notification.requestPermission().then(p=>{
-          if(p==='granted'){alert('✅ התראות הופעלו!');events.forEach(scheduleNotif);}
-          else{alert((LANGUAGES[currentLang]||LANGUAGES['he']).alertNotifDenied||'לא אושר');}
-        });
-      }
-    });
-  }else{
-    if('Notification' in window){
-      Notification.requestPermission().then(p=>{
-        if(p==='granted'){alert('✅ התראות הופעלו!');events.forEach(scheduleNotif);}
-        else{alert((LANGUAGES[currentLang]||LANGUAGES['he']).alertNotifDenied||'לא אושר');}
-      });
-    }
-  }
+// שעות שקט: אם שעת ההתראה נופלת בטווח השקט — מזיזים לסוף הטווח
+function _hm(s){const p=String(s||'').split(':');return (parseInt(p[0])||0)*60+(parseInt(p[1])||0);}
+function inQuietHours(minutes){
+  const a=_hm(settings.quietStart||'23:00'), b=_hm(settings.quietEnd||'08:00');
+  if(a===b) return false;
+  return a<b ? (minutes>=a&&minutes<b) : (minutes>=a||minutes<b);
+}
+function notifTimeOfDay(){
+  const base=9*60;
+  if(inQuietHours(base)){ const e=_hm(settings.quietEnd||'08:00'); return [Math.floor(e/60),e%60]; }
+  return [9,0];
 }
 function scheduleNotif(ev){
   if(!settings.notifEnabled||!('serviceWorker' in navigator))return;
@@ -4429,15 +4152,21 @@ function scheduleNotif(ev){
       }
       const notifDate=new Date(eventDate);
       notifDate.setDate(notifDate.getDate()-n);
-      notifDate.setHours(9,0,0,0);
+      const _tod=notifTimeOfDay();
+      notifDate.setHours(_tod[0],_tod[1],0,0);
       const ms=notifDate-new Date();
       if(ms<0)return;
+      // setTimeout מעל ~24.8 ימים "גולש" ויורה מיד — מתזמנים רק מה שקרוב;
+      // השאר יתוזמן בפתיחה הבאה של האפליקציה.
+      if(ms>2147000000)return;
       const lang=LANGUAGES[currentLang]||LANGUAGES['he'];
       const tid=setTimeout(()=>{
         reg.showNotification(lang.appName+' 🔔',{
           body:ev.name+' — '+getLabel(ev.type,ev.customType)+
             (n===1?' '+lang.tomorrow:'! '+lang.inDays.replace('{n}',n)),
           icon:'icon-192.png',tag:'ev-'+ev.id+'-'+n,dir:lang.dir,
+          silent:settings.notifSound===false,
+          vibrate:settings.notifVibrate?[200,100,200]:undefined,
         });
       },ms);
       if(window._notifTimers&&window._notifTimers[ev.id]) window._notifTimers[ev.id].push(tid);
@@ -4677,7 +4406,7 @@ const AI_PROVIDERS = {
     keyUrl:'https://aistudio.google.com/app/apikey',
     videoUrl:'https://www.youtube.com/results?search_query=how+to+get+gemini+api+key',
     def:'gemini-flash-latest',
-    fallback:['gemini-flash-latest','gemini-2.5-flash','gemini-2.5-flash-lite','gemini-flash-lite-latest','gemini-2.0-flash'],
+    fallback:['gemini-flash-latest','gemini-3.6-flash','gemini-3.5-flash','gemini-flash-lite-latest'],
     needsKey:true, isLocal:false
   },
   claude: {
@@ -4720,13 +4449,18 @@ const AI_MODELS = {
 function getAiProvider(){ return localStorage.getItem('ls2_ai_provider')||'gemini'; }
 function getAiModel(provider){
   provider=provider||getAiProvider();
-  const saved = localStorage.getItem('ls2_ai_model_'+provider);
+  let saved = localStorage.getItem('ls2_ai_model_'+provider);
+  if(saved&&typeof DEAD_MODELS!=='undefined'&&DEAD_MODELS.includes(saved)) saved=null;
   return saved || (AI_PROVIDERS[provider]?AI_PROVIDERS[provider].def:'');
 }
+// מודלים שהושבתו — מדלגים עליהם גם אם המשתמש שמר אותם בעבר
+const DEAD_MODELS=['gemini-1.5-flash','gemini-1.5-pro','gemini-2.0-flash','gemini-2.0-flash-exp','gemini-2.0-flash-lite','gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.5-pro','gemini-3-flash','gpt-3.5-turbo','claude-3-haiku-20240307'];
+function isDeadModel(m){ return DEAD_MODELS.includes(m); }
 function getAiModelChain(provider){
   const p=AI_PROVIDERS[provider]; if(!p) return [];
-  const chain = (p.fallback||[]).slice();
-  const saved = localStorage.getItem('ls2_ai_model_'+provider);
+  const chain = (p.fallback||[]).filter(m=>!isDeadModel(m));
+  let saved = localStorage.getItem('ls2_ai_model_'+provider);
+  if(saved&&isDeadModel(saved)){ localStorage.removeItem('ls2_ai_model_'+provider); saved=null; }
   if(saved){
     const i=chain.indexOf(saved);
     if(i>=0) chain.splice(i,1);
@@ -4829,7 +4563,8 @@ async function refreshAiModels(provider, key, endpoint){
       }
       const list = (data.models||[])
         .filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent'))
-        .map(m=>m.name.replace('models/',''));
+        .map(m=>m.name.replace('models/',''))
+        .filter(m=>!isDeadModel(m)&&!/embedding|aqa|imagen|tts|vision/i.test(m));
       return {ok:true, models:list};
     } else if(provider==='openai'){
       const res = await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':'Bearer '+key}});
@@ -5670,8 +5405,14 @@ function getActiveHolidays(){
   return result;
 }
 
+let _holIdx=null,_holIdxKey='';
 function isHolidayDate(dateStr){
-  return getActiveHolidays().filter(h => h.date === dateStr);
+  const k=currentLang+'|'+(localStorage.getItem('ls2_holidays_selected')||'')+'|'+new Date().getFullYear();
+  if(!_holIdx||_holIdxKey!==k){
+    _holIdxKey=k; _holIdx={};
+    getActiveHolidays().forEach(x=>{ (_holIdx[x.date]=_holIdx[x.date]||[]).push(x); });
+  }
+  return _holIdx[dateStr]||[];
 }
 
 function renderHolidaysSettings(){
@@ -5740,7 +5481,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.body.classList.toggle('ltr',lang.dir==='ltr');
   document.title=lang.appName;
   // reload greetings for saved language
-  greetings=Object.assign({},lang.greetings||LANGUAGES['he'].greetings,JSON.parse(localStorage.getItem('ls2_greetings')||'{}'));
+  greetings=Object.assign({},lang.greetings||LANGUAGES['he'].greetings,safeParse('ls2_greetings',{}));
 
   // 2.5. Handle Google OAuth return
   handleGCalOAuthReturn();
@@ -5755,11 +5496,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   applyLangToUI();
 
   // 6. splash hide
-  setTimeout(()=>{
+  requestAnimationFrame(()=>{
     const s=document.getElementById('splash');
+    if(!s) return;
     s.classList.add('hide');
-    setTimeout(()=>s.style.display='none',500);
-  },1200);
+    setTimeout(()=>s.style.display='none',300);
+  });
 
   // 7. PWA install button
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -5782,7 +5524,12 @@ document.addEventListener('DOMContentLoaded',()=>{
       }
     }).catch(()=>{});
   }
-  setTimeout(()=>requestOneSignalPermission(),3000);
+  // תזכורות מקומיות אובדות בכל סגירה — מתזמנים מחדש בכל פתיחה
+  if('Notification' in window&&Notification.permission==='granted'){ setTimeout(()=>events.forEach(scheduleNotif),1500); }
+  // OneSignal רק למי שאישר התראות בעבר (טעינה עצלה, לא חוסמת)
+  if(localStorage.getItem('ls2_push_optin')==='1'){ setTimeout(loadOneSignal,4000); }
+  // בקשה מהדפדפן לא למחוק את הנתונים בלחץ מקום
+  try{ if(navigator.storage&&navigator.storage.persist){ navigator.storage.persisted().then(p=>{ if(!p) navigator.storage.persist(); }); } }catch(e){}
 
   // 8. scroll to top
   window.addEventListener('scroll',()=>{
