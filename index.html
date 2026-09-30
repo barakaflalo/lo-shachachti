@@ -615,7 +615,7 @@ body.dark-mode #splash { background: #12121f; }
 <link rel="icon" href="icon-192.png">
 <script>
 // ===== גרסה + יומן שגיאות (נטען ראשון) =====
-const APP_VERSION='3.1.0';
+const APP_VERSION='3.1.1';
 (function(){
   function logErr(msg,src,line){
     try{
@@ -680,7 +680,7 @@ function loadOneSignal(){
   <div class="modal-box" style="text-align:center;">
     <div style="font-size:48px;margin-bottom:8px;">🔔</div>
     <div style="font-size:18px;font-weight:700;margin-bottom:4px;" id="about-app-name">לא שכחתי</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.1.0</span> · AppNest · ברק אפללו</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px;"><span class="app-ver">v3.1.1</span> · AppNest · ברק אפללו</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px;" id="about-desc">
       האפליקציה שתזכיר לך כל אירוע חשוב.<br>
       5 שפות · AI ברכות · PWA · ייבוא/ייצוא
@@ -739,7 +739,7 @@ function loadOneSignal(){
     <div class="tip-card"><div style="font-size:11px;color:#fbbf24;font-weight:500;margin-bottom:4px;" id="welcome-tip-label">⭐ טיפ חכם</div><div style="font-size:11px;color:var(--muted);" id="welcome-tip-text">לחץ "שמור וערוך פרטים" כדי להוסיף מיד טלפון, מתנה ותזכורות!</div></div>
     <button class="btn-primary" onclick="closeModal('modal-welcome-guide');openAddForm()" id="welcome-btn-add">➕ הוסף אירוע ראשון עכשיו!</button>
     <button class="btn-secondary" onclick="closeModal('modal-welcome-guide');openScreen('screen-guide')" id="welcome-btn-guide">📖 מדריך מלא</button>
-    <button class="btn-ghost" onclick="closeModal('modal-welcome-guide')" id="welcome-btn-later">אחר כך</button>
+    <button class="btn-ghost" onclick="closeModal('modal-welcome-guide')" id="welcome-btn-later">הבנתי, תודה</button>
   </div>
 </div>
 
@@ -1195,7 +1195,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'פתח את האפליקציה מהאתר, לא כקובץ מקומי',
     backupReminderMsg:'💾 מזמן לא גיבית את האירועים שלך. הנתונים נשמרים רק במכשיר הזה — אם תמחק את הדפדפן, הכל יימחק.\n\nלגבות עכשיו?',
     aboutDiag:'🩺 דוח תמיכה (לפתרון תקלות)', diagCopyPrompt:'להעתיק את הדוח? (לשליחה לתמיכה)', diagCopied:'הדוח הועתק',
-    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
+    insightGiftNotBought:'{name} בעוד {n} ימים — עוד לא קנית מתנה!', insightToday:'היום: {name}! אל תשכח לברך', insightTomorrow:'מחר: {name} — התכונן!', insightNoPhone:'{name} בקרוב — אין מספר טלפון לשליחת ברכה', welcomeGotIt:'הבנתי, תודה', storageFullMsg:'⚠️ השמירה נכשלה — האחסון במכשיר מלא. מחק תמונות/צלילים מאירועים או גבה ומחק אירועים ישנים.',
     rightsTitle:'זכויות יוצרים',
     rightsText:'כל הזכויות שמורות לברק אפללו © 2026<br>האפליקציה "{app}" — גרסה {ver}<br><br><span style="font-size:11px;">אין לשכפל, להפיץ או לעשות שימוש מסחרי ללא אישור בכתב.</span>',
     welcomeTitle:'איך עובדים עם האפליקציה?',
@@ -1260,7 +1260,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Open the app from the website, not as a local file',
     backupReminderMsg:'💾 You haven\'t backed up your events in a while. Data is stored only on this device — if you clear your browser, it\'s all gone.\n\nBack up now?',
     aboutDiag:'🩺 Support report (troubleshooting)', diagCopyPrompt:'Copy the report? (to send to support)', diagCopied:'Report copied',
-    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
+    insightGiftNotBought:'{name} in {n} days — you haven\'t bought a gift yet!', insightToday:'Today: {name}! Don\'t forget to send wishes', insightTomorrow:'Tomorrow: {name} — get ready!', insightNoPhone:'{name} soon — no phone number to send a greeting', welcomeGotIt:'Got it, thanks', storageFullMsg:'⚠️ Save failed — device storage is full. Remove photos/sounds from events or back up and delete old events.',
     rightsTitle:'Copyright',
     rightsText:'All rights reserved to Barak Afalo © 2026<br>The app "{app}" — version {ver}<br><br><span style="font-size:11px;">May not be copied, distributed, or used commercially without written permission.</span>',
     welcomeTitle:'How does the app work?',
@@ -1325,7 +1325,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Откройте приложение с сайта, а не как локальный файл',
     backupReminderMsg:'💾 Вы давно не делали резервную копию. Данные хранятся только на этом устройстве — если очистить браузер, всё пропадёт.\n\nСоздать копию сейчас?',
     aboutDiag:'🩺 Отчёт поддержки (диагностика)', diagCopyPrompt:'Скопировать отчёт? (для отправки в поддержку)', diagCopied:'Отчёт скопирован',
-    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
+    insightGiftNotBought:'{name} через {n} дн. — вы ещё не купили подарок!', insightToday:'Сегодня: {name}! Не забудьте поздравить', insightTomorrow:'Завтра: {name} — готовьтесь!', insightNoPhone:'{name} скоро — нет номера для отправки поздравления', welcomeGotIt:'Понятно, спасибо', storageFullMsg:'⚠️ Не удалось сохранить — память устройства заполнена. Удалите фото/звуки из событий или сделайте копию и удалите старые события.',
     rightsTitle:'Авторские права',
     rightsText:'Все права защищены Barak Afalo © 2026<br>Приложение "{app}" — версия {ver}<br><br><span style="font-size:11px;">Запрещено копировать, распространять или использовать в коммерческих целях без письменного разрешения.</span>',
     welcomeTitle:'Как работает приложение?',
@@ -1395,7 +1395,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'Abre la app desde el sitio web, no como archivo local',
     backupReminderMsg:'💾 Hace tiempo que no haces copia de tus eventos. Los datos se guardan solo en este dispositivo — si borras el navegador, se pierde todo.\n\n¿Hacer copia ahora?',
     aboutDiag:'🩺 Informe de soporte (solución de problemas)', diagCopyPrompt:'¿Copiar el informe? (para enviar a soporte)', diagCopied:'Informe copiado',
-    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
+    insightGiftNotBought:'{name} en {n} días — ¡aún no has comprado un regalo!', insightToday:'Hoy: {name}! No olvides felicitar', insightTomorrow:'Mañana: {name} — ¡prepárate!', insightNoPhone:'{name} pronto — sin número para enviar felicitación', welcomeGotIt:'Entendido, gracias', storageFullMsg:'⚠️ No se pudo guardar — el almacenamiento está lleno. Quita fotos/sonidos de eventos o haz copia y borra eventos antiguos.',
     rightsTitle:'Derechos de autor',
     rightsText:'Todos los derechos reservados a Barak Afalo © 2026<br>La app "{app}" — versión {ver}<br><br><span style="font-size:11px;">No se puede copiar, distribuir ni usar comercialmente sin autorización escrita.</span>',
     welcomeTitle:'¿Cómo funciona la app?',
@@ -1460,7 +1460,7 @@ const I18N_EXTRA = {
     fileProtocolWarn:'افتح التطبيق من الموقع، وليس كملف محلي',
     backupReminderMsg:'💾 لم تقم بنسخ مناسباتك منذ فترة. تُحفظ البيانات على هذا الجهاز فقط — إذا مسحت المتصفح، سيضيع كل شيء.\n\nنسخ احتياطي الآن؟',
     aboutDiag:'🩺 تقرير الدعم (حل المشاكل)', diagCopyPrompt:'نسخ التقرير؟ (لإرساله للدعم)', diagCopied:'تم نسخ التقرير',
-    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
+    insightGiftNotBought:'{name} بعد {n} أيام — لم تشترِ هدية بعد!', insightToday:'اليوم: {name}! لا تنسَ التهنئة', insightTomorrow:'غداً: {name} — استعد!', insightNoPhone:'{name} قريباً — لا يوجد رقم هاتف لإرسال التهنئة', welcomeGotIt:'فهمت، شكراً', storageFullMsg:'⚠️ فشل الحفظ — مساحة الجهاز ممتلئة. احذف الصور/الأصوات من المناسبات أو انسخ احتياطياً واحذف المناسبات القديمة.',
     rightsTitle:'حقوق النشر',
     rightsText:'جميع الحقوق محفوظة لـ Barak Afalo © 2026<br>تطبيق "{app}" — الإصدار {ver}<br><br><span style="font-size:11px;">يُمنع النسخ أو التوزيع أو الاستخدام التجاري دون إذن خطي.</span>',
     welcomeTitle:'كيف يعمل التطبيق؟',
@@ -1947,7 +1947,7 @@ function applyLangToUI() {
   setText('welcome-tip-text', lang.guideStartTip);
   setText('welcome-btn-add', lang.welcomeBtnAdd);
   setText('welcome-btn-guide', lang.welcomeBtnGuide);
-  setText('welcome-btn-later', lang.btnLater);
+  setText('welcome-btn-later', lang.welcomeGotIt||lang.btnClose);
 
   // ===== MODAL: PHOTO =====
   setText('photo-title', lang.photoTitle);
@@ -2879,7 +2879,7 @@ function renderMain(){
   const _ts = document.getElementById('tb-settings');
   if(_ts) _ts.textContent = '⚙️ ' + (_lang.screenSettings||'הגדרות');
   const _ta = document.getElementById('tb-add');
-  if(_ta) _ta.textContent = _lang.btnAdd;const today=new Date();if(calYear===undefined){calYear=today.getFullYear();calMonth=today.getMonth();}const enriched=events.map(ev=>({...ev,...calcDays(ev)}));const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const statsEl=document.getElementById('main-stats');if(settings.showStats){const u30=enriched.filter(e=>e.daysLeft!==null&&e.daysLeft<=30).length;const budgetTotal=events.reduce((s,e)=>s+(parseInt(e.budget)||0),0);statsEl.style.display='';statsEl.innerHTML='<div class="stat-card"><div class="stat-num">'+u30+'</div><div class="stat-label">'+(lang.statsEvents30||'אירועים ב-30 יום')+'</div></div>'+(settings.showBudget?'<div class="stat-card"><div class="stat-num green">'+budgetTotal+'₪</div><div class="stat-label">'+(lang.statsBudget||'תקציב מתנות')+'</div></div>':'<div class="stat-card"><div class="stat-num">'+events.length+'</div><div class="stat-label">'+(lang.statsTotal||'סה"כ')+'</div></div>');}else statsEl.style.display='none';const calEl=document.getElementById('main-calendar');if(settings.showCalendar){calEl.style.display='';renderCalendar(enriched);}else calEl.style.display='none';const heroEl=document.getElementById('main-hero');if(settings.showHero){heroEl.style.display='';renderHero(enriched);}else heroEl.style.display='none';renderInsights(enriched);renderFilterBar();renderGroupFilters(enriched);renderEventsList(enriched);const todayEvs=enriched.filter(e=>e.daysLeft===0);if(todayEvs.length){setTimeout(()=>{triggerConfetti();showTodayModal(todayEvs);},1000);}}
+  if(_ta) _ta.textContent = _lang.btnAdd;const today=new Date();if(calYear===undefined){calYear=today.getFullYear();calMonth=today.getMonth();}const enriched=events.map(ev=>({...ev,...calcDays(ev)}));const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const statsEl=document.getElementById('main-stats');if(settings.showStats){const u30=enriched.filter(e=>e.daysLeft!==null&&e.daysLeft<=30).length;const budgetTotal=events.reduce((s,e)=>s+(parseInt(e.budget)||0),0);statsEl.style.display='';statsEl.innerHTML='<div class="stat-card"><div class="stat-num">'+u30+'</div><div class="stat-label">'+(lang.statsEvents30||'אירועים ב-30 יום')+'</div></div>'+(settings.showBudget?'<div class="stat-card"><div class="stat-num green">'+budgetTotal+'₪</div><div class="stat-label">'+(lang.statsBudget||'תקציב מתנות')+'</div></div>':'<div class="stat-card"><div class="stat-num">'+events.length+'</div><div class="stat-label">'+(lang.statsTotal||'סה"כ')+'</div></div>');}else statsEl.style.display='none';const calEl=document.getElementById('main-calendar');if(settings.showCalendar){calEl.style.display='';renderCalendar(enriched);}else calEl.style.display='none';const heroEl=document.getElementById('main-hero');if(settings.showHero){heroEl.style.display='';renderHero(enriched);}else heroEl.style.display='none';renderInsights(enriched);renderFilterBar();renderGroupFilters(enriched);renderEventsList(enriched);const todayEvs=enriched.filter(e=>e.daysLeft===0);if(todayEvs.length){const _tk=new Date().toDateString()+'|'+todayEvs.map(e=>e.id).join(',');if(localStorage.getItem('ls2_today_shown')!==_tk){localStorage.setItem('ls2_today_shown',_tk);setTimeout(()=>{triggerConfetti();showTodayModal(todayEvs);},1000);}}}
 
 function renderCalendar(enriched){const lang=LANGUAGES[currentLang]||LANGUAGES['he'];const months=lang.calMonths;const dayNames=lang.calDays;const today=new Date();const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();const evDays={};enriched.forEach(ev=>{if(!ev.date)return;const d=new Date(ev.date);let y=d.getFullYear(),m=d.getMonth(),day=d.getDate();if(getRecurrence(ev)==='yearly')y=calYear;if(y===calYear&&m===calMonth){if(!evDays[day])evDays[day]=[];evDays[day].push(ev);}});const todayDay=today.getFullYear()===calYear&&today.getMonth()===calMonth?today.getDate():-1;let grid='';for(let i=0;i<first;i++)grid+='<div class="cal-day"></div>';for(let d=1;d<=days;d++){const isToday=d===todayDay;const hasEv=evDays[d];const isUrgent=hasEv&&hasEv.some(e=>e.daysLeft!==null&&e.daysLeft<=7);let cls='cal-day';if(isToday&&events.length===0)cls+=' welcome-day';else if(isToday)cls+=' today';if(hasEv)cls+=' has-event';if(isUrgent)cls+=' urgent';const _cds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       const _chs=isHolidayDate(_cds);
@@ -5542,8 +5542,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   Object.entries(togMap).forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',!!settings[key]);});
 
   // 10. first time
-  if(settings.isFirstTime&&events.length===0){
-    setTimeout(()=>openModal('modal-welcome-guide'),2000);
+  // מדריך הפתיחה מוצג פעם אחת בלבד (המדריך המלא זמין תמיד בהגדרות ← מדריך)
+  if(events.length>0) localStorage.setItem('ls2_welcome_seen','1');
+  if(!localStorage.getItem('ls2_welcome_seen')){
+    localStorage.setItem('ls2_welcome_seen','1');
+    setTimeout(()=>openModal('modal-welcome-guide'),1500);
   }
 
   // 11. swipe navigation (calendar months + settings carousel)
